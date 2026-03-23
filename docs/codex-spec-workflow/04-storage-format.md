@@ -1,0 +1,357 @@
+# Storage Format
+
+## 저장 전략
+
+현재 요구사항에서는 DB를 두지 않고, 대상 프로젝트 내부에서 데이터를 같이 관리하는 방식이 가장 적합하다.
+
+단, 최근 프로젝트 목록 같은 앱 편의 설정은 프로젝트 내부가 아니라 앱 전역 설정 파일로 분리해도 된다.
+
+## 기본 원칙
+
+- 프로젝트 루트에 숨김 폴더 `.sdd/` 생성
+- 분석 결과, 명세서, 채팅 이력, 실행 준비 데이터를 여기에 저장
+- 앱 전역 상태는 최소화
+- 핵심 작업 데이터는 프로젝트와 함께 이동 가능해야 함
+
+추가 원칙:
+
+- 각 주요 JSON 파일은 `schemaVersion`을 가진다
+- 변경 가능한 메타 JSON은 `revision` 또는 `updatedAt` 기반 충돌 검사를 지원한다
+- spec별 source of truth는 `meta.json`이다
+- `specs/index.json`은 재생성 가능한 인덱스/캐시로 본다
+
+## 왜 이 방식이 맞는가
+
+- 사용자가 개발자 개인 1인이다.
+- 기준이 항상 특정 로컬 프로젝트다.
+- 명세와 분석 결과가 프로젝트와 함께 있어야 다시 열기 쉽다.
+- DB 없이도 충분히 MVP를 운영할 수 있다.
+
+## 권장 폴더 구조
+
+```text
+.sdd/
+  project.json
+  analysis/
+    summary.md
+    context.json
+    file-index.json
+  sessions/
+    index.json
+    session-001/
+      meta.json
+      messages.jsonl
+  specs/
+    index.json
+    project-overview/
+      meta.json
+      chat.jsonl
+      versions/
+        v1.md
+        v2.md
+      patches/
+        patch-001.json
+    feature-login/
+      meta.json
+      chat.jsonl
+      versions/
+        v1.md
+      patches/
+  runs/
+    run-001.json
+```
+
+## 파일 포맷 초안
+
+### `.sdd/project.json`
+
+역할:
+
+- 현재 프로젝트 메타데이터
+
+권장 필드:
+
+- `schemaVersion`
+- `projectName`
+- `rootPath`
+- `createdAt`
+- `updatedAt`
+- `revision`
+- `lastAnalyzedAt`
+- `detectedStack`
+- `defaultSpecId`
+
+### `.sdd/analysis/context.json`
+
+역할:
+
+- 분석 원본 결과
+
+권장 필드:
+
+- `schemaVersion`
+- `files`
+- `directories`
+- `detectedFrameworks`
+- `entrypoints`
+- `keyConfigs`
+- `modules`
+- `unknowns`
+- `confidence`
+
+### `.sdd/analysis/summary.md`
+
+역할:
+
+- 사람이 읽는 프로젝트 요약
+
+권장 내용:
+
+- 프로젝트 개요
+- 스택
+- 핵심 모듈
+- 엔트리포인트
+- unknowns
+
+### `.sdd/specs/index.json`
+
+역할:
+
+- 전체 명세 목록 인덱스
+
+권장 필드:
+
+- `schemaVersion`
+- `generatedAt`
+- `specs`
+  - `id`
+  - `slug`
+  - `title`
+  - `status`
+  - `latestVersion`
+  - `updatedAt`
+
+주의:
+
+- `index.json`은 조회 최적화를 위한 인덱스다
+- 실제 기준은 각 spec의 `meta.json`
+- 필요하면 `specs/` 디렉터리를 스캔해 재생성 가능해야 한다
+
+### `.sdd/sessions/index.json`
+
+역할:
+
+- 프로젝트 단위 대화 세션 목록 인덱스
+
+권장 필드:
+
+- `schemaVersion`
+- `generatedAt`
+- `sessions`
+  - `id`
+  - `title`
+  - `updatedAt`
+  - `lastMessageAt`
+  - `lastMessagePreview`
+  - `messageCount`
+
+주의:
+
+- 빠른 조회용 인덱스다
+- 실제 기준은 각 세션의 `meta.json`
+
+### `.sdd/sessions/<session-id>/meta.json`
+
+역할:
+
+- 프로젝트 대화 세션 하나의 메타데이터
+
+권장 필드:
+
+- `schemaVersion`
+- `id`
+- `title`
+- `createdAt`
+- `updatedAt`
+- `revision`
+- `lastMessageAt`
+- `lastMessagePreview`
+- `messageCount`
+
+### `.sdd/sessions/<session-id>/messages.jsonl`
+
+역할:
+
+- 프로젝트 대화 세션의 append-only 메시지 로그
+
+권장 레코드 필드:
+
+- `schemaVersion`
+- `id`
+- `sessionId`
+- `createdAt`
+- `role`
+- `text`
+
+주의:
+
+- Codex 연결 전에는 user 중심 메시지만 존재할 수 있다
+- 이후 assistant/system 역할이 추가돼도 같은 포맷을 이어서 사용 가능해야 한다
+
+### `.sdd/specs/<spec-slug>/meta.json`
+
+역할:
+
+- 명세 하나의 메타데이터
+
+권장 필드:
+
+- `schemaVersion`
+- `id`
+- `title`
+- `type`
+- `status`
+- `latestVersion`
+- `revision`
+- `createdAt`
+- `updatedAt`
+- `tags`
+- `relatedFiles`
+
+### `.sdd/specs/<spec-slug>/versions/v1.md`
+
+역할:
+
+- 실제 명세 본문
+
+권장 구조:
+
+- 제목
+- 배경
+- 목표
+- 범위
+- 기능 요구사항
+- acceptance criteria
+- 관련 파일
+- 오픈 이슈
+
+### `.sdd/specs/<spec-slug>/chat.jsonl`
+
+역할:
+
+- 명세서별 append-only 이벤트 로그
+
+권장 레코드 필드:
+
+- `id`
+- `createdAt`
+- `type`
+- `specVersion`
+- `role` (message 계열 이벤트일 때)
+- `message` (message 계열 이벤트일 때)
+- `patchId` (patch 계열 이벤트일 때)
+- `payload`
+
+권장 이벤트 타입:
+
+- `user_message`
+- `assistant_message`
+- `patch_proposed`
+- `patch_applied`
+- `patch_rejected`
+
+즉, `chat.jsonl`은 단순 대화 배열이 아니라 projection 가능한 이벤트 로그로 유지한다.
+
+### `.sdd/specs/<spec-slug>/patches/<patch-id>.json`
+
+역할:
+
+- 채팅으로부터 생성된 수정안
+
+권장 필드:
+
+- `schemaVersion`
+- `id`
+- `baseVersion`
+- `proposedVersion`
+- `summary`
+- `status`
+- `revision`
+- `sectionsChanged`
+- `createdAt`
+
+### `.sdd/runs/<run-id>.json`
+
+역할:
+
+- 이후 Codex 실행 준비 또는 실행 결과 기록
+
+권장 필드:
+
+- `schemaVersion`
+- `id`
+- `specVersion`
+- `snapshot`
+- `candidateFiles`
+- `status`
+- `summary`
+
+여기서 `snapshot`은 MVP 기준으로는 Git commit snapshot이 아니라 `lastAnalyzedAt` 시점의 로컬 분석 기준을 뜻한다.
+
+## source of truth 규칙
+
+spec 단위에서는 아래처럼 고정한다.
+
+- 진실의 원본: `specs/<spec-slug>/meta.json`
+- 버전 원본: `specs/<spec-slug>/versions/*`
+- 인덱스/캐시: `specs/index.json`
+
+즉, `index.json`과 `meta.json`이 어긋나면 `meta.json` 기준으로 복구한다.
+
+권장 복구 방식:
+
+1. `specs/` 하위 `meta.json`들을 스캔
+2. `index.json` 재생성
+3. 손상된 index는 덮어써도 됨
+
+### 앱 전역 설정 파일
+
+역할:
+
+- 프로젝트와 직접 관계없는 로컬 편의 정보 저장
+
+권장 예시:
+
+- 최근 열어본 프로젝트 목록
+- 마지막 열었던 창 상태
+- 사용자 UI 설정
+
+예시 위치:
+
+- `~/.sdd-app/settings.json`
+
+## 구현시 권장 규칙
+
+- 명세 버전은 덮어쓰기보다 `versions/` 누적 저장
+- 채팅은 append-only `jsonl`
+- 분석 결과는 최신본 + 필요 시 snapshot 분리
+- 사람이 직접 열어봐도 이해 가능한 파일명 사용
+- `.sdd/` 내부 구조는 초기에 고정
+- repository read 직후 runtime schema validation 수행
+- 변경 가능한 JSON은 revision 또는 updatedAt 기준 충돌 검사 수행
+
+## 장점과 주의점
+
+### 장점
+
+- DB 없이 바로 시작 가능
+- 프로젝트와 함께 이동/백업 가능
+- Git에 포함하기로 결정하면 추적이 쉬움
+- 단일 사용자 로컬 도구에 잘 맞음
+
+### 주의점
+
+- 동시 편집과 충돌 처리에는 약함
+- 검색/집계 성능은 DB보다 불리함
+- 파일 규칙이 흐트러지면 금방 복잡해짐
+- `.sdd/`를 Git에 포함할지 여부는 아직 정책 결정이 필요함
