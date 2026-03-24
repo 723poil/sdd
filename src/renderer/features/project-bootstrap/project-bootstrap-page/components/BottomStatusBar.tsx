@@ -327,7 +327,7 @@ function getPanelHeadline(input: BottomStatusBarProps): string {
     return '최근 분석 결과가 준비되어 있습니다.';
   }
 
-  return '에이전트 분석을 실행하면 진행 단계가 표시됩니다.';
+  return '전체 분석이나 참조 분석을 실행하면 진행 단계가 표시됩니다.';
 }
 
 function getPanelDetail(input: BottomStatusBarProps): string {
@@ -361,7 +361,7 @@ function getPanelDetail(input: BottomStatusBarProps): string {
     return `최근 분석 기록 ${formatVerboseTimestamp(input.inspection.projectMeta.lastAnalyzedAt)}`;
   }
 
-  return '에이전트 분석을 실행하면 진행률과 최근 상태를 이곳에서 바로 확인할 수 있습니다.';
+  return '전체 분석이나 참조 분석을 실행하면 진행률과 최근 상태를 이곳에서 바로 확인할 수 있습니다.';
 }
 
 function buildStripMetrics(input: {
@@ -477,6 +477,8 @@ function getWorkspacePageLabel(value: WorkspacePageId): string {
       return '분석';
     case 'specs':
       return '명세';
+    case 'references':
+      return '참조';
   }
 }
 

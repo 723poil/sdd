@@ -172,12 +172,61 @@
       calc(14px * var(--analysis-map-node-spacing-scale, 1));
   }
 
+  .workspace-page-stage {
+    --workspace-map-floating-inset: 10px;
+    --workspace-map-overlay-inset: 18px;
+  }
+
+  .analysis-reference-map__overlay {
+    gap: 10px;
+    width: min(
+      360px,
+      calc(
+        100% -
+          (
+            var(--workspace-map-overlay-inset, 18px) +
+              var(--workspace-map-overlay-inset, 18px)
+          )
+      )
+    );
+  }
+
+  .analysis-reference-map__overlay--collapsed {
+    width: auto;
+  }
+
+  .analysis-reference-map__inspector {
+    height: auto;
+    max-height: min(340px, calc(100vh - 240px));
+  }
+
+  .analysis-reference-map__area {
+    border-radius: 24px;
+  }
+
+  .analysis-reference-map__area-header,
+  .analysis-reference-map__cluster-header {
+    padding: 12px 14px 0;
+  }
+
+  .analysis-reference-map__role-group {
+    border-radius: 14px;
+  }
+
+  .analysis-reference-map__role-group-header {
+    padding: 10px 12px 0;
+  }
+
   .analysis-document-panel {
     position: static;
   }
 
-  .analysis-document-page__body {
+  .analysis-document-page__content-card {
     padding: 22px 20px;
+  }
+
+  .analysis-document-page__references {
+    padding: 20px;
   }
 
   .analysis-document-page__references-header {

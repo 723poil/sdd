@@ -208,8 +208,8 @@
 
 .workspace-page-floating-tabs {
   position: absolute;
-  left: 14px;
-  bottom: 14px;
+  left: var(--workspace-map-floating-inset, 14px);
+  bottom: var(--workspace-map-floating-inset, 14px);
   z-index: 7;
   display: inline-flex;
   align-items: center;
@@ -223,6 +223,9 @@
 }
 
 .workspace-page-stage {
+  --workspace-map-shell-radius: 16px;
+  --workspace-map-floating-inset: 14px;
+  --workspace-map-overlay-inset: 28px;
   position: relative;
   display: flex;
   flex: 1;

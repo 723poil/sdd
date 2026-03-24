@@ -12,10 +12,20 @@ import type {
   SelectedProjectAnalysisDocumentId,
   StructuredProjectAnalysis,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import {
+  ANALYSIS_DOCUMENT_BOARD_LAYOUT_PRESET,
+  DOCUMENT_MAP_VIEWPORT_PRESET,
+  WORKSPACE_MAP_GRID_SIZE,
+  clamp,
+  getWorkspaceMapFitScale,
+  getWorkspaceMapNodeFontScale,
+  getWorkspaceMapNodeSpacingScale,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
 
 interface AnalysisWorkspaceProps {
   analysis: StructuredProjectAnalysis | null;
   analysisSessionKey: string;
+  isActive: boolean;
   selectedDocumentId: SelectedProjectAnalysisDocumentId;
   onViewModeChange?: (viewMode: 'map' | 'document') => void;
   onSelectDocument: (documentId: ProjectAnalysisDocumentId) => void;
@@ -101,19 +111,6 @@ const INITIAL_VIEWPORT: AnalysisViewport = {
   offsetY: 0,
 };
 
-const GRID_SIZE = 40;
-const MAX_SCALE = 2.8;
-const MIN_SCALE = 0.35;
-const FIT_MIN_SCALE = 0.68;
-
-const ANALYSIS_BOARD_LAYOUT: Record<ProjectAnalysisDocumentId, AnalysisDocumentBoardLayout> = {
-  overview: { x: -820, y: -60, width: 620, height: 340 },
-  purpose: { x: -20, y: -460, width: 640, height: 360 },
-  structure: { x: -20, y: 260, width: 640, height: 360 },
-  layers: { x: 760, y: -460, width: 600, height: 360 },
-  connectivity: { x: 760, y: 260, width: 600, height: 360 },
-};
-
 const DEFAULT_ANALYSIS_BOARD_LINKS: AnalysisDocumentBoardLink[] = [
   { from: 'overview', label: '목적', to: 'purpose' },
   { from: 'overview', label: '구조', to: 'structure' },
@@ -194,7 +191,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
   }, [onViewModeChange, viewMode]);
 
   useEffect(() => {
-    if (viewMode !== 'map') {
+    if (!props.isActive || viewMode !== 'map' || !analysis) {
       return;
     }
 
@@ -203,15 +200,22 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
       return;
     }
 
-    const stageRect = stageElement.getBoundingClientRect();
-    setStageSize({
-      width: stageRect.width,
-      height: stageRect.height,
-    });
+    let animationFrameId = 0;
+    const updateStageSize = () => {
+      const stageRect = stageElement.getBoundingClientRect();
+      setStageSize({
+        width: stageRect.width,
+        height: stageRect.height,
+      });
+    };
+
+    updateStageSize();
+    animationFrameId = window.requestAnimationFrame(updateStageSize);
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) {
+        updateStageSize();
         return;
       }
 
@@ -223,9 +227,10 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
 
     resizeObserver.observe(stageElement);
     return () => {
+      window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, [viewMode]);
+  }, [analysis, props.isActive, viewMode]);
 
   const boardNodes = useMemo(
     () => buildAnalysisDocumentBoardNodes(documents, boardPositions),
@@ -234,14 +239,22 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
   const worldStyle = useMemo<CSSProperties>(
     () => ({
       transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
-      ['--analysis-map-node-font-scale' as string]: getAnalysisMapNodeFontScale(viewport.scale),
-      ['--analysis-map-node-spacing-scale' as string]: getAnalysisMapNodeSpacingScale(viewport.scale),
+      ['--analysis-map-node-font-scale' as string]: getWorkspaceMapNodeFontScale(viewport.scale),
+      ['--analysis-map-node-spacing-scale' as string]: getWorkspaceMapNodeSpacingScale(
+        viewport.scale,
+      ),
     }),
     [viewport.offsetX, viewport.offsetY, viewport.scale],
   );
 
   useEffect(() => {
-    if (viewMode !== 'map' || boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
+    if (
+      !props.isActive ||
+      viewMode !== 'map' ||
+      boardNodes.length === 0 ||
+      stageSize.width === 0 ||
+      stageSize.height === 0
+    ) {
       return;
     }
 
@@ -251,7 +264,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
 
     setViewport(createViewportToFitNodes(boardNodes, stageSize));
     hasAdjustedViewportRef.current = true;
-  }, [boardNodes, stageSize, viewMode]);
+  }, [boardNodes, props.isActive, stageSize, viewMode]);
 
   useEffect(() => {
     if (viewMode !== 'map') {
@@ -371,7 +384,11 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
 
     hasAdjustedViewportRef.current = true;
     setViewport((current) => {
-      const nextScale = clamp(current.scale * scaleDelta, MIN_SCALE, MAX_SCALE);
+      const nextScale = clamp(
+        current.scale * scaleDelta,
+        DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+        DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
+      );
       const worldX = (anchorX - stageRect.width / 2 - current.offsetX) / current.scale;
       const worldY = (anchorY - stageRect.height / 2 - current.offsetY) / current.scale;
 
@@ -391,7 +408,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
             <span className="analysis-empty-panel__eyebrow">분석 준비</span>
             <h3 className="analysis-empty-panel__title">문서 맵이 아직 없습니다.</h3>
             <p className="analysis-empty-panel__description">
-              에이전트 분석을 실행하면 문서 카드와 연결 관계를 이곳에서 바로 볼 수 있습니다.
+              전체 분석을 실행하면 문서 카드와 연결 관계를 이곳에서 바로 볼 수 있습니다.
             </p>
           </div>
         </section>
@@ -429,13 +446,15 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
           </div>
           <div className="analysis-document-page__body">
             <div className="analysis-document-page__scroll">
-              <p className="analysis-document-panel__summary">{selectedDocument.summary}</p>
-              <div className="analysis-document-markdown">
-                <MarkdownDocument markdown={selectedDocument.markdown} />
-              </div>
+              <section className="analysis-document-page__content-card">
+                <p className="analysis-document-panel__summary">{selectedDocument.summary}</p>
+                <div className="analysis-document-markdown">
+                  <MarkdownDocument markdown={selectedDocument.markdown} />
+                </div>
+              </section>
               <section className="analysis-document-page__references">
                 <div className="analysis-document-page__references-header">
-                  <div>
+                  <div className="analysis-document-page__references-copy">
                     <h5>핵심 파일 참조</h5>
                     <p>에이전트가 정리한 중요한 파일 간 참조 관계입니다.</p>
                   </div>
@@ -548,8 +567,8 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
               const stageY = event.clientY - stageRect.top;
               const nextScale = clamp(
                 viewport.scale * Math.exp(-event.deltaY * 0.0016),
-                MIN_SCALE,
-                MAX_SCALE,
+                DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+                DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
               );
               const centerX = stageRect.width / 2;
               const centerY = stageRect.height / 2;
@@ -743,7 +762,7 @@ function buildAnalysisDocumentBoardNodes(
   boardPositions: ProjectAnalysisDocumentLayoutMap,
 ): AnalysisDocumentBoardNode[] {
   return documents.map((document) => {
-    const layout = ANALYSIS_BOARD_LAYOUT[document.id];
+    const layout = ANALYSIS_DOCUMENT_BOARD_LAYOUT_PRESET[document.id];
     const position = boardPositions[document.id] ?? { x: layout.x, y: layout.y };
 
     return {
@@ -765,7 +784,7 @@ function createResolvedDocumentLayoutMap(
   const next: ProjectAnalysisDocumentLayoutMap = {};
 
   for (const document of documents) {
-    const layout = ANALYSIS_BOARD_LAYOUT[document.id];
+    const layout = ANALYSIS_DOCUMENT_BOARD_LAYOUT_PRESET[document.id];
     next[document.id] = storedLayouts[document.id] ?? {
       x: layout.x,
       y: layout.y,
@@ -914,13 +933,13 @@ function createViewportToFitNodes(
   stageSize: AnalysisStageSize,
 ): AnalysisViewport {
   const bounds = getNodeBounds(nodes);
-  const availableWidth = Math.max(stageSize.width - 48, 1);
-  const availableHeight = Math.max(stageSize.height - 48, 1);
-  const scale = clamp(
-    Math.min(availableWidth / bounds.width, availableHeight / bounds.height),
-    FIT_MIN_SCALE,
-    1.12,
-  );
+  const scale = getWorkspaceMapFitScale({
+    boundsWidth: bounds.width,
+    boundsHeight: bounds.height,
+    stageWidth: stageSize.width,
+    stageHeight: stageSize.height,
+    viewportPreset: DOCUMENT_MAP_VIEWPORT_PRESET,
+  });
 
   return {
     scale,
@@ -930,7 +949,7 @@ function createViewportToFitNodes(
 }
 
 function createStageGridStyle(viewport: AnalysisViewport): Record<string, string> {
-  const gridSize = GRID_SIZE * viewport.scale;
+  const gridSize = WORKSPACE_MAP_GRID_SIZE * viewport.scale;
 
   return {
     backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
@@ -1013,16 +1032,4 @@ function toWorldPoint(input: {
     x: (stageX - stageRect.width / 2 - input.viewport.offsetX) / input.viewport.scale,
     y: (stageY - stageRect.height / 2 - input.viewport.offsetY) / input.viewport.scale,
   };
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function getAnalysisMapNodeFontScale(viewportScale: number): number {
-  return clamp(0.9 / viewportScale, 1, 1.42);
-}
-
-function getAnalysisMapNodeSpacingScale(viewportScale: number): number {
-  return clamp(0.82 / viewportScale, 1, 1.22);
 }

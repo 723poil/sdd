@@ -81,7 +81,11 @@
   - 읽기/쓰기 가능 여부 검사
   - 대상 프로젝트 내부 `.sdd/` 초기화
   - `project.json`, `analysis/context.json`, `analysis/summary.md`, `analysis/file-index.json`, `specs/index.json` 기본 생성
-  - Codex exec 기반 기본 프로젝트 분석 실행
+  - `전체 분석`과 `참조 분석` 실행 경로 분리
+  - 로컬 정적 분석 기반 기본 프로젝트 분석 실행
+  - TS/JS/Kotlin/PHP/Java 파일의 정적 참조 관계 추출
+  - 읽기 전용 프로젝트에서도 참조 분석은 저장 없이 화면에 임시 표시 가능
+  - 필요 시 Codex exec 기반 문서 서술 보강
   - 분석 결과를 `.sdd/analysis/*` 와 `project.json.lastAnalyzedAt` 에 반영
   - 분석 결과의 문서 맵 연결선과 파일별 참조 관계를 함께 저장
   - 최근 프로젝트 목록 유지 및 수동 드래그 정렬
@@ -105,7 +109,7 @@
   - 채팅 / patch / diff
   - 명세 컨텍스트별 assistant 응답 연결
   - 저장된 CLI 설정을 실제 분석/채팅 실행에 연결
-  - `codex exec` 연동
+  - 명세/채팅 경로의 `codex exec` 연동
 
 ## 문서 동기화 주의
 

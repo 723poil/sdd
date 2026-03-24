@@ -13,14 +13,19 @@ import {
   findAgentCliConnectionDefinition,
   type AgentCliConnectionSettings,
 } from '@/domain/app-settings/agent-cli-connection-model';
+import type { ProjectAnalysisDraft } from '@/domain/project/project-analysis-model';
 import { createProjectError } from '@/domain/project/project-errors';
-import { err, type Result } from '@/shared/contracts/result';
+import { err, ok, type Result } from '@/shared/contracts/result';
 
 import {
   createProjectAnalysisPrompt,
   createProjectAnalysisOutputSchema,
 } from '@/infrastructure/analysis/project-analysis-codex-prompt';
 import { parseProjectAnalysisCodexResult } from '@/infrastructure/analysis/project-analysis-codex-result';
+import {
+  createLocalProjectAnalysisDraft,
+  mergeProjectAnalysisWithLocalDraft,
+} from '@/infrastructure/analysis/project-analysis-local-draft';
 
 const CODEX_ANALYSIS_IDLE_TIMEOUT_MS = 20 * 60 * 1000;
 const CODEX_ANALYSIS_MAX_DURATION_MS = 60 * 60 * 1000;
@@ -36,16 +41,66 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
       const startedAt = new Date().toISOString();
       const beginRunResult = dependencies.analysisRunStatusStore.beginAnalysisRun({
         rootPath,
-        stageMessage: 'Codex CLI 실행 준비 중',
-        progressMessage: '분석 실행 환경을 확인하고 있습니다.',
+        stageMessage: input.mode === 'references' ? '참조 분석 준비 중' : '전체 분석 준비 중',
+        progressMessage:
+          input.mode === 'references'
+            ? '저장소 구조와 참조 관계를 스캔할 준비를 하고 있습니다.'
+            : '저장소 구조와 분석 문서를 준비하고 있습니다.',
         startedAt,
         stepIndex: 1,
-        stepTotal: 4,
+        stepTotal: input.mode === 'references' ? 3 : 4,
       });
       if (!beginRunResult.ok) {
         return beginRunResult;
       }
       const runControl = beginRunResult.value;
+
+      dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
+        rootPath,
+        stageMessage: '로컬 정적 참조 분석 중',
+        progressMessage: 'TS/JS/Kotlin/PHP/Java 파일의 정적 참조를 스캔하고 있습니다.',
+        stepIndex: 1,
+      });
+
+      let localDraft: ProjectAnalysisDraft;
+      try {
+        localDraft = await createLocalProjectAnalysisDraft({
+          projectName: input.projectName,
+          rootPath,
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : '로컬 정적 분석 중 알 수 없는 오류가 발생했습니다.';
+
+        markAnalysisRunAsFailed({
+          analysisRunStatusStore: dependencies.analysisRunStatusStore,
+          error: message,
+          rootPath,
+          stageMessage: '로컬 정적 분석 실패',
+          stepIndex: 1,
+        });
+
+        return err(
+          createProjectError(
+            'PROJECT_ANALYSIS_FAILED',
+            '로컬 정적 분석으로 참조 데이터를 만들지 못했습니다.',
+            message,
+          ),
+        );
+      }
+
+      dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
+        rootPath,
+        stageMessage: '로컬 분석 결과 정리 중',
+        progressMessage: '정적 참조 결과를 저장 가능한 초안으로 정리하고 있습니다.',
+        stepIndex: 2,
+      });
+
+      if (input.mode === 'references') {
+        return ok(localDraft);
+      }
 
       const codexRuntimeSettingsResult = await resolveCodexRuntimeSettings({
         agentCliSettingsStore: dependencies.agentCliSettingsStore,
@@ -54,18 +109,17 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
         return createCancelledAnalysisResult({
           analysisRunStatusStore: dependencies.analysisRunStatusStore,
           rootPath,
-          stageMessage: '에이전트 분석 취소됨',
+          stageMessage: '분석 취소됨',
         });
       }
       if (!codexRuntimeSettingsResult.ok) {
-        markAnalysisRunAsFailed({
+        return createLocalAnalysisFallbackResult({
+          analysis: localDraft,
           analysisRunStatusStore: dependencies.analysisRunStatusStore,
-          error: codexRuntimeSettingsResult.error.message,
+          progressMessage: 'Codex 설정을 확인하지 못해 로컬 정적 분석 결과만 사용합니다.',
           rootPath,
-          stageMessage: 'Codex CLI 설정 확인 실패',
-          stepIndex: 1,
+          stageMessage: '로컬 정적 분석 완료',
         });
-        return codexRuntimeSettingsResult;
       }
 
       const tempDirectoryPath = await mkdtemp(join(tmpdir(), 'sdd-codex-analysis-'));
@@ -82,7 +136,7 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
           return createCancelledAnalysisResult({
             analysisRunStatusStore: dependencies.analysisRunStatusStore,
             rootPath,
-            stageMessage: '에이전트 분석 취소됨',
+            stageMessage: '분석 취소됨',
           });
         }
 
@@ -101,50 +155,57 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
           signal: runControl.signal,
         });
         if (!executeResult.ok) {
-          return executeResult;
+          if (executeResult.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+            return executeResult;
+          }
+
+          return createLocalAnalysisFallbackResult({
+            analysis: localDraft,
+            analysisRunStatusStore: dependencies.analysisRunStatusStore,
+            progressMessage: 'Codex 보강 분석에 실패해 로컬 정적 분석 결과만 사용합니다.',
+            rootPath,
+            stageMessage: 'Codex 보강 없이 로컬 분석 사용',
+          });
         }
 
         dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
           rootPath,
           stageMessage: 'Codex 응답 정리 중',
-          progressMessage: '구조화 결과를 읽고 검증하고 있습니다.',
+          progressMessage: 'Codex 서술 결과와 로컬 참조 데이터를 합치고 있습니다.',
           stepIndex: 3,
         });
 
         const rawOutput = await readFile(outputLastMessagePath, 'utf8');
         const parsedResult = parseProjectAnalysisCodexResult(rawOutput);
         if (!parsedResult.ok) {
-          markAnalysisRunAsFailed({
+          return createLocalAnalysisFallbackResult({
+            analysis: localDraft,
             analysisRunStatusStore: dependencies.analysisRunStatusStore,
-            error: parsedResult.error.message,
+            progressMessage: 'Codex 응답 검증에 실패해 로컬 정적 분석 결과만 사용합니다.',
             rootPath,
-            stageMessage: 'Codex 응답 검증 실패',
-            stepIndex: 3,
+            stageMessage: 'Codex 응답 대신 로컬 분석 사용',
           });
         }
 
-        return parsedResult;
+        return ok(
+          mergeProjectAnalysisWithLocalDraft({
+            codexDraft: parsedResult.value,
+            localDraft,
+          }),
+        );
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
             : '프로젝트 분석 중 알 수 없는 오류가 발생했습니다.';
 
-        markAnalysisRunAsFailed({
+        return createLocalAnalysisFallbackResult({
+          analysis: localDraft,
           analysisRunStatusStore: dependencies.analysisRunStatusStore,
-          error: message,
+          progressMessage: `Codex 보강 분석 중 오류가 발생해 로컬 정적 분석 결과만 사용합니다. (${message})`,
           rootPath,
-          stageMessage: '에이전트 분석 실패',
-          stepIndex: 3,
+          stageMessage: 'Codex 오류로 로컬 분석 사용',
         });
-
-        return err(
-          createProjectError(
-            'PROJECT_ANALYSIS_FAILED',
-            '연결된 에이전트로 프로젝트 분석에 실패했습니다.',
-            message,
-          ),
-        );
       } finally {
         await rm(tempDirectoryPath, { recursive: true, force: true });
       }
@@ -225,7 +286,7 @@ async function executeCodexProjectAnalysis(input: {
         createCancelledAnalysisResult({
           analysisRunStatusStore: input.analysisRunStatusStore,
           rootPath: input.rootPath,
-          stageMessage: '에이전트 분석 취소됨',
+          stageMessage: '분석 취소됨',
         }),
       );
       return;
@@ -268,9 +329,9 @@ async function executeCodexProjectAnalysis(input: {
 
     input.analysisRunStatusStore.updateAnalysisRunStatus({
       rootPath: input.rootPath,
-      stageMessage: 'Codex 에이전트 분석 실행 중',
-      progressMessage: '저장소 구조를 읽고 있습니다.',
-      stepIndex: 2,
+      stageMessage: 'Codex 보강 분석 실행 중',
+      progressMessage: '구조 설명과 문서 요약을 보강하고 있습니다.',
+      stepIndex: 3,
     });
 
     const refreshIdleTimeout = () => {
@@ -328,7 +389,7 @@ async function executeCodexProjectAnalysis(input: {
         input.analysisRunStatusStore.updateAnalysisRunStatus({
           rootPath: input.rootPath,
           progressMessage: truncateProgressMessage(stderrMessage),
-          stepIndex: 2,
+          stepIndex: 3,
         });
       }
     });
@@ -341,13 +402,6 @@ async function executeCodexProjectAnalysis(input: {
       const errorCode =
         error instanceof Error && 'code' in error ? (error as NodeJS.ErrnoException).code : null;
       if (errorCode === 'ENOENT' || errorCode === 'EACCES') {
-        markAnalysisRunAsFailed({
-          analysisRunStatusStore: input.analysisRunStatusStore,
-          error: input.executablePath,
-          rootPath: input.rootPath,
-          stageMessage: 'Codex CLI 실행 파일을 찾지 못했습니다.',
-          stepIndex: 1,
-        });
         resolveOnce(
           err(
             createProjectError(
@@ -359,14 +413,6 @@ async function executeCodexProjectAnalysis(input: {
         );
         return;
       }
-
-      markAnalysisRunAsFailed({
-        analysisRunStatusStore: input.analysisRunStatusStore,
-        error: error instanceof Error ? error.message : 'Codex CLI 실행 오류',
-        rootPath: input.rootPath,
-        stageMessage: 'Codex CLI 실행 오류',
-        stepIndex: 2,
-      });
 
       resolveOnce(
         err(
@@ -389,25 +435,18 @@ async function executeCodexProjectAnalysis(input: {
           createCancelledAnalysisResult({
             analysisRunStatusStore: input.analysisRunStatusStore,
             rootPath: input.rootPath,
-            stageMessage: '에이전트 분석 취소됨',
+            stageMessage: '분석 취소됨',
           }),
         );
         return;
       }
 
       if (didIdleTimeout) {
-        markAnalysisRunAsFailed({
-          analysisRunStatusStore: input.analysisRunStatusStore,
-          error: '진행 이벤트 없음',
-          rootPath: input.rootPath,
-          stageMessage: '에이전트 분석 응답 대기 시간 초과',
-          stepIndex: 2,
-        });
         resolveOnce(
           err(
             createProjectError(
               'PROJECT_ANALYSIS_FAILED',
-              '에이전트 분석이 오랫동안 진행 이벤트를 보내지 않아 중단되었습니다.',
+              '분석이 오랫동안 진행 이벤트를 보내지 않아 중단되었습니다.',
             ),
           ),
         );
@@ -415,18 +454,11 @@ async function executeCodexProjectAnalysis(input: {
       }
 
       if (didMaxDurationTimeout) {
-        markAnalysisRunAsFailed({
-          analysisRunStatusStore: input.analysisRunStatusStore,
-          error: '최대 실행 시간 초과',
-          rootPath: input.rootPath,
-          stageMessage: '에이전트 분석 최대 실행 시간 초과',
-          stepIndex: 2,
-        });
         resolveOnce(
           err(
             createProjectError(
               'PROJECT_ANALYSIS_FAILED',
-              '에이전트 분석이 최대 실행 시간을 넘어 중단되었습니다.',
+              '분석이 최대 실행 시간을 넘어 중단되었습니다.',
             ),
           ),
         );
@@ -434,17 +466,6 @@ async function executeCodexProjectAnalysis(input: {
       }
 
       if (code !== 0) {
-        markAnalysisRunAsFailed({
-          analysisRunStatusStore: input.analysisRunStatusStore,
-          error: buildCodexFailureDetails({
-            code,
-            stderrTail,
-            stdoutTail,
-          }),
-          rootPath: input.rootPath,
-          stageMessage: 'Codex CLI 비정상 종료',
-          stepIndex: 2,
-        });
         resolveOnce(
           err(
             createProjectError(
@@ -520,7 +541,7 @@ function createCancelledAnalysisResult(input: {
   });
 
   return err(
-    createProjectError('PROJECT_ANALYSIS_CANCELLED', '에이전트 분석이 취소되었습니다.'),
+    createProjectError('PROJECT_ANALYSIS_CANCELLED', '분석이 취소되었습니다.'),
   );
 }
 
@@ -542,9 +563,9 @@ function processCodexProgressLines(input: {
 
     input.analysisRunStatusStore.updateAnalysisRunStatus({
       rootPath: input.rootPath,
-      stageMessage: 'Codex 에이전트 분석 실행 중',
+      stageMessage: 'Codex 보강 분석 실행 중',
       progressMessage,
-      stepIndex: 2,
+      stepIndex: 3,
     });
   }
 
@@ -656,4 +677,24 @@ function describeCodexProgressToken(...values: unknown[]): string | null {
 
 function truncateProgressMessage(value: string): string {
   return value.length > 240 ? `${value.slice(0, 237)}...` : value;
+}
+
+function createLocalAnalysisFallbackResult(input: {
+  analysis: ProjectAnalysisDraft;
+  analysisRunStatusStore: ProjectAnalysisRunStatusPort;
+  progressMessage: string;
+  rootPath: string;
+  stageMessage: string;
+}): Result<ProjectAnalysisDraft> {
+  input.analysisRunStatusStore.updateAnalysisRunStatus({
+    rootPath: input.rootPath,
+    status: 'running',
+    stageMessage: input.stageMessage,
+    progressMessage: input.progressMessage,
+    stepIndex: 3,
+    completedAt: null,
+    lastError: null,
+  });
+
+  return ok(input.analysis);
 }

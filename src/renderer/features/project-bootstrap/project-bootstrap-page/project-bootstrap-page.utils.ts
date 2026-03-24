@@ -37,15 +37,15 @@ export function describeInitializationState(inspection: ProjectInspection | null
   }
 
   if (inspection.initializationState === 'ready' && inspection.projectMeta?.lastAnalyzedAt) {
-    return '에이전트 분석 결과가 준비되어 있습니다. 구조 문서를 확인한 뒤 다음 작업으로 이어가면 됩니다.';
+    return '분석 결과가 준비되어 있습니다. 구조 문서를 확인한 뒤 다음 작업으로 이어가면 됩니다.';
   }
 
   if (inspection.initializationState === 'ready') {
-    return '이 프로젝트는 바로 사용할 수 있습니다. 이제 에이전트 분석을 실행할 수 있습니다.';
+    return '이 프로젝트는 바로 사용할 수 있습니다. 이제 전체 분석이나 참조 분석을 실행할 수 있습니다.';
   }
 
   if (!inspection.isWritable) {
-    return '이 경로에는 쓰기 권한이 없습니다. 권한을 확인해야 분석과 채팅 저장을 진행할 수 있습니다.';
+    return '이 경로에는 쓰기 권한이 없습니다. 전체 분석과 저장은 막히지만, 참조 분석은 저장 없이 실행할 수 있습니다.';
   }
 
   return '이 프로젝트에는 아직 저장용 작업 공간 정보가 없습니다.';
@@ -68,7 +68,7 @@ export function getStorageStatus(inspection: ProjectInspection | null): StatusBa
 
   if (!inspection.isWritable) {
     return {
-      label: '쓰기 권한 필요',
+      label: '읽기 전용',
       tone: 'warning',
     };
   }
@@ -89,6 +89,13 @@ export function getAnalysisStatus(input: {
     return {
       label: '프로젝트 필요',
       tone: 'neutral',
+    };
+  }
+
+  if (inspection.initializationState !== 'ready' && !inspection.isWritable) {
+    return {
+      label: '참조 분석만 가능',
+      tone: 'warning',
     };
   }
 

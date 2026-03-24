@@ -8,6 +8,7 @@ import type {
   ProjectAnalysis,
   ProjectAnalysisDraft,
   ProjectAnalysisDocumentLayoutMap,
+  ProjectAnalysisMode,
   ProjectAnalysisRunState,
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
@@ -35,6 +36,7 @@ export interface ProjectInspectorPort {
 
 export interface ProjectAnalyzerPort {
   analyzeProject(input: {
+    mode: ProjectAnalysisMode;
     rootPath: string;
     projectName: string;
   }): Promise<Result<ProjectAnalysisDraft>>;

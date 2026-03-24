@@ -1,6 +1,7 @@
 import type {
   ProjectAnalysis,
   ProjectAnalysisDocumentLayoutMap,
+  ProjectAnalysisMode,
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
@@ -45,6 +46,7 @@ export interface ReadProjectAnalysisInput {
 }
 
 export interface AnalyzeProjectInput {
+  mode: ProjectAnalysisMode;
   rootPath: string;
 }
 

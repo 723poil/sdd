@@ -15,7 +15,7 @@ import type {
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 
-export const WORKSPACE_PAGE_IDS = ['analysis', 'specs'] as const;
+export const WORKSPACE_PAGE_IDS = ['analysis', 'specs', 'references'] as const;
 export type WorkspacePageId = (typeof WORKSPACE_PAGE_IDS)[number];
 
 export type StatusBadgeTone = 'positive' | 'warning' | 'neutral';
@@ -71,7 +71,8 @@ export interface ProjectBootstrapWorkbenchState {
 export interface ProjectBootstrapWorkbenchViewModel {
   analysisStatus: StatusBadgeModel;
   analysisRunStatus: ProjectAnalysisRunStatus | null;
-  canAnalyze: boolean;
+  canAnalyzeProject: boolean;
+  canAnalyzeReferences: boolean;
   canCancelAnalysis: boolean;
   projectEntries: RecentProject[];
   selectedSession: ProjectSessionSummary | null;

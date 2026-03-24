@@ -21,7 +21,7 @@ export function createInMemoryProjectAnalysisRunStatusStore(): ProjectAnalysisRu
         return err(
           createProjectError(
             'PROJECT_ANALYSIS_ALREADY_RUNNING',
-            '이 프로젝트의 에이전트 분석이 이미 실행 중입니다.',
+            '이 프로젝트의 분석이 이미 실행 중입니다.',
           ),
         );
       }
@@ -63,7 +63,7 @@ export function createInMemoryProjectAnalysisRunStatusStore(): ProjectAnalysisRu
       const nextStatus: ProjectAnalysisRunStatus = {
         ...currentStatus,
         status: 'cancelling',
-        stageMessage: '에이전트 분석 취소 중',
+        stageMessage: '분석 취소 중',
         progressMessage: 'Codex 실행을 종료하고 있습니다.',
         updatedAt: new Date().toISOString(),
         completedAt: null,

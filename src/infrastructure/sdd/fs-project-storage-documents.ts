@@ -311,7 +311,7 @@ function createInitialAnalysisSummaryMarkdown(projectName: string): string {
     '',
     '## 다음 단계',
     '',
-    '- 연결된 에이전트로 프로젝트 분석 실행',
+    '- 전체 분석 또는 참조 분석 실행',
     '- 구조와 계층 정리',
     '- 명세 초안 생성',
     '',

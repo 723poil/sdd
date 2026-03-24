@@ -21,7 +21,8 @@ import type {
 interface InfoSidebarProps {
   activeWorkspacePage: WorkspacePageId;
   analysis: StructuredProjectAnalysis | null;
-  canAnalyze: boolean;
+  canAnalyzeProject: boolean;
+  canAnalyzeReferences: boolean;
   canCancelAnalysis: boolean;
   canCreateSpec: boolean;
   inspection: ProjectInspection | null;
@@ -42,6 +43,7 @@ interface InfoSidebarProps {
   onChangeChatReasoningEffort: (value: AgentCliModelReasoningEffort) => void;
   onChangeDraftMessage: (value: string) => void;
   onAnalyzeProject: () => void;
+  onAnalyzeReferences: () => void;
   onCancelAnalysis: () => void;
   onCreateSpec: () => void;
   onSendMessage: () => void;
@@ -118,15 +120,19 @@ export function InfoSidebar(props: InfoSidebarProps) {
             <div className="info-sidebar__action-bar">
               <button
                 className="info-sidebar__action-button"
-                disabled={!props.canAnalyze || props.isAnalyzing}
+                disabled={!props.canAnalyzeProject || props.isAnalyzing}
                 onClick={props.onAnalyzeProject}
                 type="button"
               >
-                {props.isCancellingAnalysis
-                  ? '분석 취소 중'
-                  : props.isAnalyzing
-                    ? '분석 실행 중'
-                    : '분석 실행'}
+                전체 분석
+              </button>
+              <button
+                className="info-sidebar__action-button"
+                disabled={!props.canAnalyzeReferences || props.isAnalyzing}
+                onClick={props.onAnalyzeReferences}
+                type="button"
+              >
+                참조 분석
               </button>
               {props.isAnalyzing ? (
                 <button

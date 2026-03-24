@@ -46,6 +46,9 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleAnalyzeProject = () => {
     workbench.onAnalyzeProject();
   };
+  const handleAnalyzeReferences = () => {
+    workbench.onAnalyzeReferences();
+  };
   const handleCancelAnalysis = () => {
     workbench.onCancelAnalysis();
   };
@@ -126,7 +129,8 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             <InfoSidebar
               activeWorkspacePage={workbench.activeWorkspacePage}
               analysis={workbench.analysis}
-              canAnalyze={workbench.canAnalyze}
+              canAnalyzeProject={workbench.canAnalyzeProject}
+              canAnalyzeReferences={workbench.canAnalyzeReferences}
               canCancelAnalysis={workbench.canCancelAnalysis}
               canCreateSpec={
                 workbench.inspection?.initializationState === 'ready' &&
@@ -143,6 +147,7 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               isSavingChatRuntimeSettings={workbench.isSavingChatRuntimeSettings}
               isSendingMessage={workbench.isSendingMessage}
               onAnalyzeProject={handleAnalyzeProject}
+              onAnalyzeReferences={handleAnalyzeReferences}
               onCancelAnalysis={handleCancelAnalysis}
               onChangeChatModel={handleChangeChatModel}
               onChangeChatReasoningEffort={handleChangeChatReasoningEffort}

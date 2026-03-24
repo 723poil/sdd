@@ -20,11 +20,12 @@ export function createProjectBootstrapWorkbenchViewModel(
     visibleAnalysisRunStatus?.status === 'running' ||
     visibleAnalysisRunStatus?.status === 'cancelling';
   const isCancellingAnalysis = visibleAnalysisRunStatus?.status === 'cancelling';
-  const canAnalyze =
+  const canAnalyzeProject =
     state.inspection !== null &&
     state.inspection.initializationState === 'ready' &&
     state.inspection.isWritable &&
     !isAnalyzing;
+  const canAnalyzeReferences = state.inspection !== null && state.inspection.isReadable && !isAnalyzing;
   const canCancelAnalysis =
     visibleAnalysisRunStatus !== null &&
     (visibleAnalysisRunStatus.status === 'running' ||
@@ -44,7 +45,8 @@ export function createProjectBootstrapWorkbenchViewModel(
       analysisRunStatus: visibleAnalysisRunStatus,
     }),
     analysisRunStatus: visibleAnalysisRunStatus,
-    canAnalyze,
+    canAnalyzeProject,
+    canAnalyzeReferences,
     canCancelAnalysis,
     isCancellingAnalysis,
     isAnalyzing,

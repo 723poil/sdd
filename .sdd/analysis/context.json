@@ -1,0 +1,1568 @@
+{
+  "schemaVersion": 2,
+  "files": [
+    ".codex/skills/sdd-codex-cli/SKILL.md",
+    ".codex/skills/sdd-commit-workflow/SKILL.md",
+    ".codex/skills/sdd-engineering-conventions/SKILL.md",
+    ".codex/skills/sdd-implementation-guardrails/SKILL.md",
+    ".codex/skills/sdd-product-mvp/SKILL.md",
+    ".codex/skills/sdd-storage-contracts/SKILL.md",
+    ".editorconfig",
+    ".gitignore",
+    ".nvmrc",
+    ".prettierrc.json",
+    "AGENTS.md",
+    "codex-spec-workflow-plan.md",
+    "docs/codex-spec-workflow/01-product-overview.md",
+    "docs/codex-spec-workflow/02-architecture.md",
+    "docs/codex-spec-workflow/03-mvp-plan.md",
+    "docs/codex-spec-workflow/04-storage-format.md",
+    "docs/codex-spec-workflow/05-risks-and-questions.md",
+    "docs/codex-spec-workflow/06-design-patterns.md",
+    "docs/codex-spec-workflow/07-engineering-conventions.md",
+    "docs/codex-spec-workflow/08-codex-cli-integration.md",
+    "docs/codex-spec-workflow/README.md",
+    "electron.vite.config.ts",
+    "eslint.config.mjs",
+    "package-lock.json",
+    "package.json",
+    "README.md",
+    "scripts/generate-icon-assets.ts",
+    "scripts/prepare-dev-mac-app.ts",
+    "scripts/render-icon.swift",
+    "scripts/run-dev.ts",
+    "scripts/write-icns.swift",
+    "src/application/app-settings/app-settings.ports.ts",
+    "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+    "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+    "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+    "src/application/project/activate-project.use-case.ts",
+    "src/application/project/analyze-project.use-case.ts",
+    "src/application/project/cancel-project-analysis.use-case.ts",
+    "src/application/project/create-project-session.use-case.ts",
+    "src/application/project/create-project-spec.use-case.ts",
+    "src/application/project/ensure-project-storage-ready.ts",
+    "src/application/project/initialize-project-storage.use-case.ts",
+    "src/application/project/inspect-project.use-case.ts",
+    "src/application/project/list-project-sessions.use-case.ts",
+    "src/application/project/list-recent-projects.use-case.ts",
+    "src/application/project/project-analysis-draft-merger.ts",
+    "src/application/project/project.ports.ts",
+    "src/application/project/read-project-analysis-run-status.use-case.ts",
+    "src/application/project/read-project-analysis.use-case.ts",
+    "src/application/project/read-project-session-messages.use-case.ts",
+    "src/application/project/read-project-specs.use-case.ts",
+    "src/application/project/reorder-recent-projects.use-case.ts",
+    "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+    "src/application/project/select-project-directory.use-case.ts",
+    "src/application/project/send-project-session-message.use-case.ts",
+    "src/domain/app-settings/agent-cli-connection-model.ts",
+    "src/domain/project/project-analysis-model.ts",
+    "src/domain/project/project-errors.ts",
+    "src/domain/project/project-model.ts",
+    "src/domain/project/project-session-model.ts",
+    "src/domain/project/project-spec-model.ts",
+    "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+    "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+    "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+    "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+    "src/infrastructure/analysis/project-analysis-codex-result.ts",
+    "src/infrastructure/analysis/project-analysis-detection.ts",
+    "src/infrastructure/analysis/project-analysis-local-draft.ts",
+    "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+    "src/infrastructure/analysis/project-analysis-scanner.ts",
+    "src/infrastructure/analysis/project-analysis-summary.ts",
+    "src/infrastructure/analysis/project-analysis.constants.ts",
+    "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+    "src/infrastructure/app-settings/fs-app-settings-store.ts",
+    "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+    "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
+    "src/infrastructure/fs/node-project-inspector.adapter.ts",
+    "src/infrastructure/fs/write-json-atomically.ts",
+    "src/infrastructure/sdd/fs-project-session-documents.ts",
+    "src/infrastructure/sdd/fs-project-session-paths.ts",
+    "src/infrastructure/sdd/fs-project-session.repository.ts",
+    "src/infrastructure/sdd/fs-project-spec-documents.ts",
+    "src/infrastructure/sdd/fs-project-storage-documents.ts",
+    "src/infrastructure/sdd/fs-project-storage-io.ts",
+    "src/infrastructure/sdd/fs-project-storage-paths.ts",
+    "src/infrastructure/sdd/fs-project-storage.repository.ts",
+    "src/main/apply-mac-app-icon.ts",
+    "src/main/create-main-window.ts",
+    "src/main/ipc/register-project-ipc.ts",
+    "src/main/ipc/register-settings-ipc.ts",
+    "src/main/main.ts",
+    "src/preload/index.ts",
+    "src/renderer/app-view.ts",
+    "src/renderer/App.tsx",
+    "src/renderer/components/AppViewSwitcher.tsx",
+    "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+    "src/renderer/features/agent-cli-settings/index.ts",
+    "src/renderer/features/agent-cli-settings/types.ts",
+    "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+    "src/renderer/features/agent-cli-settings/utils.ts",
+    "src/renderer/features/project-bootstrap/index.ts",
+    "src/renderer/global.d.ts",
+    "src/renderer/index.html",
+    "src/renderer/main.tsx",
+    "src/renderer/styles/analysis.css",
+    "src/renderer/styles/app.css",
+    "src/renderer/styles/base.css",
+    "src/renderer/styles/common-components.css",
+    "src/renderer/styles/project-sidebar.css",
+    "src/renderer/styles/responsive.css",
+    "src/renderer/styles/settings.css",
+    "src/renderer/styles/workbench-chrome.css",
+    "src/renderer/styles/workspace-ui.css",
+    "src/shared/app/app-display-name.ts",
+    "src/shared/contracts/app-error.ts",
+    "src/shared/contracts/result.ts",
+    "src/shared/ipc/project-ipc.ts",
+    "src/shared/ipc/sdd-ipc.ts",
+    "src/shared/ipc/settings-ipc.ts",
+    "tsconfig.json"
+  ],
+  "directories": [
+    ".codex",
+    ".codex/skills",
+    ".codex/skills/sdd-codex-cli",
+    ".codex/skills/sdd-commit-workflow",
+    ".codex/skills/sdd-engineering-conventions",
+    ".codex/skills/sdd-implementation-guardrails",
+    ".codex/skills/sdd-product-mvp",
+    ".codex/skills/sdd-storage-contracts",
+    "docs",
+    "docs/codex-spec-workflow",
+    "scripts",
+    "src",
+    "src/application",
+    "src/application/app-settings",
+    "src/application/project",
+    "src/domain",
+    "src/domain/app-settings",
+    "src/domain/project",
+    "src/infrastructure",
+    "src/infrastructure/agent-cli",
+    "src/infrastructure/analysis",
+    "src/infrastructure/app-settings",
+    "src/infrastructure/dialog",
+    "src/infrastructure/fs",
+    "src/infrastructure/sdd",
+    "src/main",
+    "src/main/ipc",
+    "src/preload",
+    "src/renderer",
+    "src/renderer/components",
+    "src/renderer/features",
+    "src/renderer/features/agent-cli-settings",
+    "src/renderer/features/agent-cli-settings/components",
+    "src/renderer/features/project-bootstrap",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page",
+    "src/renderer/styles",
+    "src/shared",
+    "src/shared/app",
+    "src/shared/contracts",
+    "src/shared/ipc"
+  ],
+  "detectedFrameworks": [
+    "Electron",
+    "Node.js",
+    "React",
+    "TypeScript",
+    "Vite"
+  ],
+  "entrypoints": [
+    "./out/main/main.js",
+    "src/main/main.ts",
+    "src/preload/index.ts",
+    "src/renderer/features/agent-cli-settings/index.ts",
+    "src/renderer/features/project-bootstrap/index.ts",
+    "src/renderer/index.html",
+    "src/renderer/main.tsx",
+    "src/renderer/styles/app.css"
+  ],
+  "keyConfigs": [
+    "electron.vite.config.ts",
+    "eslint.config.mjs",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "modules": [
+    "src",
+    "src/application",
+    "src/domain",
+    "src/infrastructure",
+    "src/main",
+    "src/preload",
+    "src/renderer",
+    "src/shared"
+  ],
+  "unknowns": [],
+  "confidence": 0.95,
+  "projectPurpose": "정적 분석 기준으로는 Electron, Node.js, React, TypeScript, Vite 중심의 코드베이스로 보입니다. 도메인 목적은 추가 설명 없이 확정하지 않았습니다.",
+  "architectureSummary": "주요 경로는 application, domain, electron.vite.config.ts, eslint.config.mjs, infrastructure, main, package.json, preload, renderer, scripts, shared, tsconfig.json 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계를 함께 저장합니다.",
+  "documentSummaries": [
+    {
+      "id": "overview",
+      "summary": "프로젝트 전체 개요를 확인합니다."
+    },
+    {
+      "id": "purpose",
+      "summary": "정적 분석으로 확인한 목적 단서와 불확실성을 정리했습니다."
+    },
+    {
+      "id": "structure",
+      "summary": "주요 모듈과 디렉터리 구조를 정리했습니다."
+    },
+    {
+      "id": "layers",
+      "summary": "경로 기반 계층과 의존 방향을 요약했습니다."
+    },
+    {
+      "id": "connectivity",
+      "summary": "정적 참조 기반의 핵심 연결 관계를 정리했습니다."
+    }
+  ],
+  "documentLayouts": {},
+  "layers": [
+    {
+      "dependsOn": [
+        "domain",
+        "shared"
+      ],
+      "directories": [],
+      "name": "application",
+      "responsibility": "애플리케이션 유스케이스 관련 코드 24개"
+    },
+    {
+      "dependsOn": [
+        "shared"
+      ],
+      "directories": [],
+      "name": "domain",
+      "responsibility": "도메인 규칙 관련 코드 6개"
+    },
+    {
+      "dependsOn": [],
+      "directories": [],
+      "name": "electron.vite.config.ts",
+      "responsibility": "electron.vite.config.ts 경로 아래 주요 코드 1개"
+    },
+    {
+      "dependsOn": [],
+      "directories": [],
+      "name": "eslint.config.mjs",
+      "responsibility": "eslint.config.mjs 경로 아래 주요 코드 1개"
+    },
+    {
+      "dependsOn": [
+        "domain",
+        "shared"
+      ],
+      "directories": [],
+      "name": "infrastructure",
+      "responsibility": "인프라 연동 관련 코드 24개"
+    },
+    {
+      "dependsOn": [
+        "shared"
+      ],
+      "directories": [],
+      "name": "main",
+      "responsibility": "메인 프로세스 관련 코드 5개"
+    },
+    {
+      "dependsOn": [],
+      "directories": [],
+      "name": "package.json",
+      "responsibility": "package.json 경로 아래 주요 코드 1개"
+    },
+    {
+      "dependsOn": [
+        "shared"
+      ],
+      "directories": [],
+      "name": "preload",
+      "responsibility": "preload bridge 관련 코드 1개"
+    },
+    {
+      "dependsOn": [
+        "domain",
+        "shared"
+      ],
+      "directories": [],
+      "name": "renderer",
+      "responsibility": "renderer UI 관련 코드 13개"
+    },
+    {
+      "dependsOn": [
+        "shared"
+      ],
+      "directories": [],
+      "name": "scripts",
+      "responsibility": "scripts 경로 아래 주요 코드 2개"
+    },
+    {
+      "dependsOn": [
+        "domain"
+      ],
+      "directories": [],
+      "name": "shared",
+      "responsibility": "공용 계약 및 유틸리티 6개"
+    },
+    {
+      "dependsOn": [],
+      "directories": [],
+      "name": "tsconfig.json",
+      "responsibility": "tsconfig.json 경로 아래 주요 코드 1개"
+    }
+  ],
+  "directorySummaries": [
+    {
+      "layer": "src",
+      "path": "src",
+      "role": "정적 분석 기준 주요 파일 79개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "application",
+      "path": "src/application",
+      "role": "정적 분석 기준 주요 파일 24개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "domain",
+      "path": "src/domain",
+      "role": "정적 분석 기준 주요 파일 6개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "infrastructure",
+      "path": "src/infrastructure",
+      "role": "정적 분석 기준 주요 파일 24개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "main",
+      "path": "src/main",
+      "role": "정적 분석 기준 주요 파일 5개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "preload",
+      "path": "src/preload",
+      "role": "정적 분석 기준 주요 파일 1개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "renderer",
+      "path": "src/renderer",
+      "role": "정적 분석 기준 주요 파일 13개가 이 경로 아래에 있습니다."
+    },
+    {
+      "layer": "shared",
+      "path": "src/shared",
+      "role": "정적 분석 기준 주요 파일 6개가 이 경로 아래에 있습니다."
+    }
+  ],
+  "connections": [
+    {
+      "from": "infrastructure",
+      "reason": "정적 참조 35건. 예: src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-errors.ts",
+      "relationship": "정적 참조",
+      "to": "domain"
+    },
+    {
+      "from": "application",
+      "reason": "정적 참조 32건. 예: src/application/app-settings/app-settings.ports.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/application/app-settings/check-agent-cli-connection.use-case.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/application/app-settings/list-agent-cli-connections.use-case.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
+      "relationship": "정적 참조",
+      "to": "domain"
+    },
+    {
+      "from": "infrastructure",
+      "reason": "정적 참조 29건. 예: src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-prompt.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-result.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "relationship": "정적 참조",
+      "to": "infrastructure"
+    },
+    {
+      "from": "application",
+      "reason": "정적 참조 23건. 예: src/application/app-settings/app-settings.ports.ts -> src/shared/contracts/result.ts, src/application/app-settings/check-agent-cli-connection.use-case.ts -> src/shared/contracts/result.ts, src/application/app-settings/list-agent-cli-connections.use-case.ts -> src/shared/contracts/result.ts",
+      "relationship": "정적 참조",
+      "to": "shared"
+    },
+    {
+      "from": "infrastructure",
+      "reason": "정적 참조 15건. 예: src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/shared/contracts/result.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/shared/contracts/result.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/shared/contracts/result.ts",
+      "relationship": "정적 참조",
+      "to": "shared"
+    },
+    {
+      "from": "renderer",
+      "reason": "정적 참조 11건. 예: src/renderer/App.tsx -> src/renderer/features/agent-cli-settings/index.ts, src/renderer/App.tsx -> src/renderer/features/project-bootstrap/index.ts, src/renderer/App.tsx -> src/renderer/app-view.ts",
+      "relationship": "정적 참조",
+      "to": "renderer"
+    },
+    {
+      "from": "application",
+      "reason": "정적 참조 6건. 예: src/application/project/analyze-project.use-case.ts -> src/application/project/ensure-project-storage-ready.ts, src/application/project/analyze-project.use-case.ts -> src/application/project/project-analysis-draft-merger.ts, src/application/project/create-project-session.use-case.ts -> src/application/project/ensure-project-storage-ready.ts",
+      "relationship": "정적 참조",
+      "to": "application"
+    },
+    {
+      "from": "shared",
+      "reason": "정적 참조 5건. 예: src/shared/contracts/result.ts -> src/shared/contracts/app-error.ts, src/shared/ipc/project-ipc.ts -> src/shared/contracts/result.ts, src/shared/ipc/sdd-ipc.ts -> src/shared/ipc/project-ipc.ts",
+      "relationship": "정적 참조",
+      "to": "shared"
+    },
+    {
+      "from": "shared",
+      "reason": "정적 참조 5건. 예: src/shared/ipc/project-ipc.ts -> src/domain/project/project-analysis-model.ts, src/shared/ipc/project-ipc.ts -> src/domain/project/project-model.ts, src/shared/ipc/project-ipc.ts -> src/domain/project/project-spec-model.ts",
+      "relationship": "정적 참조",
+      "to": "domain"
+    },
+    {
+      "from": "main",
+      "reason": "정적 참조 4건. 예: src/main/create-main-window.ts -> src/shared/app/app-display-name.ts, src/main/ipc/register-project-ipc.ts -> src/shared/ipc/project-ipc.ts, src/main/ipc/register-settings-ipc.ts -> src/shared/ipc/settings-ipc.ts",
+      "relationship": "정적 참조",
+      "to": "shared"
+    },
+    {
+      "from": "main",
+      "reason": "정적 참조 4건. 예: src/main/main.ts -> src/main/apply-mac-app-icon.ts, src/main/main.ts -> src/main/create-main-window.ts, src/main/main.ts -> src/main/ipc/register-project-ipc.ts",
+      "relationship": "정적 참조",
+      "to": "main"
+    },
+    {
+      "from": "renderer",
+      "reason": "정적 참조 4건. 예: src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/types.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
+      "relationship": "정적 참조",
+      "to": "domain"
+    }
+  ],
+  "documentLinks": [
+    {
+      "from": "overview",
+      "label": "목적",
+      "reason": "프로젝트 개요에서 목적 문서로 이어집니다.",
+      "to": "purpose"
+    },
+    {
+      "from": "overview",
+      "label": "구조",
+      "reason": "프로젝트 개요에서 구조 문서로 이어집니다.",
+      "to": "structure"
+    },
+    {
+      "from": "purpose",
+      "label": "책임",
+      "reason": "목적 문서에서 계층 책임 문서로 이어집니다.",
+      "to": "layers"
+    },
+    {
+      "from": "structure",
+      "label": "흐름",
+      "reason": "구조 문서에서 연결성 문서로 이어집니다.",
+      "to": "connectivity"
+    },
+    {
+      "from": "purpose",
+      "label": "참조",
+      "reason": "목적 문서에서 핵심 참조 문서로 이어집니다.",
+      "to": "connectivity"
+    }
+  ],
+  "fileReferences": [
+    {
+      "from": "scripts/prepare-dev-mac-app.ts",
+      "reason": "정적 import: ../src/shared/app/app-display-name.ts",
+      "relationship": "imports",
+      "to": "src/shared/app/app-display-name.ts"
+    },
+    {
+      "from": "scripts/run-dev.ts",
+      "reason": "정적 import: ./prepare-dev-mac-app.ts",
+      "relationship": "imports",
+      "to": "scripts/prepare-dev-mac-app.ts"
+    },
+    {
+      "from": "src/application/app-settings/app-settings.ports.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/application/app-settings/app-settings.ports.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/activate-project.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/activate-project.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/application/project/ensure-project-storage-ready",
+      "relationship": "imports",
+      "to": "src/application/project/ensure-project-storage-ready.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project.use-case.ts",
+      "reason": "정적 import: @/application/project/project-analysis-draft-merger",
+      "relationship": "imports",
+      "to": "src/application/project/project-analysis-draft-merger.ts"
+    },
+    {
+      "from": "src/application/project/cancel-project-analysis.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/cancel-project-analysis.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/create-project-session.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/application/project/create-project-session.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/create-project-session.use-case.ts",
+      "reason": "정적 import: @/application/project/ensure-project-storage-ready",
+      "relationship": "imports",
+      "to": "src/application/project/ensure-project-storage-ready.ts"
+    },
+    {
+      "from": "src/application/project/create-project-spec.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/create-project-spec.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/application/project/create-project-spec.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/create-project-spec.use-case.ts",
+      "reason": "정적 import: @/application/project/ensure-project-storage-ready",
+      "relationship": "imports",
+      "to": "src/application/project/ensure-project-storage-ready.ts"
+    },
+    {
+      "from": "src/application/project/ensure-project-storage-ready.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/application/project/ensure-project-storage-ready.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/ensure-project-storage-ready.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/initialize-project-storage.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/application/project/initialize-project-storage.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/initialize-project-storage.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/inspect-project.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/inspect-project.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/list-project-sessions.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/application/project/list-project-sessions.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/list-recent-projects.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/list-recent-projects.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/project-analysis-draft-merger.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/project.ports.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/project.ports.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/project.ports.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/application/project/project.ports.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/application/project/project.ports.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/read-project-analysis-run-status.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/read-project-analysis-run-status.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/read-project-analysis.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/read-project-analysis.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/read-project-session-messages.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/application/project/read-project-session-messages.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/read-project-specs.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/application/project/read-project-specs.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/reorder-recent-projects.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/reorder-recent-projects.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "reason": "정적 import: @/application/project/ensure-project-storage-ready",
+      "relationship": "imports",
+      "to": "src/application/project/ensure-project-storage-ready.ts"
+    },
+    {
+      "from": "src/application/project/select-project-directory.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/send-project-session-message.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/application/project/send-project-session-message.use-case.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/application/project/send-project-session-message.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/send-project-session-message.use-case.ts",
+      "reason": "정적 import: @/application/project/ensure-project-storage-ready",
+      "relationship": "imports",
+      "to": "src/application/project/ensure-project-storage-ready.ts"
+    },
+    {
+      "from": "src/domain/project/project-analysis-model.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/domain/project/project-errors.ts",
+      "reason": "정적 import: @/shared/contracts/app-error",
+      "relationship": "imports",
+      "to": "src/shared/contracts/app-error.ts"
+    },
+    {
+      "from": "src/domain/project/project-spec-model.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-prompt",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-codex-prompt.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-result",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-codex-result.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-draft",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-draft.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-detection",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-detection.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-summary",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-summary.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-summary.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store",
+      "relationship": "imports",
+      "to": "src/infrastructure/app-settings/fs-app-settings-store.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
+      "relationship": "imports",
+      "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+      "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store",
+      "relationship": "imports",
+      "to": "src/infrastructure/app-settings/fs-app-settings-store.ts"
+    },
+    {
+      "from": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
+      "relationship": "imports",
+      "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-session-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-session-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-session-documents",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-session-documents.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-session-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-session-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
+      "relationship": "imports",
+      "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-io.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-io.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-io.ts",
+      "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
+      "relationship": "imports",
+      "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-documents",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-documents.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-spec-documents",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-spec-documents.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
+      "relationship": "imports",
+      "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/main/create-main-window.ts",
+      "reason": "정적 import: @/shared/app/app-display-name",
+      "relationship": "imports",
+      "to": "src/shared/app/app-display-name.ts"
+    },
+    {
+      "from": "src/main/ipc/register-project-ipc.ts",
+      "reason": "정적 import: @/shared/ipc/project-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/project-ipc.ts"
+    },
+    {
+      "from": "src/main/ipc/register-settings-ipc.ts",
+      "reason": "정적 import: @/shared/ipc/settings-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/settings-ipc.ts"
+    },
+    {
+      "from": "src/main/main.ts",
+      "reason": "정적 import: @/main/apply-mac-app-icon",
+      "relationship": "imports",
+      "to": "src/main/apply-mac-app-icon.ts"
+    },
+    {
+      "from": "src/main/main.ts",
+      "reason": "정적 import: @/main/create-main-window",
+      "relationship": "imports",
+      "to": "src/main/create-main-window.ts"
+    },
+    {
+      "from": "src/main/main.ts",
+      "reason": "정적 import: @/main/ipc/register-project-ipc",
+      "relationship": "imports",
+      "to": "src/main/ipc/register-project-ipc.ts"
+    },
+    {
+      "from": "src/main/main.ts",
+      "reason": "정적 import: @/main/ipc/register-settings-ipc",
+      "relationship": "imports",
+      "to": "src/main/ipc/register-settings-ipc.ts"
+    },
+    {
+      "from": "src/main/main.ts",
+      "reason": "정적 import: @/shared/app/app-display-name",
+      "relationship": "imports",
+      "to": "src/shared/app/app-display-name.ts"
+    },
+    {
+      "from": "src/preload/index.ts",
+      "reason": "정적 import: @/shared/ipc/sdd-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/sdd-ipc.ts"
+    },
+    {
+      "from": "src/preload/index.ts",
+      "reason": "정적 import: @/shared/ipc/project-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/project-ipc.ts"
+    },
+    {
+      "from": "src/preload/index.ts",
+      "reason": "정적 import: @/shared/ipc/settings-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/settings-ipc.ts"
+    },
+    {
+      "from": "src/renderer/App.tsx",
+      "reason": "정적 import: @/renderer/features/agent-cli-settings",
+      "relationship": "imports",
+      "to": "src/renderer/features/agent-cli-settings/index.ts"
+    },
+    {
+      "from": "src/renderer/App.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/index.ts"
+    },
+    {
+      "from": "src/renderer/App.tsx",
+      "reason": "정적 import: @/renderer/app-view",
+      "relationship": "imports",
+      "to": "src/renderer/app-view.ts"
+    },
+    {
+      "from": "src/renderer/components/AppViewSwitcher.tsx",
+      "reason": "정적 import: @/renderer/app-view",
+      "relationship": "imports",
+      "to": "src/renderer/app-view.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "reason": "정적 import: @/renderer/app-view",
+      "relationship": "imports",
+      "to": "src/renderer/app-view.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "reason": "정적 import: @/renderer/components/AppViewSwitcher",
+      "relationship": "imports",
+      "to": "src/renderer/components/AppViewSwitcher.tsx"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "reason": "정적 import: @/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow",
+      "relationship": "imports",
+      "to": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/index.ts",
+      "reason": "정적 import: @/renderer/features/agent-cli-settings/AgentCliSettingsPage",
+      "relationship": "imports",
+      "to": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/types.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+      "reason": "정적 import: @/shared/ipc/sdd-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/sdd-ipc.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+      "reason": "정적 import: @/renderer/features/agent-cli-settings/types",
+      "relationship": "imports",
+      "to": "src/renderer/features/agent-cli-settings/types.ts"
+    },
+    {
+      "from": "src/renderer/features/agent-cli-settings/utils.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/renderer/global.d.ts",
+      "reason": "정적 import: @/shared/ipc/sdd-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/sdd-ipc.ts"
+    },
+    {
+      "from": "src/renderer/main.tsx",
+      "reason": "정적 import: @/renderer/App",
+      "relationship": "imports",
+      "to": "src/renderer/App.tsx"
+    },
+    {
+      "from": "src/renderer/main.tsx",
+      "reason": "정적 import: @/renderer/styles/app.css",
+      "relationship": "imports",
+      "to": "src/renderer/styles/app.css"
+    },
+    {
+      "from": "src/shared/contracts/result.ts",
+      "reason": "정적 import: @/shared/contracts/app-error",
+      "relationship": "imports",
+      "to": "src/shared/contracts/app-error.ts"
+    },
+    {
+      "from": "src/shared/ipc/project-ipc.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/shared/ipc/project-ipc.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/shared/ipc/project-ipc.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/shared/ipc/project-ipc.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/shared/ipc/project-ipc.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/shared/ipc/sdd-ipc.ts",
+      "reason": "정적 import: @/shared/ipc/project-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/project-ipc.ts"
+    },
+    {
+      "from": "src/shared/ipc/sdd-ipc.ts",
+      "reason": "정적 import: @/shared/ipc/settings-ipc",
+      "relationship": "imports",
+      "to": "src/shared/ipc/settings-ipc.ts"
+    },
+    {
+      "from": "src/shared/ipc/settings-ipc.ts",
+      "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
+      "relationship": "imports",
+      "to": "src/domain/app-settings/agent-cli-connection-model.ts"
+    },
+    {
+      "from": "src/shared/ipc/settings-ipc.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    }
+  ]
+}

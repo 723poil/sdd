@@ -1,3 +1,4 @@
+import type { Dirent } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
 
@@ -60,11 +61,18 @@ export async function scanProjectAnalysis(input: {
     withFileTypes: true,
   });
 
-  const sortedEntries = [...entries].sort((left, right) => left.name.localeCompare(right.name));
+  const sortedEntries = [...entries].sort((left, right) =>
+    compareScanEntries({
+      currentPath: input.currentPath,
+      left,
+      right,
+      rootPath: input.rootPath,
+    }),
+  );
 
   for (const entry of sortedEntries) {
     if (entry.isDirectory()) {
-      if (IGNORED_DIRECTORIES.has(entry.name)) {
+      if (shouldIgnoreDirectory(entry.name)) {
         continue;
       }
 
@@ -146,6 +154,78 @@ function collectLanguageExtension(input: {
   }
 }
 
+function compareScanEntries(input: {
+  currentPath: string;
+  left: Dirent;
+  right: Dirent;
+  rootPath: string;
+}): number {
+  const leftPriority = getScanEntryPriority({
+    currentPath: input.currentPath,
+    entry: input.left,
+    rootPath: input.rootPath,
+  });
+  const rightPriority = getScanEntryPriority({
+    currentPath: input.currentPath,
+    entry: input.right,
+    rootPath: input.rootPath,
+  });
+
+  if (leftPriority !== rightPriority) {
+    return leftPriority - rightPriority;
+  }
+
+  return input.left.name.localeCompare(input.right.name);
+}
+
+function getScanEntryPriority(input: {
+  currentPath: string;
+  entry: Dirent;
+  rootPath: string;
+}): number {
+  const relativePath = normalizeRelativePath(
+    relative(input.rootPath, join(input.currentPath, input.entry.name)),
+  );
+
+  if (input.entry.isFile() && matchesKeyConfig(input.entry.name)) {
+    return 0;
+  }
+
+  if (input.entry.isFile() && isEntrypointCandidate(relativePath, input.entry.name)) {
+    return 1;
+  }
+
+  if (input.entry.isFile() && isSupportedSourceFile(input.entry.name)) {
+    return 2;
+  }
+
+  if (input.entry.isDirectory() && MODULE_ROOT_DIRECTORIES.has(input.entry.name)) {
+    return 3;
+  }
+
+  if (input.entry.isDirectory()) {
+    return 4;
+  }
+
+  if (input.entry.isFile()) {
+    return 5;
+  }
+
+  return 6;
+}
+
+function shouldIgnoreDirectory(name: string): boolean {
+  if (IGNORED_DIRECTORIES.has(name)) {
+    return true;
+  }
+
+  return name.startsWith('.');
+}
+
+function isSupportedSourceFile(fileName: string): boolean {
+  return getLanguageName(extname(fileName).toLowerCase()) !== null;
+}
+
 function getLanguageName(extension: string): string | null {
   if (extension === '.ts' || extension === '.tsx') {
     return 'TypeScript';
@@ -161,6 +241,18 @@ function getLanguageName(extension: string): string | null {
 
   if (extension === '.json') {
     return 'JSON';
+  }
+
+  if (extension === '.kt' || extension === '.kts') {
+    return 'Kotlin';
+  }
+
+  if (extension === '.php') {
+    return 'PHP';
+  }
+
+  if (extension === '.java') {
+    return 'Java';
   }
 
   if (extension === '.md') {

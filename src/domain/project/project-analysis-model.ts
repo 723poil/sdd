@@ -132,6 +132,9 @@ export interface ProjectAnalysisDraft extends ProjectAnalysis {
   detectedStack: string[];
 }
 
+export const PROJECT_ANALYSIS_MODES = ['full', 'references'] as const;
+export type ProjectAnalysisMode = (typeof PROJECT_ANALYSIS_MODES)[number];
+
 export const PROJECT_ANALYSIS_RUN_STATES = [
   'idle',
   'running',

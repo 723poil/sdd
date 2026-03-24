@@ -9,6 +9,7 @@ import type {
   ProjectAnalysis,
   ProjectAnalysisDocumentId,
   ProjectAnalysisDocumentLayoutMap,
+  ProjectAnalysisMode,
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
@@ -53,6 +54,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   actions: {
     onActivateProject(rootPath: string): Promise<void>;
     onAnalyzeProject(): void;
+    onAnalyzeReferences(): void;
     onCancelAnalysis(): void;
     onChangeDraftMessage(value: string): void;
     onCreateSpec(): void;
@@ -486,21 +488,29 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
   }
 
-  async function handleAnalyzeProject(): Promise<void> {
+  async function handleAnalyzeProject(mode: ProjectAnalysisMode): Promise<void> {
     if (!selectedPath) {
       return;
     }
 
     const analysisRootPath = selectedPath;
+    if (mode === 'references') {
+      setActiveWorkspacePage('references');
+    }
+
     const sddApi = getSddApi();
     if (!sddApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
-      setMessage('에이전트 분석을 시작할 수 없습니다.');
+      setMessage(mode === 'references' ? '참조 분석을 시작할 수 없습니다.' : '전체 분석을 시작할 수 없습니다.');
       return;
     }
 
     setErrorMessage(null);
-    setMessage('에이전트 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.');
+    setMessage(
+      mode === 'references'
+        ? '참조 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.'
+        : '전체 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.',
+    );
     setAnalysisRunStatusesByRootPath((current) => {
       const startedAt = new Date().toISOString();
       return {
@@ -509,9 +519,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           rootPath: analysisRootPath,
           status: 'running',
           stepIndex: 1,
-          stepTotal: 4,
-          stageMessage: 'Codex CLI 실행 준비 중',
-          progressMessage: '분석 요청을 전송했습니다.',
+          stepTotal: mode === 'references' ? 3 : 4,
+          stageMessage: mode === 'references' ? '참조 분석 준비 중' : '전체 분석 준비 중',
+          progressMessage:
+            mode === 'references'
+              ? '참조 분석 요청을 전송했습니다.'
+              : '전체 분석 요청을 전송했습니다.',
           startedAt,
           updatedAt: startedAt,
           completedAt: null,
@@ -522,6 +535,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     try {
       const result = await sddApi.project.analyze({
+        mode,
         rootPath: analysisRootPath,
       });
 
@@ -533,17 +547,17 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         }));
       }
 
-      if (!result.ok) {
-        if (selectedPathRef.current === analysisRootPath) {
-          if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
-            setErrorMessage(null);
-            setMessage('에이전트 분석이 취소되었습니다.');
-          } else {
-            setErrorMessage(result.error.message);
-            setMessage('에이전트 분석에 실패했습니다.');
+        if (!result.ok) {
+          if (selectedPathRef.current === analysisRootPath) {
+            if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+              setErrorMessage(null);
+              setMessage(mode === 'references' ? '참조 분석이 취소되었습니다.' : '전체 분석이 취소되었습니다.');
+            } else {
+              setErrorMessage(result.error.message);
+              setMessage(mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.');
+            }
           }
-        }
-        return;
+          return;
       }
 
       if (selectedPathRef.current !== analysisRootPath) {
@@ -554,10 +568,23 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       const structuredAnalysis = toStructuredProjectAnalysis(result.value.analysis);
       setAnalysis(structuredAnalysis);
       setSelectedAnalysisDocumentId(structuredAnalysis?.documents?.[0]?.id ?? null);
-      setMessage('에이전트 분석이 완료되었습니다. 분석 페이지에서 문서를 확인해 주세요.');
+      if (mode === 'references') {
+        setActiveWorkspacePage('references');
+      }
+      setMessage(
+        mode === 'references'
+          ? result.value.inspection.isWritable
+            ? '참조 분석이 완료되었습니다. 참조 탭과 분석 문서를 확인해 주세요.'
+            : '참조 분석이 완료되었습니다. 현재 실행에서는 저장하지 않고 화면에만 표시했습니다.'
+          : '전체 분석이 완료되었습니다. 분석 페이지에서 문서를 확인해 주세요.',
+      );
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : '에이전트 분석을 실행하지 못했습니다.';
+        error instanceof Error
+          ? error.message
+          : mode === 'references'
+            ? '참조 분석을 실행하지 못했습니다.'
+            : '전체 분석을 실행하지 못했습니다.';
       const latestRunStatus = await readAnalysisRunStatus(analysisRootPath);
       if (latestRunStatus) {
         setAnalysisRunStatusesByRootPath((current) => ({
@@ -568,7 +595,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
       if (selectedPathRef.current === analysisRootPath) {
         setErrorMessage(nextMessage);
-        setMessage('에이전트 분석에 실패했습니다.');
+        setMessage(mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.');
       }
     }
   }
@@ -608,7 +635,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }));
     setMessage(
       result.value.status === 'cancelling'
-        ? '에이전트 분석 취소를 요청했습니다.'
+        ? '분석 취소를 요청했습니다.'
         : '분석 상태를 다시 확인했습니다.',
     );
   }
@@ -867,7 +894,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     actions: {
       onActivateProject: activateProject,
       onAnalyzeProject() {
-        void handleAnalyzeProject();
+        void handleAnalyzeProject('full');
+      },
+      onAnalyzeReferences() {
+        void handleAnalyzeProject('references');
       },
       onCancelAnalysis() {
         void handleCancelAnalysis();

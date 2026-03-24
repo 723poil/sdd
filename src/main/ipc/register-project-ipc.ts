@@ -188,9 +188,12 @@ export function registerProjectIpc(): void {
     },
   );
 
-  ipcMain.handle(projectIpcChannels.analyze, async (_event, input: { rootPath: string }) => {
-    return analyzeProject.execute(input);
-  });
+  ipcMain.handle(
+    projectIpcChannels.analyze,
+    async (_event, input: { mode: 'full' | 'references'; rootPath: string }) => {
+      return analyzeProject.execute(input);
+    },
+  );
 
   ipcMain.handle(projectIpcChannels.cancelAnalysis, (_event, input: { rootPath: string }) => {
     return cancelProjectAnalysis.execute(input);

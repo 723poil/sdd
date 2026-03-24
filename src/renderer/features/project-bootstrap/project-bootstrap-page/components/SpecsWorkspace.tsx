@@ -1,8 +1,18 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import {
+  DOCUMENT_MAP_VIEWPORT_PRESET,
+  SPECS_BOARD_LAYOUT_PRESET,
+  WORKSPACE_MAP_GRID_SIZE,
+  clamp,
+  getWorkspaceMapFitScale,
+  getWorkspaceMapNodeFontScale,
+  getWorkspaceMapNodeSpacingScale,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
 
 interface SpecsWorkspaceProps {
+  isActive: boolean;
   selectedSpecId: string | null;
   specs: ProjectSpecDocument[];
   onSelectSpec: (specId: string) => void;
@@ -52,15 +62,6 @@ const INITIAL_VIEWPORT: SpecsViewport = {
   offsetY: 0,
 };
 
-const GRID_SIZE = 40;
-const MAX_SCALE = 2.4;
-const MIN_SCALE = 0.42;
-const FIT_MIN_SCALE = 0.58;
-const SPEC_CARD_WIDTH = 420;
-const SPEC_CARD_HEIGHT = 248;
-const SPEC_COLUMN_GAP = 180;
-const SPEC_ROW_GAP = 120;
-
 export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const selectedSpec = resolveSelectedSpec(props.specs, props.selectedSpecId);
   const specsKey = useMemo(() => props.specs.map((spec) => spec.meta.id).join('|'), [props.specs]);
@@ -74,8 +75,10 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const worldStyle = useMemo<CSSProperties>(
     () => ({
       transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
-      ['--analysis-map-node-font-scale' as string]: getSpecNodeFontScale(viewport.scale),
-      ['--analysis-map-node-spacing-scale' as string]: getSpecNodeSpacingScale(viewport.scale),
+      ['--analysis-map-node-font-scale' as string]: getWorkspaceMapNodeFontScale(viewport.scale),
+      ['--analysis-map-node-spacing-scale' as string]: getWorkspaceMapNodeSpacingScale(
+        viewport.scale,
+      ),
     }),
     [viewport.offsetX, viewport.offsetY, viewport.scale],
   );
@@ -86,20 +89,31 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   }, [specsKey]);
 
   useEffect(() => {
+    if (!props.isActive || props.specs.length === 0) {
+      return;
+    }
+
     const stageElement = stageRef.current;
     if (!stageElement) {
       return;
     }
 
-    const stageRect = stageElement.getBoundingClientRect();
-    setStageSize({
-      width: stageRect.width,
-      height: stageRect.height,
-    });
+    let animationFrameId = 0;
+    const updateStageSize = () => {
+      const stageRect = stageElement.getBoundingClientRect();
+      setStageSize({
+        width: stageRect.width,
+        height: stageRect.height,
+      });
+    };
+
+    updateStageSize();
+    animationFrameId = window.requestAnimationFrame(updateStageSize);
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) {
+        updateStageSize();
         return;
       }
 
@@ -111,12 +125,13 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
     resizeObserver.observe(stageElement);
     return () => {
+      window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [props.isActive, props.specs.length]);
 
   useEffect(() => {
-    if (boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
+    if (!props.isActive || boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
       return;
     }
 
@@ -126,7 +141,7 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
     setViewport(createViewportToFitNodes(boardNodes, stageSize));
     hasAdjustedViewportRef.current = true;
-  }, [boardNodes, stageSize]);
+  }, [boardNodes, props.isActive, stageSize]);
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
@@ -184,7 +199,11 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
     hasAdjustedViewportRef.current = true;
     setViewport((current) => {
-      const nextScale = clamp(current.scale * scaleDelta, MIN_SCALE, MAX_SCALE);
+      const nextScale = clamp(
+        current.scale * scaleDelta,
+        DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+        DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
+      );
       const worldX = (anchorX - stageRect.width / 2 - current.offsetX) / current.scale;
       const worldY = (anchorY - stageRect.height / 2 - current.offsetY) / current.scale;
 
@@ -244,8 +263,8 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
             const stageY = event.clientY - stageRect.top;
             const nextScale = clamp(
               viewport.scale * Math.exp(-event.deltaY * 0.0016),
-              MIN_SCALE,
-              MAX_SCALE,
+              DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+              DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
             );
             const centerX = stageRect.width / 2;
             const centerY = stageRect.height / 2;
@@ -365,9 +384,11 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
 function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
   const columnCount = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(specs.length))));
-  const totalWidth = columnCount * SPEC_CARD_WIDTH + Math.max(columnCount - 1, 0) * SPEC_COLUMN_GAP;
+  const totalWidth =
+    columnCount * SPECS_BOARD_LAYOUT_PRESET.cardWidth +
+    Math.max(columnCount - 1, 0) * SPECS_BOARD_LAYOUT_PRESET.columnGap;
   const startX = -totalWidth / 2;
-  const startY = -SPEC_CARD_HEIGHT / 2;
+  const startY = -SPECS_BOARD_LAYOUT_PRESET.cardHeight / 2;
 
   return specs.map((spec, index) => {
     const columnIndex = index % columnCount;
@@ -383,10 +404,16 @@ function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
       title: spec.meta.title,
       updatedAtLabel: formatSpecTimestamp(spec.meta.updatedAt),
       version: spec.meta.latestVersion,
-      width: SPEC_CARD_WIDTH,
-      height: SPEC_CARD_HEIGHT,
-      x: startX + columnIndex * (SPEC_CARD_WIDTH + SPEC_COLUMN_GAP) + (rowIndex % 2 === 0 ? 0 : 48),
-      y: startY + rowIndex * (SPEC_CARD_HEIGHT + SPEC_ROW_GAP),
+      width: SPECS_BOARD_LAYOUT_PRESET.cardWidth,
+      height: SPECS_BOARD_LAYOUT_PRESET.cardHeight,
+      x:
+        startX +
+        columnIndex *
+          (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
+        (rowIndex % 2 === 0 ? 0 : SPECS_BOARD_LAYOUT_PRESET.rowOffset),
+      y:
+        startY +
+        rowIndex * (SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap),
     };
   });
 }
@@ -404,13 +431,13 @@ function resolveSelectedSpec(
 
 function createViewportToFitNodes(nodes: SpecBoardNode[], stageSize: SpecsStageSize): SpecsViewport {
   const bounds = getNodeBounds(nodes);
-  const availableWidth = Math.max(stageSize.width - 48, 1);
-  const availableHeight = Math.max(stageSize.height - 48, 1);
-  const scale = clamp(
-    Math.min(availableWidth / bounds.width, availableHeight / bounds.height),
-    FIT_MIN_SCALE,
-    1.05,
-  );
+  const scale = getWorkspaceMapFitScale({
+    boundsWidth: bounds.width,
+    boundsHeight: bounds.height,
+    stageWidth: stageSize.width,
+    stageHeight: stageSize.height,
+    viewportPreset: DOCUMENT_MAP_VIEWPORT_PRESET,
+  });
 
   return {
     scale,
@@ -439,7 +466,7 @@ function getNodeBounds(nodes: SpecBoardNode[]): {
 }
 
 function createStageGridStyle(viewport: SpecsViewport): Record<string, string> {
-  const gridSize = GRID_SIZE * viewport.scale;
+  const gridSize = WORKSPACE_MAP_GRID_SIZE * viewport.scale;
 
   return {
     backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
@@ -468,16 +495,4 @@ function formatSpecTimestamp(value: string): string {
     month: 'numeric',
     day: 'numeric',
   }).format(date);
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function getSpecNodeFontScale(scale: number): number {
-  return clamp(0.88 + scale * 0.12, 0.78, 1.06);
-}
-
-function getSpecNodeSpacingScale(scale: number): number {
-  return clamp(0.84 + scale * 0.16, 0.78, 1.08);
 }

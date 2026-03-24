@@ -9,8 +9,11 @@ export const IGNORED_DIRECTORIES = new Set([
   'build',
   'coverage',
   'dist',
+  'docs',
+  'logs',
   'node_modules',
   'out',
+  'specs',
   'target',
 ]);
 
@@ -28,6 +31,11 @@ export const MODULE_ROOT_DIRECTORIES = new Set([
 ]);
 
 export const KEY_CONFIG_MATCHERS = [
+  /^composer\.json$/u,
+  /^pom\.xml$/u,
+  /^build\.gradle(?:\.kts)?$/u,
+  /^settings\.gradle(?:\.kts)?$/u,
+  /^gradle\.properties$/u,
   /^package\.json$/u,
   /^tsconfig(?:\.[\w-]+)?\.json$/u,
   /^vite\.config\./u,
@@ -66,6 +74,6 @@ export const LOCKFILE_TO_PACKAGE_MANAGER: Record<string, string> = {
   'yarn.lock': 'yarn',
 };
 
-export const MAX_SCAN_DEPTH = 4;
-export const MAX_DIRECTORY_COUNT = 160;
-export const MAX_FILE_COUNT = 420;
+export const MAX_SCAN_DEPTH = 8;
+export const MAX_DIRECTORY_COUNT = 420;
+export const MAX_FILE_COUNT = 1400;

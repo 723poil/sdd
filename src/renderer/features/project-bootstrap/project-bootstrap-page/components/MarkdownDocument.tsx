@@ -1,5 +1,7 @@
 import { Fragment } from 'react';
 
+import { MermaidDiagram } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram';
+
 interface MarkdownDocumentProps {
   markdown: string;
 }
@@ -95,9 +97,13 @@ function renderBlock(block: MarkdownBlock, index: number) {
                 ? block.language
                 : 'code'}
           </div>
-          <pre>
-            <code>{block.code}</code>
-          </pre>
+          {block.language === 'mermaid' ? (
+            <MermaidDiagram code={block.code} />
+          ) : (
+            <pre>
+              <code>{block.code}</code>
+            </pre>
+          )}
         </section>
       );
   }
