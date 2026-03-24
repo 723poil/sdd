@@ -39,7 +39,11 @@ export function SessionWorkspace(props: SessionWorkspaceProps) {
       ) : null}
 
       {props.inspection && props.inspection.initializationState !== 'ready' ? (
-        <p className="helper-text">작업 공간 준비를 먼저 완료해야 대화 세션을 저장할 수 있습니다.</p>
+        <p className="helper-text">
+          {props.inspection.isWritable
+            ? '프로젝트 정보를 확인한 뒤 대화 세션을 사용할 수 있습니다.'
+            : '이 프로젝트 폴더에 쓰기 권한이 있어야 대화 세션을 저장할 수 있습니다.'}
+        </p>
       ) : null}
 
       {canUseSessions && props.sessionCount === 0 ? (

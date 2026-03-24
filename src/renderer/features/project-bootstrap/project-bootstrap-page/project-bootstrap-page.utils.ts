@@ -32,14 +32,14 @@ export function describeInitializationState(inspection: ProjectInspection | null
   }
 
   if (inspection.initializationState === 'ready') {
-    return '이 프로젝트는 준비되었습니다. 이제 기본 분석을 실행할 수 있습니다.';
+    return '이 프로젝트는 바로 사용할 수 있습니다. 이제 기본 분석을 실행할 수 있습니다.';
   }
 
   if (!inspection.isWritable) {
-    return '이 경로에는 쓰기 권한이 없습니다. 권한을 확인해야 작업 공간을 만들 수 있습니다.';
+    return '이 경로에는 쓰기 권한이 없습니다. 권한을 확인해야 분석과 세션 저장을 진행할 수 있습니다.';
   }
 
-  return '이 프로젝트용 작업 공간을 만들기 위해 준비 작업이 필요합니다.';
+  return '이 프로젝트에는 아직 저장용 작업 공간 정보가 없습니다.';
 }
 
 export function getStorageStatus(inspection: ProjectInspection | null): StatusBadgeModel {
@@ -52,7 +52,7 @@ export function getStorageStatus(inspection: ProjectInspection | null): StatusBa
 
   if (inspection.initializationState === 'ready') {
     return {
-      label: '작업 준비 완료',
+      label: '프로젝트 준비됨',
       tone: 'positive',
     };
   }
@@ -65,7 +65,7 @@ export function getStorageStatus(inspection: ProjectInspection | null): StatusBa
   }
 
   return {
-    label: '작업 공간 준비 필요',
+    label: '저장 공간 없음',
     tone: 'warning',
   };
 }
@@ -85,7 +85,7 @@ export function getAnalysisStatus(input: {
 
   if (inspection.initializationState !== 'ready') {
     return {
-      label: '작업 공간 필요',
+      label: '저장 공간 없음',
       tone: 'warning',
     };
   }

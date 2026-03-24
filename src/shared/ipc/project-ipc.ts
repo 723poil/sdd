@@ -10,7 +10,6 @@ import type { Result } from '@/shared/contracts/result';
 export const projectIpcChannels = {
   selectDirectory: 'project/select-directory',
   inspect: 'project/inspect',
-  initializeStorage: 'project/initialize-storage',
   readAnalysis: 'project/read-analysis',
   analyze: 'project/analyze',
   listSessions: 'project/list-sessions',
@@ -28,10 +27,6 @@ export interface SelectProjectDirectoryOutput {
 }
 
 export interface InspectProjectInput {
-  rootPath: string;
-}
-
-export interface InitializeProjectStorageInput {
   rootPath: string;
 }
 
@@ -71,12 +66,6 @@ export interface ReorderRecentProjectsInput {
   rootPaths: string[];
 }
 
-export interface InitializeProjectStorageOutput {
-  inspection: ProjectInspection;
-  createdSddDirectory: boolean;
-  initializedAt: string;
-}
-
 export interface ActivateProjectOutput {
   inspection: ProjectInspection;
   recentProjects: RecentProject[];
@@ -108,7 +97,4 @@ export interface RendererProjectApi {
   sendSessionMessage(
     input: SendProjectSessionMessageInput,
   ): Promise<Result<SendProjectSessionMessageOutput>>;
-  initializeStorage(
-    input: InitializeProjectStorageInput,
-  ): Promise<Result<InitializeProjectStorageOutput>>;
 }

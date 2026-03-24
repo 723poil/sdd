@@ -9,8 +9,6 @@ import {
 export function createProjectBootstrapWorkbenchViewModel(
   state: ProjectBootstrapWorkbenchState,
 ): ProjectBootstrapWorkbenchViewModel {
-  const canInitialize =
-    state.inspection !== null && state.inspection.initializationState !== 'ready' && state.inspection.isWritable;
   const canAnalyze =
     state.inspection !== null && state.inspection.initializationState === 'ready' && state.inspection.isWritable;
   const selectedSession = resolveSelectedSession(state.sessions, state.selectedSessionId);
@@ -21,7 +19,6 @@ export function createProjectBootstrapWorkbenchViewModel(
       isAnalyzing: state.isAnalyzing,
     }),
     canAnalyze,
-    canInitialize,
     projectEntries: state.recentProjects,
     selectedSession,
     storageStatus: getStorageStatus(state.inspection),

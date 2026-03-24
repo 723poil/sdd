@@ -1,4 +1,5 @@
 import type { InspectProjectUseCase } from '@/application/project/inspect-project.use-case';
+import type { InitializeProjectStorageUseCase } from '@/application/project/initialize-project-storage.use-case';
 import type { RecentProjectsStorePort } from '@/application/project/project.ports';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
 import { ok, type Result } from '@/shared/contracts/result';
@@ -14,6 +15,7 @@ export interface ActivateProjectUseCase {
 
 export function createActivateProjectUseCase(dependencies: {
   inspectProject: InspectProjectUseCase;
+  initializeProjectStorage: InitializeProjectStorageUseCase;
   recentProjectsStore: RecentProjectsStorePort;
 }): ActivateProjectUseCase {
   return {
@@ -23,7 +25,18 @@ export function createActivateProjectUseCase(dependencies: {
         return inspectionResult;
       }
 
-      const inspection = inspectionResult.value;
+      let inspection = inspectionResult.value;
+      if (inspection.initializationState === 'missing' && inspection.isWritable) {
+        const initializationResult = await dependencies.initializeProjectStorage.execute({
+          rootPath: inspection.rootPath,
+        });
+        if (!initializationResult.ok) {
+          return initializationResult;
+        }
+
+        inspection = initializationResult.value.inspection;
+      }
+
       const rememberResult = await dependencies.recentProjectsStore.upsertRecentProject({
         rootPath: inspection.rootPath,
         projectName: inspection.projectName,

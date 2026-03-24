@@ -44,11 +44,17 @@ export function registerProjectIpc(): void {
   const listProjectSessions = createListProjectSessionsUseCase({
     projectSessionStore,
   });
+  const initializeProjectStorage = createInitializeProjectStorageUseCase({
+    projectInspector,
+    projectStorage,
+  });
   const activateProject = createActivateProjectUseCase({
     inspectProject,
+    initializeProjectStorage,
     recentProjectsStore,
   });
   const createProjectSession = createCreateProjectSessionUseCase({
+    projectInspector,
     projectSessionStore,
     projectStorage,
   });
@@ -59,11 +65,8 @@ export function registerProjectIpc(): void {
     recentProjectsStore,
   });
   const sendProjectSessionMessage = createSendProjectSessionMessageUseCase({
-    projectSessionStore,
-    projectStorage,
-  });
-  const initializeProjectStorage = createInitializeProjectStorageUseCase({
     projectInspector,
+    projectSessionStore,
     projectStorage,
   });
   const analyzeProject = createAnalyzeProjectUseCase({
@@ -121,13 +124,6 @@ export function registerProjectIpc(): void {
     projectIpcChannels.reorderRecentProjects,
     async (_event, input: { rootPaths: string[] }) => {
       return reorderRecentProjects.execute(input);
-    },
-  );
-
-  ipcMain.handle(
-    projectIpcChannels.initializeStorage,
-    async (_event, input: { rootPath: string }) => {
-      return initializeProjectStorage.execute(input);
     },
   );
 

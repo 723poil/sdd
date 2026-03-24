@@ -39,9 +39,6 @@ const sddApi: RendererSddApi = {
     reorderRecentProjects(input) {
       return ipcRenderer.invoke(projectIpcChannels.reorderRecentProjects, input);
     },
-    initializeStorage(input) {
-      return ipcRenderer.invoke(projectIpcChannels.initializeStorage, input);
-    },
   },
   settings: {
     listAgentCliConnections() {

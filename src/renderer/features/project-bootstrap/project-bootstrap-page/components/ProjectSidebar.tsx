@@ -114,7 +114,9 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                       </>
                     ) : (
                       <p className="project-subsection-note">
-                        작업 공간 준비를 마치면 프로젝트 안에서 여러 대화 세션을 만들 수 있습니다.
+                        {props.inspection?.isWritable
+                          ? '프로젝트 정보를 확인한 뒤 이 영역에서 대화 세션을 사용할 수 있습니다.'
+                          : '이 프로젝트 폴더에 쓰기 권한이 있어야 대화 세션을 저장할 수 있습니다.'}
                       </p>
                     )}
                   </div>

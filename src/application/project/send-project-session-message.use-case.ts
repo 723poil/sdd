@@ -3,7 +3,12 @@ import { createProjectError } from '@/domain/project/project-errors';
 import type { Result } from '@/shared/contracts/result';
 import { err, ok } from '@/shared/contracts/result';
 
-import type { ProjectSessionPort, ProjectStoragePort } from '@/application/project/project.ports';
+import { ensureProjectStorageReady } from '@/application/project/ensure-project-storage-ready';
+import type {
+  ProjectInspectorPort,
+  ProjectSessionPort,
+  ProjectStoragePort,
+} from '@/application/project/project.ports';
 
 export interface SendProjectSessionMessageOutput {
   message: ProjectSessionMessage;
@@ -15,25 +20,18 @@ export interface SendProjectSessionMessageUseCase {
 }
 
 export function createSendProjectSessionMessageUseCase(dependencies: {
+  projectInspector: ProjectInspectorPort;
   projectSessionStore: ProjectSessionPort;
   projectStorage: ProjectStoragePort;
 }): SendProjectSessionMessageUseCase {
   return {
     async execute(input) {
-      const projectMetaResult = await dependencies.projectStorage.readProjectMeta({
+      const storageResult = await ensureProjectStorageReady(dependencies, {
+        notWritableMessage: '메시지를 저장하려면 프로젝트 경로에 쓰기 권한이 필요합니다.',
         rootPath: input.rootPath,
       });
-      if (!projectMetaResult.ok) {
-        return projectMetaResult;
-      }
-
-      if (!projectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            '먼저 작업 공간 준비를 완료해야 메시지를 저장할 수 있습니다.',
-          ),
-        );
+      if (!storageResult.ok) {
+        return storageResult;
       }
 
       const trimmedText = input.text.trim();

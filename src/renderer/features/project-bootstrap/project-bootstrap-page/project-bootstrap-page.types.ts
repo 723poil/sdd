@@ -24,7 +24,6 @@ export interface ProjectBootstrapWorkbenchState {
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
   isSelecting: boolean;
-  isInitializing: boolean;
   isAnalyzing: boolean;
   isCreatingSession: boolean;
   isSendingMessage: boolean;
@@ -37,7 +36,6 @@ export interface ProjectBootstrapWorkbenchState {
 export interface ProjectBootstrapWorkbenchViewModel {
   analysisStatus: StatusBadgeModel;
   canAnalyze: boolean;
-  canInitialize: boolean;
   projectEntries: RecentProject[];
   selectedSession: ProjectSessionSummary | null;
   storageStatus: StatusBadgeModel;

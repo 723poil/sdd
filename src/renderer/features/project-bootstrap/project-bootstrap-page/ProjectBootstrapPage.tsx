@@ -29,9 +29,6 @@ export function ProjectBootstrapPage() {
   const handleAnalyzeProject = () => {
     workbench.onAnalyzeProject();
   };
-  const handleInitializeStorage = () => {
-    workbench.onInitializeStorage();
-  };
   const handleSendMessage = () => {
     workbench.onSendMessage();
   };
@@ -83,20 +80,17 @@ export function ProjectBootstrapPage() {
       <MainWorkspace
         analysisStatus={workbench.analysisStatus}
         canAnalyze={workbench.canAnalyze}
-        canInitialize={workbench.canInitialize}
         draftMessage={workbench.draftMessage}
         errorMessage={workbench.errorMessage}
         inspection={workbench.inspection}
         isAnalyzing={workbench.isAnalyzing}
         isCreatingSession={workbench.isCreatingSession}
-        isInitializing={workbench.isInitializing}
         isSelecting={workbench.isSelecting}
         isSendingMessage={workbench.isSendingMessage}
         message={workbench.message}
         onAnalyzeProject={handleAnalyzeProject}
         onChangeDraftMessage={handleChangeDraftMessage}
         onCreateSession={handleCreateSession}
-        onInitializeStorage={handleInitializeStorage}
         onSelectProject={handleSelectProject}
         onSendMessage={handleSendMessage}
         selectedSession={workbench.selectedSession}

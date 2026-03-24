@@ -41,7 +41,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onDragOverProject(rootPath: string): void;
     onDropProject(rootPath: string): void;
     onEndDraggingProject(): void;
-    onInitializeStorage(): void;
     onSelectProject(): void;
     onSelectSession(sessionId: string): void;
     onSendMessage(): void;
@@ -61,7 +60,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [draggingProjectRootPath, setDraggingProjectRootPath] = useState<string | null>(null);
   const [dropTargetRootPath, setDropTargetRootPath] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -123,7 +121,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    setMessage('프로젝트를 불러오는 중입니다.');
+    setMessage('프로젝트를 불러오고 작업 공간을 확인하는 중입니다.');
     setErrorMessage(null);
 
     const result = await sddApi.project.activate({ rootPath });
@@ -237,53 +235,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       await activateProject(selectionResult.value.rootPath);
     } finally {
       setIsSelecting(false);
-    }
-  }
-
-  async function handleInitializeStorage(): Promise<void> {
-    if (!selectedPath) {
-      return;
-    }
-
-    const sddApi = getSddApi();
-    if (!sddApi) {
-      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
-      setMessage('작업 공간을 준비할 수 없습니다.');
-      return;
-    }
-
-    setIsInitializing(true);
-    setErrorMessage(null);
-
-    try {
-      const initializationResult = await sddApi.project.initializeStorage({
-        rootPath: selectedPath,
-      });
-
-      if (!initializationResult.ok) {
-        setMessage('작업 공간 준비에 실패했습니다.');
-        setErrorMessage(initializationResult.error.message);
-        return;
-      }
-
-      setInspection(initializationResult.value.inspection);
-      setMessage(
-        initializationResult.value.createdSddDirectory
-          ? '작업 공간 준비가 끝났습니다. 이제 기본 분석과 대화 세션을 사용할 수 있습니다.'
-          : '이미 준비된 작업 공간을 확인했습니다. 바로 분석과 대화로 이어갈 수 있습니다.',
-      );
-      await Promise.all([
-        loadProjectAnalysis({
-          inspection: initializationResult.value.inspection,
-          rootPath: selectedPath,
-        }),
-        loadProjectSessions({
-          inspection: initializationResult.value.inspection,
-          rootPath: selectedPath,
-        }),
-      ]);
-    } finally {
-      setIsInitializing(false);
     }
   }
 
@@ -470,7 +421,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       draggingProjectRootPath,
       dropTargetRootPath,
       isSelecting,
-      isInitializing,
       isAnalyzing,
       isCreatingSession,
       isSendingMessage,
@@ -501,9 +451,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onEndDraggingProject() {
         setDraggingProjectRootPath(null);
         setDropTargetRootPath(null);
-      },
-      onInitializeStorage() {
-        void handleInitializeStorage();
       },
       onSelectProject() {
         void handleSelectProject();

@@ -17,10 +17,8 @@ interface MainWorkspaceProps {
   message: string;
   errorMessage: string | null;
   canAnalyze: boolean;
-  canInitialize: boolean;
   draftMessage: string;
   isSelecting: boolean;
-  isInitializing: boolean;
   isAnalyzing: boolean;
   isCreatingSession: boolean;
   isSendingMessage: boolean;
@@ -32,7 +30,6 @@ interface MainWorkspaceProps {
   onCreateSession: () => void;
   onSendMessage: () => void;
   onSelectProject: () => void;
-  onInitializeStorage: () => void;
 }
 
 export function MainWorkspace(props: MainWorkspaceProps) {
@@ -72,13 +69,6 @@ export function MainWorkspace(props: MainWorkspaceProps) {
             disabled={props.isSelecting}
           >
             {props.isSelecting ? '프로젝트 불러오는 중...' : '프로젝트 선택'}
-          </button>
-          <button
-            className="secondary-button"
-            onClick={props.onInitializeStorage}
-            disabled={!props.canInitialize || props.isInitializing}
-          >
-            {props.isInitializing ? '작업 공간 준비 중...' : '작업 공간 준비'}
           </button>
           <button
             className="secondary-button"

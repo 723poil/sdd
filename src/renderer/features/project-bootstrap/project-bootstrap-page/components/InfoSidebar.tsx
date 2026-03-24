@@ -55,7 +55,9 @@ export function InfoSidebar(props: InfoSidebarProps) {
                 {!props.inspection
                   ? '먼저 작업할 프로젝트를 선택해 주세요.'
                   : props.inspection.initializationState !== 'ready'
-                    ? '작업 공간 준비를 완료해 주세요.'
+                    ? props.inspection.isWritable
+                      ? '프로젝트 저장 공간 정보를 확인하고 있습니다.'
+                      : '프로젝트 폴더에 쓰기 권한이 필요합니다.'
                     : '기본 분석을 실행해 주세요.'}
               </p>
             </div>

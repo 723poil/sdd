@@ -2,36 +2,32 @@ import {
   createDefaultProjectSessionTitle,
   type ProjectSessionMeta,
 } from '@/domain/project/project-session-model';
-import { createProjectError } from '@/domain/project/project-errors';
 import type { Result } from '@/shared/contracts/result';
-import { err } from '@/shared/contracts/result';
 
-import type { ProjectSessionPort, ProjectStoragePort } from '@/application/project/project.ports';
+import { ensureProjectStorageReady } from '@/application/project/ensure-project-storage-ready';
+import type {
+  ProjectInspectorPort,
+  ProjectSessionPort,
+  ProjectStoragePort,
+} from '@/application/project/project.ports';
 
 export interface CreateProjectSessionUseCase {
   execute(input: { rootPath: string; title?: string }): Promise<Result<ProjectSessionMeta>>;
 }
 
 export function createCreateProjectSessionUseCase(dependencies: {
+  projectInspector: ProjectInspectorPort;
   projectSessionStore: ProjectSessionPort;
   projectStorage: ProjectStoragePort;
 }): CreateProjectSessionUseCase {
   return {
     async execute(input) {
-      const projectMetaResult = await dependencies.projectStorage.readProjectMeta({
+      const storageResult = await ensureProjectStorageReady(dependencies, {
+        notWritableMessage: '대화 세션을 만들려면 프로젝트 경로에 쓰기 권한이 필요합니다.',
         rootPath: input.rootPath,
       });
-      if (!projectMetaResult.ok) {
-        return projectMetaResult;
-      }
-
-      if (!projectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            '먼저 작업 공간 준비를 완료해야 대화 세션을 만들 수 있습니다.',
-          ),
-        );
+      if (!storageResult.ok) {
+        return storageResult;
       }
 
       const sessionsResult = await dependencies.projectSessionStore.listSessions({
