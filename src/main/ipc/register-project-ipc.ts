@@ -25,7 +25,24 @@ import { createElectronProjectDialogAdapter } from '@/infrastructure/dialog/elec
 import { createNodeProjectInspectorAdapter } from '@/infrastructure/fs/node-project-inspector.adapter';
 import { createFsProjectSessionRepository } from '@/infrastructure/sdd/fs-project-session.repository';
 import { createFsProjectStorageRepository } from '@/infrastructure/sdd/fs-project-storage.repository';
-import { projectIpcChannels } from '@/shared/ipc/project-ipc';
+import { registerIpcHandle0, registerIpcHandle1 } from '@/shared/ipc/ipc-bridge';
+import {
+  type ActivateProjectInput,
+  type AnalyzeProjectInput,
+  type CancelProjectAnalysisInput,
+  type CreateProjectSessionInput,
+  type CreateProjectSpecInput,
+  type InspectProjectInput,
+  type ListProjectSessionsInput,
+  type ReadProjectAnalysisInput,
+  type ReadProjectAnalysisRunStatusInput,
+  type ReadProjectSessionMessagesInput,
+  type ReadProjectSpecsInput,
+  type ReorderRecentProjectsInput,
+  type SaveProjectAnalysisDocumentLayoutsInput,
+  type SendProjectSessionMessageInput,
+  projectIpcChannels,
+} from '@/shared/ipc/project-ipc';
 
 export function registerProjectIpc(): void {
   const agentCliSettingsStore = createFsAgentCliSettingsRepository();
@@ -105,97 +122,65 @@ export function registerProjectIpc(): void {
     projectStorage,
   });
 
-  ipcMain.handle(projectIpcChannels.selectDirectory, async () => {
-    return selectProjectDirectory.execute();
-  });
-
-  ipcMain.handle(projectIpcChannels.inspect, async (_event, input: { rootPath: string }) => {
-    return inspectProject.execute(input);
-  });
-
-  ipcMain.handle(projectIpcChannels.readAnalysis, async (_event, input: { rootPath: string }) => {
-    return readProjectAnalysis.execute(input);
-  });
-
-  ipcMain.handle(
+  registerIpcHandle0(ipcMain, projectIpcChannels.selectDirectory, () =>
+    selectProjectDirectory.execute(),
+  );
+  registerIpcHandle1(ipcMain, projectIpcChannels.inspect, (input: InspectProjectInput) =>
+    inspectProject.execute(input),
+  );
+  registerIpcHandle1(ipcMain, projectIpcChannels.readAnalysis, (input: ReadProjectAnalysisInput) =>
+    readProjectAnalysis.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
     projectIpcChannels.saveAnalysisDocumentLayouts,
-    async (
-      _event,
-      input: {
-        rootPath: string;
-        documentLayouts: Record<string, { x: number; y: number }>;
-      },
-    ) => {
-      return saveProjectAnalysisDocumentLayouts.execute(input);
-    },
+    (input: SaveProjectAnalysisDocumentLayoutsInput) =>
+      saveProjectAnalysisDocumentLayouts.execute(input),
   );
-
-  ipcMain.handle(projectIpcChannels.readSpecs, async (_event, input: { rootPath: string }) => {
-    return readProjectSpecs.execute(input);
-  });
-
-  ipcMain.handle(
-    projectIpcChannels.createSpec,
-    async (_event, input: { rootPath: string; title?: string | null }) => {
-      return createProjectSpec.execute(input);
-    },
+  registerIpcHandle1(ipcMain, projectIpcChannels.readSpecs, (input: ReadProjectSpecsInput) =>
+    readProjectSpecs.execute(input),
   );
-
-  ipcMain.handle(
+  registerIpcHandle1(ipcMain, projectIpcChannels.createSpec, (input: CreateProjectSpecInput) =>
+    createProjectSpec.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
     projectIpcChannels.readAnalysisRunStatus,
-    (_event, input: { rootPath: string }) => {
-      return readProjectAnalysisRunStatus.execute(input);
-    },
+    (input: ReadProjectAnalysisRunStatusInput) => readProjectAnalysisRunStatus.execute(input),
   );
-
-  ipcMain.handle(projectIpcChannels.listSessions, async (_event, input: { rootPath: string }) => {
-    return listProjectSessions.execute(input);
-  });
-
-  ipcMain.handle(
-    projectIpcChannels.createSession,
-    async (_event, input: { rootPath: string; specId?: string | null; title?: string }) => {
-      return createProjectSession.execute(input);
-    },
+  registerIpcHandle1(ipcMain, projectIpcChannels.listSessions, (input: ListProjectSessionsInput) =>
+    listProjectSessions.execute(input),
   );
-
-  ipcMain.handle(
+  registerIpcHandle1(ipcMain, projectIpcChannels.createSession, (input: CreateProjectSessionInput) =>
+    createProjectSession.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
     projectIpcChannels.readSessionMessages,
-    async (_event, input: { rootPath: string; sessionId: string }) => {
-      return readProjectSessionMessages.execute(input);
-    },
+    (input: ReadProjectSessionMessagesInput) => readProjectSessionMessages.execute(input),
   );
-
-  ipcMain.handle(
+  registerIpcHandle1(
+    ipcMain,
     projectIpcChannels.sendSessionMessage,
-    async (_event, input: { rootPath: string; sessionId: string; text: string }) => {
-      return sendProjectSessionMessage.execute(input);
-    },
+    (input: SendProjectSessionMessageInput) => sendProjectSessionMessage.execute(input),
   );
-
-  ipcMain.handle(projectIpcChannels.listRecentProjects, async () => {
-    return listRecentProjects.execute();
-  });
-
-  ipcMain.handle(projectIpcChannels.activate, async (_event, input: { rootPath: string }) => {
-    return activateProject.execute(input);
-  });
-
-  ipcMain.handle(
+  registerIpcHandle0(ipcMain, projectIpcChannels.listRecentProjects, () =>
+    listRecentProjects.execute(),
+  );
+  registerIpcHandle1(ipcMain, projectIpcChannels.activate, (input: ActivateProjectInput) =>
+    activateProject.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
     projectIpcChannels.reorderRecentProjects,
-    async (_event, input: { rootPaths: string[] }) => {
-      return reorderRecentProjects.execute(input);
-    },
+    (input: ReorderRecentProjectsInput) => reorderRecentProjects.execute(input),
   );
-
-  ipcMain.handle(
-    projectIpcChannels.analyze,
-    async (_event, input: { mode: 'full' | 'references'; rootPath: string }) => {
-      return analyzeProject.execute(input);
-    },
+  registerIpcHandle1(ipcMain, projectIpcChannels.analyze, (input: AnalyzeProjectInput) =>
+    analyzeProject.execute(input),
   );
-
-  ipcMain.handle(projectIpcChannels.cancelAnalysis, (_event, input: { rootPath: string }) => {
-    return cancelProjectAnalysis.execute(input);
-  });
+  registerIpcHandle1(
+    ipcMain,
+    projectIpcChannels.cancelAnalysis,
+    (input: CancelProjectAnalysisInput) => cancelProjectAnalysis.execute(input),
+  );
 }

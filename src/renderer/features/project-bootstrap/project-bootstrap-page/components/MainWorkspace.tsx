@@ -9,6 +9,7 @@ import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import { AnalysisReferenceMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap';
 import { AnalysisWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace';
 import { SpecsWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace';
+import type { AnalysisWorkspaceViewMode } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
 import type {
   SelectedProjectAnalysisDocumentId,
   StructuredProjectAnalysis,
@@ -30,13 +31,17 @@ interface MainWorkspaceProps {
 }
 
 export function MainWorkspace(props: MainWorkspaceProps) {
-  const [isAnalysisDocumentViewOpen, setIsAnalysisDocumentViewOpen] = useState(false);
+  const [analysisViewMode, setAnalysisViewMode] = useState<AnalysisWorkspaceViewMode>('map');
 
   useEffect(() => {
     if (props.activeWorkspacePage !== 'analysis') {
-      setIsAnalysisDocumentViewOpen(false);
+      setAnalysisViewMode('map');
     }
   }, [props.activeWorkspacePage]);
+
+  useEffect(() => {
+    setAnalysisViewMode('map');
+  }, [props.analysisSessionKey]);
 
   return (
     <section className="main-panel">
@@ -50,12 +55,11 @@ export function MainWorkspace(props: MainWorkspaceProps) {
             analysis={props.analysis}
             analysisSessionKey={props.analysisSessionKey}
             isActive={props.activeWorkspacePage === 'analysis'}
-            onViewModeChange={(viewMode) => {
-              setIsAnalysisDocumentViewOpen(viewMode === 'document');
-            }}
+            onViewModeChange={setAnalysisViewMode}
             onSelectDocument={props.onSelectAnalysisDocument}
             onSaveDocumentLayouts={props.onSaveAnalysisDocumentLayouts}
             selectedDocumentId={props.selectedAnalysisDocumentId}
+            viewMode={analysisViewMode}
           />
         </div>
 
@@ -95,7 +99,7 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           )}
         </div>
 
-        {!isAnalysisDocumentViewOpen ? (
+        {analysisViewMode !== 'document' ? (
           <div className="workspace-page-floating-tabs" role="tablist" aria-label="작업 페이지">
             <button
               aria-selected={props.activeWorkspacePage === 'analysis'}

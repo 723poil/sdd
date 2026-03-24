@@ -5,6 +5,7 @@ import { createListAgentCliConnectionsUseCase } from '@/application/app-settings
 import { createSaveAgentCliConnectionUseCase } from '@/application/app-settings/save-agent-cli-connection.use-case';
 import { createFsAgentCliSettingsRepository } from '@/infrastructure/app-settings/fs-agent-cli-settings.repository';
 import { createNodeAgentCliRuntimeAdapter } from '@/infrastructure/agent-cli/node-agent-cli-runtime.adapter';
+import { registerIpcHandle0, registerIpcHandle1 } from '@/shared/ipc/ipc-bridge';
 import {
   type CheckAgentCliConnectionInput,
   type SaveAgentCliConnectionInput,
@@ -24,21 +25,19 @@ export function registerSettingsIpc(): void {
     agentCliRuntime,
   });
 
-  ipcMain.handle(settingsIpcChannels.listAgentCliConnections, async () => {
-    return listAgentCliConnections.execute();
-  });
-
-  ipcMain.handle(
-    settingsIpcChannels.saveAgentCliConnection,
-    async (_event, input: SaveAgentCliConnectionInput) => {
-      return saveAgentCliConnection.execute(input);
-    },
+  registerIpcHandle0(
+    ipcMain,
+    settingsIpcChannels.listAgentCliConnections,
+    () => listAgentCliConnections.execute(),
   );
-
-  ipcMain.handle(
+  registerIpcHandle1(
+    ipcMain,
+    settingsIpcChannels.saveAgentCliConnection,
+    (input: SaveAgentCliConnectionInput) => saveAgentCliConnection.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
     settingsIpcChannels.checkAgentCliConnection,
-    async (_event, input: CheckAgentCliConnectionInput) => {
-      return checkAgentCliConnection.execute(input);
-    },
+    (input: CheckAgentCliConnectionInput) => checkAgentCliConnection.execute(input),
   );
 }
