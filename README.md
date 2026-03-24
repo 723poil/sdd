@@ -49,6 +49,7 @@ npm run dist:mac
 
 성공하면 아키텍처별 출력 폴더 아래 `dist/mac-*/SDD.app` 가 생성됩니다.
 패키징은 `electron-vite` 번들 기준으로 진행되며, 전체 타입체크는 별도 `npm run build` 로 검증합니다.
+아이콘 원본은 `build/icon/sdd-icon.svg` 이고, 파생 자산은 `npm run generate:icons` 로 다시 생성합니다.
 
 ## 검증 명령
 

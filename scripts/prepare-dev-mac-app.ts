@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ import { APP_DISPLAY_NAME } from '../src/shared/app/app-display-name.ts';
 type DevAppMetadata = {
   electronVersion: string;
   executableName: string;
+  iconModifiedAt: number;
 };
 
 const require = createRequire(import.meta.url);
@@ -21,6 +22,10 @@ const sourceAppPath = join(electronModulePath, 'dist', 'Electron.app');
 const devAppDirectoryPath = join(projectRootPath, 'out', 'dev-app');
 const targetAppPath = join(devAppDirectoryPath, `${APP_DISPLAY_NAME}.app`);
 const targetInfoPlistPath = join(targetAppPath, 'Contents', 'Info.plist');
+const sourcePreviewIconPath = join(projectRootPath, 'build', 'icon', 'sdd-icon.png');
+const sourceIconPath = join(projectRootPath, 'build', 'icon', 'sdd.icns');
+const targetElectronIconPath = join(targetAppPath, 'Contents', 'Resources', 'electron.icns');
+const targetAppIconPath = join(targetAppPath, 'Contents', 'Resources', 'sdd.icns');
 const metadataFilePath = join(devAppDirectoryPath, 'metadata.json');
 
 async function readElectronVersion(): Promise<string> {
@@ -50,6 +55,11 @@ async function hasExistingDevApp(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function readIconModifiedAt(): Promise<number> {
+  const fileStat = await stat(sourcePreviewIconPath);
+  return fileStat.mtimeMs;
 }
 
 function upsertPlistStringKey(key: string, value: string): void {
@@ -83,12 +93,28 @@ function updateMainBundleMetadata(): void {
   upsertPlistStringKey('CFBundleName', APP_DISPLAY_NAME);
   upsertPlistStringKey('CFBundleExecutable', APP_DISPLAY_NAME);
   upsertPlistStringKey('CFBundleIdentifier', 'com.sdd.desktop.dev');
+  upsertPlistStringKey('CFBundleIconFile', 'electron.icns');
 }
 
 function adHocSignAppBundle(): void {
   execFileSync('codesign', ['--force', '--deep', '--sign', '-', targetAppPath], {
     stdio: 'ignore',
   });
+}
+
+function clearBundleExtendedAttributes(): void {
+  execFileSync('xattr', ['-cr', targetAppPath], {
+    stdio: 'ignore',
+  });
+}
+
+async function installAppIcon(): Promise<void> {
+  await copyFile(sourceIconPath, targetElectronIconPath);
+  await copyFile(sourceIconPath, targetAppIconPath);
+}
+
+function refreshAppBundleTimestamp(): void {
+  execFileSync('touch', [targetAppPath]);
 }
 
 async function writeMetadata(metadata: DevAppMetadata): Promise<void> {
@@ -105,23 +131,30 @@ export async function prepareDevMacApp(): Promise<string> {
   }
 
   const electronVersion = await readElectronVersion();
+  const iconModifiedAt = await readIconModifiedAt();
   const metadata = await readMetadata();
   const hasAppBundle = await hasExistingDevApp();
   const shouldRefresh =
     !hasAppBundle ||
     metadata?.electronVersion !== electronVersion ||
-    metadata?.executableName !== APP_DISPLAY_NAME;
+    metadata?.executableName !== APP_DISPLAY_NAME ||
+    metadata?.iconModifiedAt !== iconModifiedAt;
 
-  if (shouldRefresh) {
-    await copyFreshAppBundle();
+  if (!shouldRefresh) {
+    return getTargetExecutablePath();
   }
 
+  await copyFreshAppBundle();
   await renameExecutableIfNeeded();
+  await installAppIcon();
   updateMainBundleMetadata();
+  refreshAppBundleTimestamp();
+  clearBundleExtendedAttributes();
   adHocSignAppBundle();
   await writeMetadata({
     electronVersion,
     executableName: APP_DISPLAY_NAME,
+    iconModifiedAt,
   });
 
   return getTargetExecutablePath();

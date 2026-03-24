@@ -1,5 +1,6 @@
 import { BrowserWindow, app } from 'electron';
 
+import { applyMacAppIcon } from '@/main/apply-mac-app-icon';
 import { createMainWindow } from '@/main/create-main-window';
 import { registerProjectIpc } from '@/main/ipc/register-project-ipc';
 import { registerSettingsIpc } from '@/main/ipc/register-settings-ipc';
@@ -10,6 +11,7 @@ app.setName(APP_DISPLAY_NAME);
 async function bootstrap(): Promise<void> {
   await app.whenReady();
 
+  applyMacAppIcon();
   registerProjectIpc();
   registerSettingsIpc();
   createMainWindow();

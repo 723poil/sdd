@@ -9,6 +9,7 @@
     "node": "^22.12.0 || ^24.0.0"
   },
   "scripts": {
+    "generate:icons": "node --experimental-strip-types ./scripts/generate-icon-assets.ts",
     "dev": "node --experimental-strip-types ./scripts/run-dev.ts",
     "dev:raw": "electron-vite dev",
     "prepare:dev:mac-app": "node --experimental-strip-types ./scripts/prepare-dev-mac-app.ts",
@@ -28,11 +29,20 @@
       "output": "dist"
     },
     "electronDist": "node_modules/electron/dist",
+    "extraResources": [
+      {
+        "from": "build/icon/sdd-icon.png",
+        "to": "icon/sdd-icon.png"
+      }
+    ],
     "files": [
-      "out/**/*",
+      "out/main/**/*",
+      "out/preload/**/*",
+      "out/renderer/**/*",
       "package.json"
     ],
     "mac": {
+      "icon": "build/icon/sdd.icns",
       "category": "public.app-category.developer-tools",
       "target": [
         "dir"
