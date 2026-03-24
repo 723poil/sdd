@@ -1,5 +1,6 @@
 {
   "name": "sdd",
+  "productName": "SDD",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,13 +9,35 @@
     "node": "^22.12.0 || ^24.0.0"
   },
   "scripts": {
-    "dev": "electron-vite dev",
+    "dev": "node --experimental-strip-types ./scripts/run-dev.ts",
+    "dev:raw": "electron-vite dev",
+    "prepare:dev:mac-app": "node --experimental-strip-types ./scripts/prepare-dev-mac-app.ts",
     "build": "tsc --noEmit && electron-vite build",
+    "bundle": "electron-vite build",
+    "dist:mac": "npm run bundle && electron-builder --mac dir",
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write ."
+  },
+  "build": {
+    "appId": "com.sdd.desktop",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "electronDist": "node_modules/electron/dist",
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dir"
+      ]
+    }
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -27,6 +50,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
     "electron": "^41.0.3",
+    "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.4",
     "eslint-plugin-import": "^2.32.0",

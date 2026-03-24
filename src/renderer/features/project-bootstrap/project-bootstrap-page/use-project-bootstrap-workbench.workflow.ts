@@ -6,7 +6,7 @@ import type {
   ProjectSessionMessage,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
-import type { RendererSddApi } from '@/shared/ipc/project-ipc';
+import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
 import {
   describeInitializationState,

@@ -74,6 +74,8 @@ Prefer these patterns:
 ## Renderer UX rules
 
 - User-facing UI should describe product actions, not implementation details like IPC or internal transport.
+- Do not expose internal roadmap, future expansion plans, experimental options, or implementation detail as primary user-facing copy.
+- If future capability or technical limitation must be mentioned, keep it short and user-task oriented; move the real detail to docs, not the main UI.
 - If a feature is not actually connected yet, present it as `준비 중` or an empty state, not as a fake live feature.
 - Project-scoped chat sessions must appear inside the selected project context, not as unrelated global workflow stages.
 - Selecting a project must not silently reorder project lists.

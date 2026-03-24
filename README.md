@@ -38,6 +38,18 @@ npm install
 npm run dev
 ```
 
+macOS에서는 `npm run dev` 가 메뉴바 이름 표시를 위해 로컬 dev wrapper app(`out/dev-app/SDD.app`)을 준비한 뒤 실행합니다.
+기존 기본 실행 경로가 필요하면 `npm run dev:raw` 를 사용합니다.
+
+## macOS 패키징
+
+```bash
+npm run dist:mac
+```
+
+성공하면 아키텍처별 출력 폴더 아래 `dist/mac-*/SDD.app` 가 생성됩니다.
+패키징은 `electron-vite` 번들 기준으로 진행되며, 전체 타입체크는 별도 `npm run build` 로 검증합니다.
+
 ## 검증 명령
 
 ```bash

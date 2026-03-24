@@ -55,6 +55,8 @@ Read these first:
 
 - Use Korean-first user-facing text unless there is a strong reason not to.
 - Prefer concise labels and hide implementation details from end users.
+- Do not surface internal roadmap, future extensibility, transport choices, or other engineering-facing detail in the main UI copy.
+- Keep user-facing explanations centered on the action the user can take now; move internal background to docs.
 - Do not reorder visible lists as a side effect of selection.
 - If a list order is user-meaningful, store and preserve that order explicitly.
 

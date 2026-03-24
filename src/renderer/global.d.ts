@@ -1,4 +1,4 @@
-import type { RendererSddApi } from '@/shared/ipc/project-ipc';
+import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
 declare global {
   interface Window {

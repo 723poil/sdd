@@ -92,25 +92,23 @@ export interface SendProjectSessionMessageOutput {
   session: ProjectSessionMeta;
 }
 
-export interface RendererSddApi {
-  project: {
-    selectDirectory(): Promise<Result<SelectProjectDirectoryOutput>>;
-    inspect(input: InspectProjectInput): Promise<Result<ProjectInspection>>;
-    listRecentProjects(): Promise<Result<RecentProject[]>>;
-    activate(input: ActivateProjectInput): Promise<Result<ActivateProjectOutput>>;
-    reorderRecentProjects(input: ReorderRecentProjectsInput): Promise<Result<RecentProject[]>>;
-    readAnalysis(input: ReadProjectAnalysisInput): Promise<Result<ProjectAnalysis | null>>;
-    analyze(input: AnalyzeProjectInput): Promise<Result<AnalyzeProjectOutput>>;
-    listSessions(input: ListProjectSessionsInput): Promise<Result<ProjectSessionSummary[]>>;
-    createSession(input: CreateProjectSessionInput): Promise<Result<ProjectSessionMeta>>;
-    readSessionMessages(
-      input: ReadProjectSessionMessagesInput,
-    ): Promise<Result<ProjectSessionMessage[]>>;
-    sendSessionMessage(
-      input: SendProjectSessionMessageInput,
-    ): Promise<Result<SendProjectSessionMessageOutput>>;
-    initializeStorage(
-      input: InitializeProjectStorageInput,
-    ): Promise<Result<InitializeProjectStorageOutput>>;
-  };
+export interface RendererProjectApi {
+  selectDirectory(): Promise<Result<SelectProjectDirectoryOutput>>;
+  inspect(input: InspectProjectInput): Promise<Result<ProjectInspection>>;
+  listRecentProjects(): Promise<Result<RecentProject[]>>;
+  activate(input: ActivateProjectInput): Promise<Result<ActivateProjectOutput>>;
+  reorderRecentProjects(input: ReorderRecentProjectsInput): Promise<Result<RecentProject[]>>;
+  readAnalysis(input: ReadProjectAnalysisInput): Promise<Result<ProjectAnalysis | null>>;
+  analyze(input: AnalyzeProjectInput): Promise<Result<AnalyzeProjectOutput>>;
+  listSessions(input: ListProjectSessionsInput): Promise<Result<ProjectSessionSummary[]>>;
+  createSession(input: CreateProjectSessionInput): Promise<Result<ProjectSessionMeta>>;
+  readSessionMessages(
+    input: ReadProjectSessionMessagesInput,
+  ): Promise<Result<ProjectSessionMessage[]>>;
+  sendSessionMessage(
+    input: SendProjectSessionMessageInput,
+  ): Promise<Result<SendProjectSessionMessageOutput>>;
+  initializeStorage(
+    input: InitializeProjectStorageInput,
+  ): Promise<Result<InitializeProjectStorageOutput>>;
 }

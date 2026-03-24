@@ -1,6 +1,8 @@
 import { BrowserWindow, nativeTheme } from 'electron';
 import { join } from 'node:path';
 
+import { APP_DISPLAY_NAME } from '@/shared/app/app-display-name';
+
 function getSystemBackgroundColor(): string {
   return nativeTheme.shouldUseDarkColors ? '#0c1117' : '#f3f5f7';
 }
@@ -12,6 +14,7 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 1100,
     minHeight: 760,
     show: false,
+    title: APP_DISPLAY_NAME,
     titleBarStyle: 'hiddenInset',
     backgroundColor: getSystemBackgroundColor(),
     webPreferences: {
