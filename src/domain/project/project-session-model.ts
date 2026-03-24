@@ -75,6 +75,25 @@ export function createProjectSessionMessage(input: {
   };
 }
 
+export function createDefaultProjectSessionTitle(input: { sequenceNumber: number }): string {
+  return `새 대화 ${String(input.sequenceNumber).padStart(2, '0')}`;
+}
+
+export function createNextProjectSessionMetaAfterMessage(input: {
+  current: ProjectSessionMeta;
+  now: string;
+  text: string;
+}): ProjectSessionMeta {
+  return {
+    ...input.current,
+    updatedAt: input.now,
+    revision: input.current.revision + 1,
+    lastMessageAt: input.now,
+    lastMessagePreview: createSessionMessagePreview(input.text),
+    messageCount: input.current.messageCount + 1,
+  };
+}
+
 export function toProjectSessionSummary(meta: ProjectSessionMeta): ProjectSessionSummary {
   return {
     id: meta.id,
@@ -121,4 +140,9 @@ export function isProjectSessionMessage(value: unknown): value is ProjectSession
     (candidate.role === 'system' || candidate.role === 'user' || candidate.role === 'assistant') &&
     typeof candidate.text === 'string'
   );
+}
+
+function createSessionMessagePreview(text: string): string {
+  const normalized = text.replaceAll(/\s+/gu, ' ').trim();
+  return normalized.length > 80 ? `${normalized.slice(0, 80)}...` : normalized;
 }

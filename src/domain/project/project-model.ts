@@ -61,6 +61,20 @@ export function createInitialProjectMeta(input: {
   };
 }
 
+export function createNextProjectMetaAfterAnalysis(input: {
+  current: ProjectMeta;
+  detectedStack: string[];
+  now: string;
+}): ProjectMeta {
+  return {
+    ...input.current,
+    updatedAt: input.now,
+    revision: input.current.revision + 1,
+    lastAnalyzedAt: input.now,
+    detectedStack: input.detectedStack,
+  };
+}
+
 export function isProjectMeta(value: unknown): value is ProjectMeta {
   if (!value || typeof value !== 'object') {
     return false;

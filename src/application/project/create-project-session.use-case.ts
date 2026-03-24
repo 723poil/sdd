@@ -1,4 +1,7 @@
-import type { ProjectSessionMeta } from '@/domain/project/project-session-model';
+import {
+  createDefaultProjectSessionTitle,
+  type ProjectSessionMeta,
+} from '@/domain/project/project-session-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import type { Result } from '@/shared/contracts/result';
 import { err } from '@/shared/contracts/result';
@@ -39,7 +42,10 @@ export function createCreateProjectSessionUseCase(dependencies: {
       }
 
       const title =
-        input.title?.trim() || `새 대화 ${String(sessionsResult.value.length + 1).padStart(2, '0')}`;
+        input.title?.trim() ||
+        createDefaultProjectSessionTitle({
+          sequenceNumber: sessionsResult.value.length + 1,
+        });
 
       return dependencies.projectSessionStore.createSession({
         rootPath: input.rootPath,

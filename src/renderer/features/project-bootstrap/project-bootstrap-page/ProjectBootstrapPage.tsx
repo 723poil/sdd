@@ -48,16 +48,8 @@ export function ProjectBootstrapPage() {
     workbench.onToggleRightSidebar();
   };
 
-  const workbenchClassName = [
-    'workbench',
-    !workbench.isLeftSidebarOpen ? 'workbench--left-collapsed' : '',
-    !workbench.isRightSidebarOpen ? 'workbench--right-collapsed' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <main className={workbenchClassName}>
+    <main className={workbench.workbenchClassName}>
       {workbench.isLeftSidebarOpen ? (
         <ProjectSidebar
           draggingProjectRootPath={workbench.draggingProjectRootPath}

@@ -1,33 +1,32 @@
 import { randomUUID } from 'node:crypto';
-import { constants } from 'node:fs';
-import { access, mkdir, readFile, readdir } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import type { ProjectSessionPort } from '@/application/project/project.ports';
 import {
-  PROJECT_SESSION_INDEX_SCHEMA_VERSION,
+  createNextProjectSessionMetaAfterMessage,
   createProjectSessionMessage,
   createProjectSessionMeta,
-  isProjectSessionMessage,
-  isProjectSessionMeta,
-  toProjectSessionSummary,
-  type ProjectSessionIndex,
-  type ProjectSessionMessage,
   type ProjectSessionMeta,
 } from '@/domain/project/project-session-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok } from '@/shared/contracts/result';
 
+import {
+  appendSessionMessageDocument,
+  readSessionIds,
+  readSessionMessagesDocument,
+  readSessionMetaDocument,
+  toProjectSessionViewSummaries,
+  writeSessionIndexDocument,
+} from '@/infrastructure/sdd/fs-project-session-documents';
+import {
+  getSessionMessagesPath,
+  getSessionMetaPath,
+  getSessionsDirectoryPath,
+} from '@/infrastructure/sdd/fs-project-session-paths';
+import { pathExists } from '@/infrastructure/sdd/fs-project-storage-io';
 import { writeJsonAtomically, writeTextAtomically } from '@/infrastructure/fs/write-json-atomically';
-
-async function pathExists(path: string): Promise<boolean> {
-  try {
-    await access(path, constants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 async function ensureDirectory(path: string): Promise<void> {
   await mkdir(path, {
@@ -49,7 +48,7 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
       const sessionMetas: ProjectSessionMeta[] = [];
 
       for (const sessionId of sessionIds) {
-        const sessionMetaResult = await readSessionMeta({
+        const sessionMetaResult = await readSessionMetaDocument({
           rootPath,
           sessionId,
         });
@@ -62,11 +61,11 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
         }
       }
 
-      const summaries = sessionMetas
-        .map((session) => toProjectSessionSummary(session))
-        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+      const summaries = toProjectSessionViewSummaries(sessionMetas).sort((left, right) =>
+        right.updatedAt.localeCompare(left.updatedAt),
+      );
 
-      await writeSessionIndex({
+      await writeSessionIndexDocument({
         rootPath,
         sessions: summaries,
       });
@@ -100,65 +99,15 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
     },
 
     async readSessionMessages(input) {
-      const rootPath = resolve(input.rootPath);
-      const messagesPath = getSessionMessagesPath(rootPath, input.sessionId);
-
-      if (!(await pathExists(messagesPath))) {
-        return ok([]);
-      }
-
-      let content = '';
-      try {
-        content = await readFile(messagesPath, 'utf8');
-      } catch {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            '세션 메시지 파일을 읽을 수 없습니다.',
-            messagesPath,
-          ),
-        );
-      }
-
-      const lines = content
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean);
-
-      const messages: ProjectSessionMessage[] = [];
-      for (const line of lines) {
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(line) as unknown;
-        } catch {
-          return err(
-            createProjectError(
-              'INVALID_PROJECT_STORAGE',
-              '세션 메시지 로그를 파싱할 수 없습니다.',
-              messagesPath,
-            ),
-          );
-        }
-
-        if (!isProjectSessionMessage(parsed)) {
-          return err(
-            createProjectError(
-              'INVALID_PROJECT_STORAGE',
-              '세션 메시지 로그가 현재 계약을 만족하지 않습니다.',
-              messagesPath,
-            ),
-          );
-        }
-
-        messages.push(parsed);
-      }
-
-      return ok(messages);
+      return readSessionMessagesDocument({
+        rootPath: input.rootPath,
+        sessionId: input.sessionId,
+      });
     },
 
     async appendSessionMessage(input) {
       const rootPath = resolve(input.rootPath);
-      const sessionMetaResult = await readSessionMeta({
+      const sessionMetaResult = await readSessionMetaDocument({
         rootPath,
         sessionId: input.sessionId,
       });
@@ -186,31 +135,17 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
         text: input.text,
       });
 
-      const messages = await this.readSessionMessages({
+      const nextSession = createNextProjectSessionMetaAfterMessage({
+        current: currentSession,
+        now,
+        text: input.text,
+      });
+
+      await appendSessionMessageDocument({
         rootPath,
+        message,
         sessionId: input.sessionId,
       });
-      if (!messages.ok) {
-        return messages;
-      }
-
-      const nextMessagesContent = [...messages.value, message]
-        .map((item) => JSON.stringify(item))
-        .join('\n');
-
-      const nextSession: ProjectSessionMeta = {
-        ...currentSession,
-        updatedAt: now,
-        revision: currentSession.revision + 1,
-        lastMessageAt: now,
-        lastMessagePreview: createPreviewText(input.text),
-        messageCount: currentSession.messageCount + 1,
-      };
-
-      await writeTextAtomically(
-        getSessionMessagesPath(rootPath, input.sessionId),
-        `${nextMessagesContent}\n`,
-      );
       await writeJsonAtomically(getSessionMetaPath(rootPath, input.sessionId), nextSession);
 
       const sessionsResult = await this.listSessions({
@@ -226,79 +161,4 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
       });
     },
   };
-}
-
-async function readSessionIds(rootPath: string): Promise<string[]> {
-  const sessionsDirectoryPath = getSessionsDirectoryPath(rootPath);
-  const entries = await readdir(sessionsDirectoryPath, {
-    withFileTypes: true,
-  });
-
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort((left, right) => left.localeCompare(right));
-}
-
-async function readSessionMeta(input: {
-  rootPath: string;
-  sessionId: string;
-}) {
-  const metaPath = getSessionMetaPath(input.rootPath, input.sessionId);
-  if (!(await pathExists(metaPath))) {
-    return ok(null);
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(await readFile(metaPath, 'utf8')) as unknown;
-  } catch {
-    return err(
-      createProjectError('INVALID_PROJECT_STORAGE', '세션 메타 파일을 읽거나 파싱할 수 없습니다.', metaPath),
-    );
-  }
-
-  if (!isProjectSessionMeta(parsed)) {
-    return err(
-      createProjectError('INVALID_PROJECT_STORAGE', '세션 메타 파일이 현재 계약을 만족하지 않습니다.', metaPath),
-    );
-  }
-
-  return ok(parsed);
-}
-
-async function writeSessionIndex(input: {
-  rootPath: string;
-  sessions: ProjectSessionIndex['sessions'];
-}): Promise<void> {
-  await writeJsonAtomically(getSessionIndexPath(input.rootPath), {
-    schemaVersion: PROJECT_SESSION_INDEX_SCHEMA_VERSION,
-    generatedAt: new Date().toISOString(),
-    sessions: input.sessions,
-  } satisfies ProjectSessionIndex);
-}
-
-function createPreviewText(text: string): string {
-  const normalized = text.replaceAll(/\s+/gu, ' ').trim();
-  return normalized.length > 80 ? `${normalized.slice(0, 80)}...` : normalized;
-}
-
-function getSessionsDirectoryPath(rootPath: string): string {
-  return join(rootPath, '.sdd', 'sessions');
-}
-
-function getSessionIndexPath(rootPath: string): string {
-  return join(getSessionsDirectoryPath(rootPath), 'index.json');
-}
-
-function getSessionDirectoryPath(rootPath: string, sessionId: string): string {
-  return join(getSessionsDirectoryPath(rootPath), sessionId);
-}
-
-function getSessionMetaPath(rootPath: string, sessionId: string): string {
-  return join(getSessionDirectoryPath(rootPath, sessionId), 'meta.json');
-}
-
-function getSessionMessagesPath(rootPath: string, sessionId: string): string {
-  return join(getSessionDirectoryPath(rootPath, sessionId), 'messages.jsonl');
 }

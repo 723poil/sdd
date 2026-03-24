@@ -24,6 +24,7 @@
 - `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-engineering-conventions/SKILL.md`
 - `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-storage-contracts/SKILL.md`
 - `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-codex-cli/SKILL.md`
+- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-commit-workflow/SKILL.md`
 
 각 스킬 용도:
 
@@ -37,6 +38,8 @@
   - `.sdd` 포맷, 명세 버전, patch, chat log, source of truth를 건드릴 때 사용
 - `sdd-codex-cli`
   - Codex CLI 실행, subprocess 연결, auth, exec/app-server 판단 시 사용
+- `sdd-commit-workflow`
+  - 커밋 범위 점검, staged/unstaged 확인, 문서 동기화 확인, Conventional Commit 메시지 작성 시 사용
 
 ## 고정된 프로젝트 규칙
 
