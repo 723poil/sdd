@@ -21,6 +21,7 @@ export interface ProjectBootstrapWorkbenchState {
   sessionMessages: ProjectSessionMessage[];
   draftMessage: string;
   recentProjects: RecentProject[];
+  expandedProjectRootPaths: string[];
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
   isSelecting: boolean;

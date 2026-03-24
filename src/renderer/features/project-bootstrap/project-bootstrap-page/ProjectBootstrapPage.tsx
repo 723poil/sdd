@@ -44,11 +44,15 @@ export function ProjectBootstrapPage() {
   const handleToggleRightSidebar = () => {
     workbench.onToggleRightSidebar();
   };
+  const handleToggleProjectExpansion = (rootPath: string) => {
+    workbench.onToggleProjectExpansion(rootPath);
+  };
 
   return (
     <main className={workbench.workbenchClassName}>
       {workbench.isLeftSidebarOpen ? (
         <ProjectSidebar
+          expandedProjectRootPaths={workbench.expandedProjectRootPaths}
           draggingProjectRootPath={workbench.draggingProjectRootPath}
           dropTargetRootPath={workbench.dropTargetRootPath}
           inspection={workbench.inspection}
@@ -60,6 +64,7 @@ export function ProjectBootstrapPage() {
           onEndDraggingProject={handleEndDraggingProject}
           onSelectSession={handleSelectSession}
           onStartDraggingProject={handleStartDraggingProject}
+          onToggleProjectExpansion={handleToggleProjectExpansion}
           projectEntries={workbench.projectEntries}
           selectedPath={workbench.selectedPath}
           selectedSessionId={workbench.selectedSession?.id ?? null}

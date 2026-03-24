@@ -1,5 +1,7 @@
 export const PROJECT_SCHEMA_VERSION = 1;
-export const ANALYSIS_CONTEXT_SCHEMA_VERSION = 1;
+export const LEGACY_ANALYSIS_CONTEXT_SCHEMA_VERSION = 1;
+export const ANALYSIS_CONTEXT_SCHEMA_VERSION = 2;
+export const ANALYSIS_FILE_INDEX_SCHEMA_VERSION = 1;
 export const SPEC_INDEX_SCHEMA_VERSION = 1;
 
 export interface ProjectMeta {

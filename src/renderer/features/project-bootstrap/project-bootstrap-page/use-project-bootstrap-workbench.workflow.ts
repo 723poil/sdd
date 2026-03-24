@@ -45,6 +45,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onSelectSession(sessionId: string): void;
     onSendMessage(): void;
     onStartDraggingProject(rootPath: string): void;
+    onToggleProjectExpansion(rootPath: string): void;
     onToggleLeftSidebar(): void;
     onToggleRightSidebar(): void;
   };
@@ -57,6 +58,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [sessionMessages, setSessionMessages] = useState<ProjectSessionMessage[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [expandedProjectRootPaths, setExpandedProjectRootPaths] = useState<string[]>([]);
   const [draggingProjectRootPath, setDraggingProjectRootPath] = useState<string | null>(null);
   const [dropTargetRootPath, setDropTargetRootPath] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -83,6 +85,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setRecentProjects(result.value);
     })();
   }, []);
+
+  useEffect(() => {
+    setExpandedProjectRootPaths((current) =>
+      current.filter((rootPath) => recentProjects.some((project) => project.rootPath === rootPath)),
+    );
+  }, [recentProjects]);
 
   const selectedSession = resolveSelectedSession(sessions, selectedSessionId);
 
@@ -139,6 +147,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setSelectedPath(result.value.inspection.rootPath);
     setInspection(result.value.inspection);
     setRecentProjects(result.value.recentProjects);
+    setExpandedProjectRootPaths((current) =>
+      current.includes(result.value.inspection.rootPath)
+        ? current
+        : [...current, result.value.inspection.rootPath],
+    );
     setDraftMessage('');
     setErrorMessage(null);
     setMessage(describeInitializationState(result.value.inspection));
@@ -354,7 +367,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
       );
       setDraftMessage('');
-      setMessage('메시지를 저장했습니다. 이후 Codex 연결이 붙어도 이 세션을 그대로 이어갈 수 있습니다.');
+      setMessage(
+        '메시지를 저장했습니다. 이후 Codex 연결이 붙어도 이 세션을 그대로 이어갈 수 있습니다.',
+      );
     } finally {
       setIsSendingMessage(false);
     }
@@ -418,6 +433,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       sessionMessages,
       draftMessage,
       recentProjects,
+      expandedProjectRootPaths,
       draggingProjectRootPath,
       dropTargetRootPath,
       isSelecting,
@@ -464,6 +480,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onStartDraggingProject(rootPath: string) {
         setDraggingProjectRootPath(rootPath);
         setDropTargetRootPath(rootPath);
+      },
+      onToggleProjectExpansion(rootPath: string) {
+        setExpandedProjectRootPaths((current) =>
+          current.includes(rootPath)
+            ? current.filter((candidate) => candidate !== rootPath)
+            : [...current, rootPath],
+        );
       },
       onToggleLeftSidebar() {
         setIsLeftSidebarOpen((current) => !current);

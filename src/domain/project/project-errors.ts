@@ -6,6 +6,9 @@ export type ProjectErrorCode =
   | 'PROJECT_NOT_READABLE'
   | 'PROJECT_NOT_WRITABLE'
   | 'PROJECT_NOT_INITIALIZED'
+  | 'AGENT_CLI_NOT_CONFIGURED'
+  | 'AGENT_CLI_NOT_AVAILABLE'
+  | 'PROJECT_ANALYSIS_FAILED'
   | 'INVALID_PROJECT_STORAGE';
 
 export function createProjectError(
