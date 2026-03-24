@@ -4,13 +4,17 @@ import type {
   AgentCliConnectionCheck,
   AgentCliConnectionRecord,
   AgentCliId,
+  AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 
 import { ConnectionStatusPill } from '@/renderer/features/agent-cli-settings/components/ConnectionStatusPill';
 import {
   describeAgentCliAuthMode,
   describeAgentCliCommandMode,
+  describeAgentCliModel,
+  describeAgentCliReasoningEffort,
   formatSavedAt,
+  getAgentCliModelOptions,
 } from '@/renderer/features/agent-cli-settings/utils';
 
 interface AgentCliConnectionCardProps {
@@ -20,6 +24,8 @@ interface AgentCliConnectionCardProps {
     commandMode: AgentCliCommandMode;
     executablePath: string;
     authMode: AgentCliAuthMode;
+    model: string;
+    modelReasoningEffort: AgentCliModelReasoningEffort;
   };
   checkResult: AgentCliConnectionCheck | undefined;
   checkLabel: string;
@@ -29,6 +35,11 @@ interface AgentCliConnectionCardProps {
   onChangeCommandMode(agentId: AgentCliId, commandMode: AgentCliCommandMode): void;
   onChangeExecutablePath(agentId: AgentCliId, executablePath: string): void;
   onChangeAuthMode(agentId: AgentCliId, authMode: AgentCliAuthMode): void;
+  onChangeModel(agentId: AgentCliId, model: string): void;
+  onChangeModelReasoningEffort(
+    agentId: AgentCliId,
+    modelReasoningEffort: AgentCliModelReasoningEffort,
+  ): void;
   onCheckConnection(agentId: AgentCliId): void;
   onSaveConnection(agentId: AgentCliId): void;
 }
@@ -63,6 +74,14 @@ export function AgentCliConnectionCard(props: AgentCliConnectionCardProps) {
         <div className="connection-meta-item">
           <span>실행 경로</span>
           <strong>{describeAgentCliCommandMode(props.draft.commandMode)}</strong>
+        </div>
+        <div className="connection-meta-item">
+          <span>모델</span>
+          <strong>{describeAgentCliModel(props.draft.model)}</strong>
+        </div>
+        <div className="connection-meta-item">
+          <span>추론</span>
+          <strong>{describeAgentCliReasoningEffort(props.draft.modelReasoningEffort)}</strong>
         </div>
       </div>
 
@@ -139,6 +158,49 @@ export function AgentCliConnectionCard(props: AgentCliConnectionCardProps) {
           <p className="field-hint">
             개인 사용이면 ChatGPT 로그인을, 앱 자동화용 환경이면 API key를 선택하세요.
           </p>
+        </div>
+
+        <div className="field-group">
+          <label className="field-label">모델</label>
+          <div className="select-row">
+            <select
+              className="select-input"
+              onChange={(event) => {
+                props.onChangeModel(props.connection.definition.agentId, event.target.value);
+              }}
+              value={props.draft.model}
+            >
+              {getAgentCliModelOptions(props.draft.model).map((model) => (
+                <option key={model} value={model}>
+                  {describeAgentCliModel(model)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="field-hint">분석과 채팅 실행에 사용할 Codex 모델입니다.</p>
+        </div>
+
+        <div className="field-group">
+          <label className="field-label">추론 강도</label>
+          <div className="select-row">
+            <select
+              className="select-input"
+              onChange={(event) => {
+                props.onChangeModelReasoningEffort(
+                  props.connection.definition.agentId,
+                  event.target.value as AgentCliModelReasoningEffort,
+                );
+              }}
+              value={props.draft.modelReasoningEffort}
+            >
+              {(['low', 'medium', 'high', 'xhigh'] as const).map((modelReasoningEffort) => (
+                <option key={modelReasoningEffort} value={modelReasoningEffort}>
+                  {describeAgentCliReasoningEffort(modelReasoningEffort)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="field-hint">깊이보다 속도가 중요하면 낮추고, 복잡한 작업이면 높이세요.</p>
         </div>
       </div>
 

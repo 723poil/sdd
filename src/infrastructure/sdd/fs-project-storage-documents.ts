@@ -1,30 +1,40 @@
-import type { ProjectAnalysis } from '@/domain/project/project-analysis-model';
-import { createProjectError } from '@/domain/project/project-errors';
-import { isProjectAnalysisContext } from '@/domain/project/project-analysis-model';
 import {
-  PROJECT_SESSION_INDEX_SCHEMA_VERSION,
-  type ProjectSessionIndex,
-} from '@/domain/project/project-session-model';
+  createProjectAnalysisDocument,
+  isProjectAnalysisFileIndexDocument,
+  normalizeProjectAnalysisContext,
+  orderProjectAnalysisDocuments,
+  PROJECT_ANALYSIS_DOCUMENT_IDS,
+  type ProjectAnalysis,
+  type ProjectAnalysisDocument,
+  type ProjectAnalysisFileIndexDocument,
+} from '@/domain/project/project-analysis-model';
+import type { ProjectSpecIndex } from '@/domain/project/project-spec-model';
+import { createProjectError } from '@/domain/project/project-errors';
 import {
   ANALYSIS_CONTEXT_SCHEMA_VERSION,
+  ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
   SPEC_INDEX_SCHEMA_VERSION,
   isProjectMeta,
   type ProjectMeta,
 } from '@/domain/project/project-model';
+import {
+  PROJECT_SESSION_INDEX_SCHEMA_VERSION,
+  type ProjectSessionIndex,
+} from '@/domain/project/project-session-model';
 import { err, ok, type Result } from '@/shared/contracts/result';
 
-import { getProjectStoragePaths } from '@/infrastructure/sdd/fs-project-storage-paths';
+import {
+  getProjectAnalysisDocumentPath,
+  getProjectStoragePaths,
+} from '@/infrastructure/sdd/fs-project-storage-paths';
 import { pathExists, readJsonFile, readTextFile } from '@/infrastructure/sdd/fs-project-storage-io';
 
 export interface InitialProjectStorageDocuments {
   analysisContext: ProjectAnalysis['context'];
+  analysisFileIndex: ProjectAnalysisFileIndexDocument;
   analysisSummaryMarkdown: string;
   sessionsIndex: ProjectSessionIndex;
-  specsIndex: {
-    schemaVersion: typeof SPEC_INDEX_SCHEMA_VERSION;
-    generatedAt: string;
-    specs: string[];
-  };
+  specsIndex: ProjectSpecIndex;
 }
 
 export async function readProjectMetaDocument(input: {
@@ -64,8 +74,13 @@ export async function readProjectMetaDocument(input: {
 export async function readProjectAnalysisDocument(input: {
   rootPath: string;
 }): Promise<Result<ProjectAnalysis | null>> {
-  const { analysisContextPath, analysisSummaryPath, sddDirectoryPath } =
-    getProjectStoragePaths(input.rootPath);
+  const {
+    analysisContextPath,
+    analysisDirectoryPath,
+    analysisFileIndexPath,
+    analysisSummaryPath,
+    sddDirectoryPath,
+  } = getProjectStoragePaths(input.rootPath);
 
   if (!(await pathExists(sddDirectoryPath))) {
     return ok(null);
@@ -83,7 +98,8 @@ export async function readProjectAnalysisDocument(input: {
     return err(contextResult.error);
   }
 
-  if (!isProjectAnalysisContext(contextResult.value)) {
+  const normalizedContext = normalizeProjectAnalysisContext(contextResult.value);
+  if (!normalizedContext) {
     return err(
       createProjectError(
         'INVALID_PROJECT_STORAGE',
@@ -101,8 +117,27 @@ export async function readProjectAnalysisDocument(input: {
     return err(summaryResult.error);
   }
 
+  const fileIndexResult = await readProjectAnalysisFileIndexDocument({
+    analysisFileIndexPath,
+    fallbackPaths: normalizedContext.files,
+  });
+  if (!fileIndexResult.ok) {
+    return err(fileIndexResult.error);
+  }
+
+  const documentsResult = await readProjectAnalysisDocuments({
+    analysisDirectoryPath,
+    context: normalizedContext,
+    summaryMarkdown: summaryResult.value,
+  });
+  if (!documentsResult.ok) {
+    return err(documentsResult.error);
+  }
+
   return ok({
-    context: contextResult.value,
+    context: normalizedContext,
+    documents: documentsResult.value,
+    fileIndex: fileIndexResult.value.entries,
     summaryMarkdown: summaryResult.value,
   });
 }
@@ -122,6 +157,20 @@ export function createInitialProjectStorageDocuments(input: {
       modules: [],
       unknowns: [],
       confidence: 0,
+      projectPurpose: '',
+      architectureSummary: '',
+      documentSummaries: [],
+      documentLayouts: {},
+      layers: [],
+      directorySummaries: [],
+      connections: [],
+      documentLinks: [],
+      fileReferences: [],
+    },
+    analysisFileIndex: {
+      schemaVersion: ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
+      generatedAt: input.now,
+      entries: [],
     },
     analysisSummaryMarkdown: createInitialAnalysisSummaryMarkdown(input.projectName),
     sessionsIndex: {
@@ -133,8 +182,123 @@ export function createInitialProjectStorageDocuments(input: {
       schemaVersion: SPEC_INDEX_SCHEMA_VERSION,
       generatedAt: input.now,
       specs: [],
-    },
+    } satisfies ProjectSpecIndex,
   };
+}
+
+async function readProjectAnalysisFileIndexDocument(input: {
+  analysisFileIndexPath: string;
+  fallbackPaths: string[];
+}): Promise<Result<ProjectAnalysisFileIndexDocument>> {
+  if (!(await pathExists(input.analysisFileIndexPath))) {
+    return ok({
+      schemaVersion: ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
+      generatedAt: new Date(0).toISOString(),
+      entries: input.fallbackPaths.map((path) => ({
+        path,
+        role: '확인 필요',
+        layer: null,
+        category: 'legacy',
+        summary: '이전 분석 포맷에서 가져온 경로입니다.',
+        references: [],
+      })),
+    });
+  }
+
+  const fileIndexResult = await readJsonFile(
+    input.analysisFileIndexPath,
+    'analysis/file-index.json 을 읽거나 파싱할 수 없습니다.',
+  );
+  if (!fileIndexResult.ok) {
+    return err(fileIndexResult.error);
+  }
+
+  if (!isProjectAnalysisFileIndexDocument(fileIndexResult.value)) {
+    return err(
+      createProjectError(
+        'INVALID_PROJECT_STORAGE',
+        'analysis/file-index.json 이 현재 schemaVersion 계약을 만족하지 않습니다.',
+        input.analysisFileIndexPath,
+      ),
+    );
+  }
+
+  return ok({
+    ...fileIndexResult.value,
+    entries: fileIndexResult.value.entries.map((entry) => ({
+      ...entry,
+      references: entry.references ?? [],
+    })),
+  });
+}
+
+async function readProjectAnalysisDocuments(input: {
+  analysisDirectoryPath: string;
+  context: ProjectAnalysis['context'];
+  summaryMarkdown: string;
+}): Promise<Result<ProjectAnalysisDocument[]>> {
+  const documentSummaryMap = new Map(
+    input.context.documentSummaries.map((documentSummary) => [documentSummary.id, documentSummary]),
+  );
+
+  const documents: ProjectAnalysisDocument[] = [
+    createProjectAnalysisDocument({
+      id: 'overview',
+      summary: resolveOverviewSummary({
+        projectPurpose: input.context.projectPurpose,
+        storedSummary: documentSummaryMap.get('overview')?.summary ?? null,
+      }),
+      markdown: input.summaryMarkdown,
+    }),
+  ];
+
+  for (const documentId of PROJECT_ANALYSIS_DOCUMENT_IDS) {
+    if (documentId === 'overview') {
+      continue;
+    }
+
+    const documentPath = getProjectAnalysisDocumentPath({
+      analysisDirectoryPath: input.analysisDirectoryPath,
+      documentId,
+    });
+    if (!(await pathExists(documentPath))) {
+      continue;
+    }
+
+    const documentResult = await readTextFile(
+      documentPath,
+      `analysis/${documentId}.md 를 읽을 수 없습니다.`,
+    );
+    if (!documentResult.ok) {
+      return err(documentResult.error);
+    }
+
+    documents.push(
+      createProjectAnalysisDocument({
+        id: documentId,
+        summary:
+          documentSummaryMap.get(documentId)?.summary ?? '프로젝트 분석 문서를 불러왔습니다.',
+        markdown: documentResult.value,
+      }),
+    );
+  }
+
+  return ok(orderProjectAnalysisDocuments(documents));
+}
+
+function resolveOverviewSummary(input: {
+  projectPurpose: string;
+  storedSummary: string | null;
+}): string {
+  if (input.storedSummary && input.storedSummary.trim().length > 0) {
+    return input.storedSummary;
+  }
+
+  if (input.projectPurpose.trim().length > 0) {
+    return input.projectPurpose;
+  }
+
+  return '프로젝트 전체 개요를 확인합니다.';
 }
 
 function createInitialAnalysisSummaryMarkdown(projectName: string): string {
@@ -147,8 +311,8 @@ function createInitialAnalysisSummaryMarkdown(projectName: string): string {
     '',
     '## 다음 단계',
     '',
-    '- 기본 분석 실행',
-    '- 스택 감지',
+    '- 연결된 에이전트로 프로젝트 분석 실행',
+    '- 구조와 계층 정리',
     '- 명세 초안 생성',
     '',
   ].join('\n');

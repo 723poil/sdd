@@ -2,7 +2,7 @@ import { appendFile, readdir } from 'node:fs/promises';
 
 import {
   isProjectSessionMessage,
-  isProjectSessionMeta,
+  normalizeProjectSessionMeta,
   PROJECT_SESSION_INDEX_SCHEMA_VERSION,
   toProjectSessionSummary,
   type ProjectSessionIndex,
@@ -55,13 +55,14 @@ export async function readSessionMetaDocument(input: {
     return err(parsedResult.error);
   }
 
-  if (!isProjectSessionMeta(parsedResult.value)) {
+  const normalizedMeta = normalizeProjectSessionMeta(parsedResult.value);
+  if (!normalizedMeta) {
     return err(
       createProjectError('INVALID_PROJECT_STORAGE', '세션 메타 파일이 현재 계약을 만족하지 않습니다.', metaPath),
     );
   }
 
-  return ok(parsedResult.value);
+  return ok(normalizedMeta);
 }
 
 export async function readSessionMessagesDocument(input: {

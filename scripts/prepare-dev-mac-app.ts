@@ -165,7 +165,7 @@ const isDirectRun = process.argv[1] === fileURLToPath(import.meta.url);
 if (isDirectRun) {
   prepareDevMacApp()
     .then((executablePath) => {
-      console.log(executablePath);
+      process.stdout.write(`${executablePath}\n`);
     })
     .catch((error: unknown) => {
       const message = error instanceof Error ? error.message : 'dev app 준비에 실패했습니다.';

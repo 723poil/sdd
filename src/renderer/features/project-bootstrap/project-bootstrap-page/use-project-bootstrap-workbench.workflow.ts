@@ -1,7 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import type { ProjectAnalysis } from '@/domain/project/project-analysis-model';
+import type {
+  AgentCliConnectionSettings,
+  AgentCliModelReasoningEffort,
+} from '@/domain/app-settings/agent-cli-connection-model';
+import { createDefaultAgentCliConnectionSettings } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  ProjectAnalysis,
+  ProjectAnalysisDocumentId,
+  ProjectAnalysisDocumentLayoutMap,
+  ProjectAnalysisRunStatus,
+} from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
+import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionSummary,
@@ -12,8 +23,14 @@ import {
   describeInitializationState,
   reorderItems,
   resolveSelectedSession,
+  resolveSelectedSpec,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils';
-import type { ProjectBootstrapWorkbenchState } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import type {
+  ProjectBootstrapWorkbenchState,
+  SelectedProjectAnalysisDocumentId,
+  StructuredProjectAnalysis,
+  WorkspacePageId,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
 function getSddApi(): RendererSddApi | null {
   if (typeof window === 'undefined') {
@@ -36,13 +53,19 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   actions: {
     onActivateProject(rootPath: string): Promise<void>;
     onAnalyzeProject(): void;
+    onCancelAnalysis(): void;
     onChangeDraftMessage(value: string): void;
-    onCreateSession(): void;
+    onCreateSpec(): void;
     onDragOverProject(rootPath: string): void;
     onDropProject(rootPath: string): void;
     onEndDraggingProject(): void;
+    onChangeChatModel(model: string): void;
+    onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort): void;
     onSelectProject(): void;
-    onSelectSession(sessionId: string): void;
+    onSelectAnalysisDocument(documentId: ProjectAnalysisDocumentId): void;
+    onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap): void;
+    onSelectSpec(specId: string): void;
+    onSelectWorkspacePage(page: WorkspacePageId): void;
     onSendMessage(): void;
     onStartDraggingProject(rootPath: string): void;
     onToggleProjectExpansion(rootPath: string): void;
@@ -51,10 +74,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   };
 } {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [activeWorkspacePage, setActiveWorkspacePage] = useState<WorkspacePageId>('analysis');
   const [inspection, setInspection] = useState<ProjectInspection | null>(null);
-  const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<StructuredProjectAnalysis | null>(null);
+  const [specs, setSpecs] = useState<ProjectSpecDocument[]>([]);
   const [sessions, setSessions] = useState<ProjectSessionSummary[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedAnalysisDocumentId, setSelectedAnalysisDocumentId] =
+    useState<SelectedProjectAnalysisDocumentId>(null);
+  const [selectedSpecId, setSelectedSpecId] = useState<string | null>(null);
+  const [analysisRunStatusesByRootPath, setAnalysisRunStatusesByRootPath] = useState<
+    Record<string, ProjectAnalysisRunStatus>
+  >({});
   const [sessionMessages, setSessionMessages] = useState<ProjectSessionMessage[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
@@ -62,13 +93,28 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [draggingProjectRootPath, setDraggingProjectRootPath] = useState<string | null>(null);
   const [dropTargetRootPath, setDropTargetRootPath] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCreatingSpec, setIsCreatingSpec] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [isSavingChatRuntimeSettings, setIsSavingChatRuntimeSettings] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
+  const [codexConnectionSettings, setCodexConnectionSettings] = useState<AgentCliConnectionSettings>(
+    () => createDefaultAgentCliConnectionSettings('codex'),
+  );
   const [message, setMessage] = useState<string>('로컬 프로젝트를 선택해 시작하세요.');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const selectedPathRef = useRef<string | null>(null);
+
+  const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
+  const specSessions = selectedSpec
+    ? sessions.filter((session) => session.specId === selectedSpec.meta.id)
+    : [];
+  const selectedSession = resolveSelectedSession(specSessions, selectedSessionId);
+
+  useEffect(() => {
+    selectedPathRef.current = selectedPath;
+  }, [selectedPath]);
 
   useEffect(() => {
     void (async () => {
@@ -77,12 +123,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      const result = await sddApi.project.listRecentProjects();
-      if (!result.ok) {
-        return;
+      const [recentProjectsResult, codexConnectionSettingsResult] = await Promise.all([
+        sddApi.project.listRecentProjects(),
+        readCodexConnectionSettings(sddApi),
+      ]);
+
+      if (recentProjectsResult.ok) {
+        setRecentProjects(recentProjectsResult.value);
       }
 
-      setRecentProjects(result.value);
+      if (codexConnectionSettingsResult.ok) {
+        setCodexConnectionSettings(codexConnectionSettingsResult.value);
+      }
     })();
   }, []);
 
@@ -92,7 +144,85 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     );
   }, [recentProjects]);
 
-  const selectedSession = resolveSelectedSession(sessions, selectedSessionId);
+  useEffect(() => {
+    if (!selectedPath) {
+      return;
+    }
+
+    let isCancelled = false;
+    let timeoutId: number | null = null;
+
+    const refreshAnalysisRunStatus = async (): Promise<void> => {
+      try {
+        const result = await readAnalysisRunStatus(selectedPath);
+        if (isCancelled || !result) {
+          return;
+        }
+
+        setAnalysisRunStatusesByRootPath((current) => ({
+          ...current,
+          [result.rootPath]: result,
+        }));
+
+        if (result.status === 'running' || result.status === 'cancelling') {
+          timeoutId = window.setTimeout(() => {
+            void refreshAnalysisRunStatus();
+          }, 1500);
+        }
+      } catch {
+        return;
+      }
+    };
+
+    void refreshAnalysisRunStatus();
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [selectedPath]);
+
+  useEffect(() => {
+    if (!analysis) {
+      setSelectedAnalysisDocumentId(null);
+      return;
+    }
+
+    const documents = analysis.documents ?? [];
+    if (documents.length === 0) {
+      setSelectedAnalysisDocumentId(null);
+      return;
+    }
+
+    const hasSelectedDocument = documents.some(
+      (document) => document.id === selectedAnalysisDocumentId,
+    );
+    if (!hasSelectedDocument) {
+      setSelectedAnalysisDocumentId(documents[0]?.id ?? null);
+    }
+  }, [analysis, selectedAnalysisDocumentId]);
+
+  useEffect(() => {
+    if (specs.length === 0) {
+      setSelectedSpecId(null);
+      return;
+    }
+
+    const hasSelectedSpec = specs.some((spec) => spec.meta.id === selectedSpecId);
+    if (hasSelectedSpec) {
+      return;
+    }
+
+    const preferredSpecId = inspection?.projectMeta?.defaultSpecId;
+    if (preferredSpecId && specs.some((spec) => spec.meta.id === preferredSpecId)) {
+      setSelectedSpecId(preferredSpecId);
+      return;
+    }
+
+    setSelectedSpecId(specs[0]?.meta.id ?? null);
+  }, [inspection?.projectMeta?.defaultSpecId, selectedSpecId, specs]);
 
   useEffect(() => {
     if (!selectedPath || !selectedSession?.id) {
@@ -121,6 +251,84 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     })();
   }, [selectedPath, selectedSession?.id]);
 
+  useEffect(() => {
+    if (
+      activeWorkspacePage !== 'specs' ||
+      !selectedPath ||
+      !selectedSpec ||
+      inspection?.initializationState !== 'ready' ||
+      isCreatingSession
+    ) {
+      return;
+    }
+
+    const existingSession =
+      sessions.find((session) => session.specId === selectedSpec.meta.id) ?? null;
+    if (existingSession) {
+      if (selectedSessionId !== existingSession.id) {
+        setSelectedSessionId(existingSession.id);
+      }
+      return;
+    }
+
+    const sddApi = getSddApi();
+    if (!sddApi) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    void (async () => {
+      setIsCreatingSession(true);
+      try {
+        const createSessionResult = await sddApi.project.createSession({
+          rootPath: selectedPath,
+          specId: selectedSpec.meta.id,
+          title: `${selectedSpec.meta.title} 채팅`,
+        });
+        if (!createSessionResult.ok) {
+          if (!isCancelled) {
+            setErrorMessage(createSessionResult.error.message);
+          }
+          return;
+        }
+
+        const sessionsResult = await sddApi.project.listSessions({
+          rootPath: selectedPath,
+        });
+        if (!sessionsResult.ok) {
+          if (!isCancelled) {
+            setErrorMessage(sessionsResult.error.message);
+          }
+          return;
+        }
+
+        if (isCancelled) {
+          return;
+        }
+
+        setSessions(sessionsResult.value);
+        setSelectedSessionId(createSessionResult.value.id);
+      } finally {
+        if (!isCancelled) {
+          setIsCreatingSession(false);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    activeWorkspacePage,
+    inspection?.initializationState,
+    isCreatingSession,
+    selectedPath,
+    selectedSessionId,
+    selectedSpec,
+    sessions,
+  ]);
+
   async function activateProject(rootPath: string): Promise<void> {
     const sddApi = getSddApi();
     if (!sddApi) {
@@ -136,6 +344,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     if (!result.ok) {
       setInspection(null);
       setAnalysis(null);
+      setSpecs([]);
+      setSelectedAnalysisDocumentId(null);
+      setSelectedSpecId(null);
       setSessions([]);
       setSelectedSessionId(null);
       setSessionMessages([]);
@@ -144,25 +355,29 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    setSelectedPath(result.value.inspection.rootPath);
+    const nextRootPath = result.value.inspection.rootPath;
+    setSelectedPath(nextRootPath);
     setInspection(result.value.inspection);
     setRecentProjects(result.value.recentProjects);
     setExpandedProjectRootPaths((current) =>
-      current.includes(result.value.inspection.rootPath)
-        ? current
-        : [...current, result.value.inspection.rootPath],
+      current.includes(nextRootPath) ? current : [...current, nextRootPath],
     );
     setDraftMessage('');
     setErrorMessage(null);
     setMessage(describeInitializationState(result.value.inspection));
+
     await Promise.all([
       loadProjectAnalysis({
         inspection: result.value.inspection,
-        rootPath: result.value.inspection.rootPath,
+        rootPath: nextRootPath,
+      }),
+      loadProjectSpecs({
+        inspection: result.value.inspection,
+        rootPath: nextRootPath,
       }),
       loadProjectSessions({
         inspection: result.value.inspection,
-        rootPath: result.value.inspection.rootPath,
+        rootPath: nextRootPath,
       }),
     ]);
   }
@@ -174,20 +389,47 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     const sddApi = getSddApi();
     if (!sddApi || input.inspection.initializationState !== 'ready') {
       setAnalysis(null);
+      setSelectedAnalysisDocumentId(null);
       return;
     }
 
     const result = await sddApi.project.readAnalysis({
       rootPath: input.rootPath,
     });
-
     if (!result.ok) {
       setAnalysis(null);
+      setSelectedAnalysisDocumentId(null);
       setErrorMessage(result.error.message);
       return;
     }
 
-    setAnalysis(result.value);
+    const structuredAnalysis = toStructuredProjectAnalysis(result.value);
+    setAnalysis(structuredAnalysis);
+    setSelectedAnalysisDocumentId(structuredAnalysis?.documents?.[0]?.id ?? null);
+  }
+
+  async function loadProjectSpecs(input: {
+    inspection: ProjectInspection;
+    rootPath: string;
+  }): Promise<void> {
+    const sddApi = getSddApi();
+    if (!sddApi || input.inspection.initializationState !== 'ready') {
+      setSpecs([]);
+      setSelectedSpecId(null);
+      return;
+    }
+
+    const result = await sddApi.project.readSpecs({
+      rootPath: input.rootPath,
+    });
+    if (!result.ok) {
+      setSpecs([]);
+      setSelectedSpecId(null);
+      setErrorMessage(result.error.message);
+      return;
+    }
+
+    setSpecs(result.value);
   }
 
   async function loadProjectSessions(input: {
@@ -201,24 +443,17 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    const result = await sddApi.project.listSessions({
+    const sessionsResult = await sddApi.project.listSessions({
       rootPath: input.rootPath,
     });
-    if (!result.ok) {
+    if (!sessionsResult.ok) {
       setSessions([]);
       setSelectedSessionId(null);
-      setErrorMessage(result.error.message);
+      setErrorMessage(sessionsResult.error.message);
       return;
     }
 
-    setSessions(result.value);
-    setSelectedSessionId((currentId) => {
-      if (currentId && result.value.some((session) => session.id === currentId)) {
-        return currentId;
-      }
-
-      return result.value[0]?.id ?? null;
-    });
+    setSessions(sessionsResult.value);
   }
 
   async function handleSelectProject(): Promise<void> {
@@ -256,38 +491,130 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const analysisRootPath = selectedPath;
     const sddApi = getSddApi();
     if (!sddApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
-      setMessage('기본 분석을 시작할 수 없습니다.');
+      setMessage('에이전트 분석을 시작할 수 없습니다.');
       return;
     }
 
-    setIsAnalyzing(true);
     setErrorMessage(null);
-    setMessage('프로젝트 구조를 분석하고 있습니다.');
+    setMessage('에이전트 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.');
+    setAnalysisRunStatusesByRootPath((current) => {
+      const startedAt = new Date().toISOString();
+      return {
+        ...current,
+        [analysisRootPath]: {
+          rootPath: analysisRootPath,
+          status: 'running',
+          stepIndex: 1,
+          stepTotal: 4,
+          stageMessage: 'Codex CLI 실행 준비 중',
+          progressMessage: '분석 요청을 전송했습니다.',
+          startedAt,
+          updatedAt: startedAt,
+          completedAt: null,
+          lastError: null,
+        },
+      };
+    });
 
     try {
       const result = await sddApi.project.analyze({
-        rootPath: selectedPath,
+        rootPath: analysisRootPath,
       });
 
+      const latestRunStatus = await readAnalysisRunStatus(analysisRootPath);
+      if (latestRunStatus) {
+        setAnalysisRunStatusesByRootPath((current) => ({
+          ...current,
+          [analysisRootPath]: latestRunStatus,
+        }));
+      }
+
       if (!result.ok) {
-        setErrorMessage(result.error.message);
-        setMessage('기본 분석에 실패했습니다.');
+        if (selectedPathRef.current === analysisRootPath) {
+          if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+            setErrorMessage(null);
+            setMessage('에이전트 분석이 취소되었습니다.');
+          } else {
+            setErrorMessage(result.error.message);
+            setMessage('에이전트 분석에 실패했습니다.');
+          }
+        }
+        return;
+      }
+
+      if (selectedPathRef.current !== analysisRootPath) {
         return;
       }
 
       setInspection(result.value.inspection);
-      setAnalysis(result.value.analysis);
-      setMessage('기본 분석이 완료되었습니다. 이제 대화 세션을 만들어 작업을 이어갈 수 있습니다.');
-    } finally {
-      setIsAnalyzing(false);
+      const structuredAnalysis = toStructuredProjectAnalysis(result.value.analysis);
+      setAnalysis(structuredAnalysis);
+      setSelectedAnalysisDocumentId(structuredAnalysis?.documents?.[0]?.id ?? null);
+      setMessage('에이전트 분석이 완료되었습니다. 분석 페이지에서 문서를 확인해 주세요.');
+    } catch (error) {
+      const nextMessage =
+        error instanceof Error ? error.message : '에이전트 분석을 실행하지 못했습니다.';
+      const latestRunStatus = await readAnalysisRunStatus(analysisRootPath);
+      if (latestRunStatus) {
+        setAnalysisRunStatusesByRootPath((current) => ({
+          ...current,
+          [analysisRootPath]: latestRunStatus,
+        }));
+      }
+
+      if (selectedPathRef.current === analysisRootPath) {
+        setErrorMessage(nextMessage);
+        setMessage('에이전트 분석에 실패했습니다.');
+      }
     }
   }
 
-  async function handleCreateSession(): Promise<void> {
-    if (!selectedPath || inspection?.initializationState !== 'ready') {
+  async function handleCancelAnalysis(): Promise<void> {
+    const rootPath = selectedPathRef.current;
+    if (!rootPath) {
+      return;
+    }
+
+    const currentStatus = analysisRunStatusesByRootPath[rootPath] ?? null;
+    if (
+      !currentStatus ||
+      (currentStatus.status !== 'running' && currentStatus.status !== 'cancelling') ||
+      currentStatus.stepIndex >= currentStatus.stepTotal
+    ) {
+      return;
+    }
+
+    const sddApi = getSddApi();
+    if (!sddApi || typeof sddApi.project.cancelAnalysis !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    setErrorMessage(null);
+
+    const result = await sddApi.project.cancelAnalysis({ rootPath });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      return;
+    }
+
+    setAnalysisRunStatusesByRootPath((current) => ({
+      ...current,
+      [rootPath]: result.value,
+    }));
+    setMessage(
+      result.value.status === 'cancelling'
+        ? '에이전트 분석 취소를 요청했습니다.'
+        : '분석 상태를 다시 확인했습니다.',
+    );
+  }
+
+  async function handleCreateSpec(): Promise<void> {
+    if (!selectedPath) {
       return;
     }
 
@@ -297,34 +624,45 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    setIsCreatingSession(true);
+    setIsCreatingSpec(true);
     setErrorMessage(null);
+    setMessage('새 명세 채팅을 준비하는 중입니다.');
 
     try {
-      const result = await sddApi.project.createSession({
+      const result = await sddApi.project.createSpec({
         rootPath: selectedPath,
       });
       if (!result.ok) {
         setErrorMessage(result.error.message);
-        setMessage('대화 세션을 만들지 못했습니다.');
+        setMessage('새 명세를 만들지 못했습니다.');
         return;
       }
 
-      await loadProjectSessions({
-        inspection,
-        rootPath: selectedPath,
-      });
-      setSelectedSessionId(result.value.id);
+      setInspection(result.value.inspection);
+      setActiveWorkspacePage('specs');
+      setSelectedSpecId(result.value.spec.meta.id);
+      setSelectedSessionId(null);
       setSessionMessages([]);
       setDraftMessage('');
-      setMessage('새 대화 세션을 만들었습니다.');
+      setMessage(`"${result.value.spec.meta.title}" 명세 채팅을 시작할 수 있습니다.`);
+
+      await Promise.all([
+        loadProjectSpecs({
+          inspection: result.value.inspection,
+          rootPath: result.value.inspection.rootPath,
+        }),
+        loadProjectSessions({
+          inspection: result.value.inspection,
+          rootPath: result.value.inspection.rootPath,
+        }),
+      ]);
     } finally {
-      setIsCreatingSession(false);
+      setIsCreatingSpec(false);
     }
   }
 
   async function handleSendMessage(): Promise<void> {
-    if (!selectedPath || !selectedSession) {
+    if (!selectedPath || !selectedSession || !selectedSpec) {
       return;
     }
 
@@ -356,6 +694,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             session.id === result.value.session.id
               ? {
                   id: result.value.session.id,
+                  specId: result.value.session.specId,
                   title: result.value.session.title,
                   updatedAt: result.value.session.updatedAt,
                   lastMessageAt: result.value.session.lastMessageAt,
@@ -367,11 +706,83 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
       );
       setDraftMessage('');
-      setMessage(
-        '메시지를 저장했습니다. 이후 Codex 연결이 붙어도 이 세션을 그대로 이어갈 수 있습니다.',
-      );
+      setMessage(`"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했습니다.`);
     } finally {
       setIsSendingMessage(false);
+    }
+  }
+
+  async function handleSaveAnalysisDocumentLayouts(
+    documentLayouts: ProjectAnalysisDocumentLayoutMap,
+  ): Promise<void> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.saveAnalysisDocumentLayouts !== 'function') {
+      return;
+    }
+
+    const result = await sddApi.project.saveAnalysisDocumentLayouts({
+      rootPath,
+      documentLayouts,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      return;
+    }
+
+    setAnalysis((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        context: {
+          ...current.context,
+          documentLayouts: result.value,
+        },
+      };
+    });
+  }
+
+  async function saveCodexConnectionSettings(
+    patch: Partial<Pick<AgentCliConnectionSettings, 'model' | 'modelReasoningEffort'>>,
+  ): Promise<void> {
+    const sddApi = getSddApi();
+    if (!sddApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    const previousSettings = codexConnectionSettings;
+    const nextSettings: AgentCliConnectionSettings = {
+      ...codexConnectionSettings,
+      ...patch,
+    };
+
+    setCodexConnectionSettings(nextSettings);
+    setIsSavingChatRuntimeSettings(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.settings.saveAgentCliConnection({
+        agentId: nextSettings.agentId,
+        commandMode: nextSettings.commandMode,
+        executablePath: nextSettings.commandMode === 'custom' ? nextSettings.executablePath : null,
+        authMode: nextSettings.authMode,
+        model: nextSettings.model,
+        modelReasoningEffort: nextSettings.modelReasoningEffort,
+      });
+
+      if (!result.ok) {
+        setCodexConnectionSettings(previousSettings);
+        setErrorMessage(result.error.message);
+        return;
+      }
+
+      setCodexConnectionSettings(result.value.settings);
+    } finally {
+      setIsSavingChatRuntimeSettings(false);
     }
   }
 
@@ -426,8 +837,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   return {
     state: {
       selectedPath,
+      activeWorkspacePage,
       inspection,
       analysis,
+      specs,
+      analysisRunStatusesByRootPath,
+      selectedAnalysisDocumentId,
+      selectedSpecId,
       sessions,
       selectedSessionId,
       sessionMessages,
@@ -437,11 +853,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       draggingProjectRootPath,
       dropTargetRootPath,
       isSelecting,
-      isAnalyzing,
+      isCreatingSpec,
       isCreatingSession,
       isSendingMessage,
+      isSavingChatRuntimeSettings,
       isLeftSidebarOpen,
       isRightSidebarOpen,
+      chatModel: codexConnectionSettings.model,
+      chatReasoningEffort: codexConnectionSettings.modelReasoningEffort,
       message,
       errorMessage,
     },
@@ -450,11 +869,20 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onAnalyzeProject() {
         void handleAnalyzeProject();
       },
+      onCancelAnalysis() {
+        void handleCancelAnalysis();
+      },
       onChangeDraftMessage(value: string) {
         setDraftMessage(value);
       },
-      onCreateSession() {
-        void handleCreateSession();
+      onCreateSpec() {
+        void handleCreateSpec();
+      },
+      onChangeChatModel(model: string) {
+        void saveCodexConnectionSettings({ model });
+      },
+      onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort) {
+        void saveCodexConnectionSettings({ modelReasoningEffort });
       },
       onDragOverProject(rootPath: string) {
         if (draggingProjectRootPath && draggingProjectRootPath !== rootPath) {
@@ -471,8 +899,17 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onSelectProject() {
         void handleSelectProject();
       },
-      onSelectSession(sessionId: string) {
-        setSelectedSessionId(sessionId);
+      onSelectAnalysisDocument(documentId: ProjectAnalysisDocumentId) {
+        setSelectedAnalysisDocumentId(documentId);
+      },
+      onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap) {
+        void handleSaveAnalysisDocumentLayouts(documentLayouts);
+      },
+      onSelectSpec(specId: string) {
+        setSelectedSpecId(specId);
+      },
+      onSelectWorkspacePage(page: WorkspacePageId) {
+        setActiveWorkspacePage(page);
       },
       onSendMessage() {
         void handleSendMessage();
@@ -495,5 +932,43 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         setIsRightSidebarOpen((current) => !current);
       },
     },
+  };
+}
+
+function toStructuredProjectAnalysis(
+  value: ProjectAnalysis | null,
+): StructuredProjectAnalysis | null {
+  return value;
+}
+
+async function readAnalysisRunStatus(rootPath: string): Promise<ProjectAnalysisRunStatus | null> {
+  const sddApi = getSddApi();
+  if (!sddApi || typeof sddApi.project.readAnalysisRunStatus !== 'function') {
+    return null;
+  }
+
+  const result = await sddApi.project.readAnalysisRunStatus({
+    rootPath,
+  });
+  if (!result.ok) {
+    return null;
+  }
+
+  return result.value;
+}
+
+async function readCodexConnectionSettings(
+  sddApi: RendererSddApi,
+): Promise<{ ok: true; value: AgentCliConnectionSettings } | { ok: false }> {
+  const result = await sddApi.settings.listAgentCliConnections();
+  if (!result.ok) {
+    return { ok: false };
+  }
+
+  return {
+    ok: true,
+    value:
+      result.value.find((connection) => connection.definition.agentId === 'codex')?.settings ??
+      createDefaultAgentCliConnectionSettings('codex'),
   };
 }

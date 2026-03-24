@@ -1,84 +1,101 @@
-import type { ProjectInspection } from '@/domain/project/project-model';
-import type {
-  ProjectSessionMessage,
-  ProjectSessionSummary,
-} from '@/domain/project/project-session-model';
+import { useEffect, useState } from 'react';
 
-import { SessionWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/SessionWorkspace';
-import { StatusBadge } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge';
 import type {
-  StatusBadgeModel,
+  ProjectAnalysisDocumentId,
+  ProjectAnalysisDocumentLayoutMap,
+} from '@/domain/project/project-analysis-model';
+import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+
+import { AnalysisWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace';
+import { SpecsWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace';
+import type {
+  SelectedProjectAnalysisDocumentId,
+  StructuredProjectAnalysis,
+  WorkspacePageId,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
 interface MainWorkspaceProps {
-  analysisStatus: StatusBadgeModel;
-  inspection: ProjectInspection | null;
-  storageStatus: StatusBadgeModel;
-  message: string;
+  activeWorkspacePage: WorkspacePageId;
+  analysis: StructuredProjectAnalysis | null;
+  analysisSessionKey: string;
+  specs: ProjectSpecDocument[];
+  selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
+  selectedSpecId: string | null;
   errorMessage: string | null;
-  canAnalyze: boolean;
-  draftMessage: string;
-  isSelecting: boolean;
-  isAnalyzing: boolean;
-  isCreatingSession: boolean;
-  isSendingMessage: boolean;
-  selectedSession: ProjectSessionSummary | null;
-  sessionMessages: ProjectSessionMessage[];
-  sessionCount: number;
-  onAnalyzeProject: () => void;
-  onChangeDraftMessage: (value: string) => void;
-  onCreateSession: () => void;
-  onSendMessage: () => void;
-  onSelectProject: () => void;
+  onSelectAnalysisDocument: (documentId: ProjectAnalysisDocumentId) => void;
+  onSaveAnalysisDocumentLayouts: (documentLayouts: ProjectAnalysisDocumentLayoutMap) => void;
+  onSelectSpec: (specId: string) => void;
+  onSelectWorkspacePage: (page: WorkspacePageId) => void;
 }
 
 export function MainWorkspace(props: MainWorkspaceProps) {
+  const [isAnalysisDocumentViewOpen, setIsAnalysisDocumentViewOpen] = useState(false);
+
+  useEffect(() => {
+    if (props.activeWorkspacePage !== 'analysis') {
+      setIsAnalysisDocumentViewOpen(false);
+    }
+  }, [props.activeWorkspacePage]);
+
   return (
     <section className="main-panel">
-      <header className="topbar">
-        <div className="topbar-leading">
-          <div>
-            <p className="topbar-label">현재 작업</p>
-            <h2>{props.inspection?.projectName ?? '프로젝트를 선택해 주세요'}</h2>
+      <div className="workspace-page-stage">
+        <div
+          aria-hidden={props.activeWorkspacePage !== 'analysis'}
+          className="workspace-page-view"
+          hidden={props.activeWorkspacePage !== 'analysis'}
+        >
+          <AnalysisWorkspace
+            analysis={props.analysis}
+            analysisSessionKey={props.analysisSessionKey}
+            onViewModeChange={(viewMode) => {
+              setIsAnalysisDocumentViewOpen(viewMode === 'document');
+            }}
+            onSelectDocument={props.onSelectAnalysisDocument}
+            onSaveDocumentLayouts={props.onSaveAnalysisDocumentLayouts}
+            selectedDocumentId={props.selectedAnalysisDocumentId}
+          />
+        </div>
+
+        <div
+          aria-hidden={props.activeWorkspacePage !== 'specs'}
+          className="workspace-page-view"
+          hidden={props.activeWorkspacePage !== 'specs'}
+        >
+          <SpecsWorkspace onSelectSpec={props.onSelectSpec} selectedSpecId={props.selectedSpecId} specs={props.specs} />
+        </div>
+
+        {!isAnalysisDocumentViewOpen ? (
+          <div className="workspace-page-floating-tabs" role="tablist" aria-label="작업 페이지">
+            <button
+              aria-selected={props.activeWorkspacePage === 'analysis'}
+              className={`workspace-page-tab ${
+                props.activeWorkspacePage === 'analysis' ? 'workspace-page-tab--active' : ''
+              }`}
+              onClick={() => {
+                props.onSelectWorkspacePage('analysis');
+              }}
+              role="tab"
+              type="button"
+            >
+              분석
+            </button>
+            <button
+              aria-selected={props.activeWorkspacePage === 'specs'}
+              className={`workspace-page-tab ${
+                props.activeWorkspacePage === 'specs' ? 'workspace-page-tab--active' : ''
+              }`}
+              onClick={() => {
+                props.onSelectWorkspacePage('specs');
+              }}
+              role="tab"
+              type="button"
+            >
+              명세
+            </button>
           </div>
-        </div>
-
-        <div className="topbar-actions">
-          <StatusBadge
-            label={props.storageStatus.label}
-            tone={props.storageStatus.tone}
-          />
-          <StatusBadge
-            label={props.analysisStatus.label}
-            tone={props.analysisStatus.tone}
-          />
-        </div>
-      </header>
-
-      <section className="hero-panel">
-        <div className="hero-copy">
-          <p className="section-label">워크스페이스</p>
-          <h3>{props.inspection?.projectName ?? '로컬 프로젝트 연결'}</h3>
-          <p className="hero-description">{props.message}</p>
-        </div>
-
-        <div className="hero-actions">
-          <button
-            className="primary-button"
-            onClick={props.onSelectProject}
-            disabled={props.isSelecting}
-          >
-            {props.isSelecting ? '프로젝트 불러오는 중...' : '프로젝트 선택'}
-          </button>
-          <button
-            className="secondary-button"
-            onClick={props.onAnalyzeProject}
-            disabled={!props.canAnalyze || props.isAnalyzing}
-          >
-            {props.isAnalyzing ? '기본 분석 실행 중...' : '기본 분석 실행'}
-          </button>
-        </div>
-      </section>
+        ) : null}
+      </div>
 
       {props.errorMessage ? (
         <section className="panel-card panel-card--alert">
@@ -88,18 +105,6 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           <p className="helper-text helper-text--alert">{props.errorMessage}</p>
         </section>
       ) : null}
-      <SessionWorkspace
-        draftMessage={props.draftMessage}
-        inspection={props.inspection}
-        isCreatingSession={props.isCreatingSession}
-        isSendingMessage={props.isSendingMessage}
-        selectedSession={props.selectedSession}
-        sessionCount={props.sessionCount}
-        sessionMessages={props.sessionMessages}
-        onChangeDraftMessage={props.onChangeDraftMessage}
-        onCreateSession={props.onCreateSession}
-        onSendMessage={props.onSendMessage}
-      />
     </section>
   );
 }

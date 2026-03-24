@@ -6,6 +6,7 @@ import type {
   AgentCliConnectionCheck,
   AgentCliConnectionRecord,
   AgentCliId,
+  AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
@@ -40,6 +41,8 @@ function createDraftFromRecord(connection: AgentCliConnectionRecord): AgentCliCo
     commandMode: connection.settings.commandMode,
     executablePath: connection.settings.executablePath ?? '',
     authMode: connection.settings.authMode,
+    model: connection.settings.model,
+    modelReasoningEffort: connection.settings.modelReasoningEffort,
   };
 }
 
@@ -67,6 +70,11 @@ export function useAgentCliSettingsWorkflow(): {
     onChangeCommandMode(agentId: AgentCliId, commandMode: AgentCliCommandMode): void;
     onChangeExecutablePath(agentId: AgentCliId, executablePath: string): void;
     onChangeAuthMode(agentId: AgentCliId, authMode: AgentCliAuthMode): void;
+    onChangeModel(agentId: AgentCliId, model: string): void;
+    onChangeModelReasoningEffort(
+      agentId: AgentCliId,
+      modelReasoningEffort: AgentCliModelReasoningEffort,
+    ): void;
     onCheckConnection(agentId: AgentCliId): Promise<void>;
     onRefresh(): Promise<void>;
     onSaveConnection(agentId: AgentCliId): Promise<void>;
@@ -146,6 +154,8 @@ export function useAgentCliSettingsWorkflow(): {
         commandMode: draft.commandMode,
         executablePath: draft.commandMode === 'custom' ? draft.executablePath : null,
         authMode: draft.authMode,
+        model: draft.model,
+        modelReasoningEffort: draft.modelReasoningEffort,
       });
 
       if (!result.ok) {
@@ -269,6 +279,41 @@ export function useAgentCliSettingsWorkflow(): {
             [agentId]: {
               ...existing,
               authMode,
+            },
+          };
+        });
+      },
+      onChangeModel(agentId: AgentCliId, model: string) {
+        setDraftsByAgentId((current) => {
+          const existing = current[agentId];
+          if (!existing) {
+            return current;
+          }
+
+          return {
+            ...current,
+            [agentId]: {
+              ...existing,
+              model,
+            },
+          };
+        });
+      },
+      onChangeModelReasoningEffort(
+        agentId: AgentCliId,
+        modelReasoningEffort: AgentCliModelReasoningEffort,
+      ) {
+        setDraftsByAgentId((current) => {
+          const existing = current[agentId];
+          if (!existing) {
+            return current;
+          }
+
+          return {
+            ...current,
+            [agentId]: {
+              ...existing,
+              modelReasoningEffort,
             },
           };
         });

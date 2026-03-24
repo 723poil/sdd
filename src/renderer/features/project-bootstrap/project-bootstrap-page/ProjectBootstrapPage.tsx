@@ -1,9 +1,18 @@
+import type { ProjectAnalysisDocumentId } from '@/domain/project/project-analysis-model';
+import type { AppView } from '@/renderer/app-view';
+
+import { BottomStatusBar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar';
 import { InfoSidebar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar';
 import { MainWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace';
 import { ProjectSidebar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar';
 import { useProjectBootstrapWorkbench } from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench';
 
-export function ProjectBootstrapPage() {
+interface ProjectBootstrapPageProps {
+  activeAppView: AppView;
+  onSelectAppView: (view: AppView) => void;
+}
+
+export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const workbench = useProjectBootstrapWorkbench();
   const handleActivateProject = (rootPath: string) => {
     void workbench.onActivateProject(rootPath);
@@ -11,14 +20,22 @@ export function ProjectBootstrapPage() {
   const handleChangeDraftMessage = (value: string) => {
     workbench.onChangeDraftMessage(value);
   };
-  const handleCreateSession = () => {
-    workbench.onCreateSession();
+  const handleCreateSpec = () => {
+    workbench.onCreateSpec();
   };
   const handleDragOverProject = (rootPath: string) => {
     workbench.onDragOverProject(rootPath);
   };
   const handleDropProject = (rootPath: string) => {
     workbench.onDropProject(rootPath);
+  };
+  const handleChangeChatModel = (model: string) => {
+    workbench.onChangeChatModel(model);
+  };
+  const handleChangeChatReasoningEffort = (
+    modelReasoningEffort: Parameters<typeof workbench.onChangeChatReasoningEffort>[0],
+  ) => {
+    workbench.onChangeChatReasoningEffort(modelReasoningEffort);
   };
   const handleEndDraggingProject = () => {
     workbench.onEndDraggingProject();
@@ -29,14 +46,30 @@ export function ProjectBootstrapPage() {
   const handleAnalyzeProject = () => {
     workbench.onAnalyzeProject();
   };
+  const handleCancelAnalysis = () => {
+    workbench.onCancelAnalysis();
+  };
   const handleSendMessage = () => {
     workbench.onSendMessage();
   };
   const handleSelectProject = () => {
     workbench.onSelectProject();
   };
-  const handleSelectSession = (sessionId: string) => {
-    workbench.onSelectSession(sessionId);
+  const handleSelectAnalysisDocument = (documentId: ProjectAnalysisDocumentId) => {
+    workbench.onSelectAnalysisDocument(documentId);
+  };
+  const handleSaveAnalysisDocumentLayouts = (
+    documentLayouts: Parameters<typeof workbench.onSaveAnalysisDocumentLayouts>[0],
+  ) => {
+    workbench.onSaveAnalysisDocumentLayouts(documentLayouts);
+  };
+  const handleSelectSpec = (specId: string) => {
+    workbench.onSelectSpec(specId);
+  };
+  const handleSelectWorkspacePage = (
+    page: Parameters<typeof workbench.onSelectWorkspacePage>[0],
+  ) => {
+    workbench.onSelectWorkspacePage(page);
   };
   const handleToggleLeftSidebar = () => {
     workbench.onToggleLeftSidebar();
@@ -44,83 +77,109 @@ export function ProjectBootstrapPage() {
   const handleToggleRightSidebar = () => {
     workbench.onToggleRightSidebar();
   };
-  const handleToggleProjectExpansion = (rootPath: string) => {
-    workbench.onToggleProjectExpansion(rootPath);
-  };
 
   return (
-    <main className={workbench.workbenchClassName}>
-      {workbench.isLeftSidebarOpen ? (
-        <ProjectSidebar
-          expandedProjectRootPaths={workbench.expandedProjectRootPaths}
-          draggingProjectRootPath={workbench.draggingProjectRootPath}
-          dropTargetRootPath={workbench.dropTargetRootPath}
-          inspection={workbench.inspection}
-          onActivateProject={handleActivateProject}
-          onCreateSession={handleCreateSession}
-          onToggleSidebar={handleToggleLeftSidebar}
-          onDragOverProject={handleDragOverProject}
-          onDropProject={handleDropProject}
-          onEndDraggingProject={handleEndDraggingProject}
-          onSelectSession={handleSelectSession}
-          onStartDraggingProject={handleStartDraggingProject}
-          onToggleProjectExpansion={handleToggleProjectExpansion}
-          projectEntries={workbench.projectEntries}
-          selectedPath={workbench.selectedPath}
-          selectedSessionId={workbench.selectedSession?.id ?? null}
-          sessions={workbench.sessions}
-          isCreatingSession={workbench.isCreatingSession}
-        />
-      ) : (
-        <button
-          aria-label="왼쪽 프로젝트 패널 열기"
-          className="sidebar-peek-button sidebar-peek-button--left"
-          onClick={handleToggleLeftSidebar}
-          type="button"
-        >
-          <span aria-hidden="true">›</span>
-        </button>
-      )}
+    <div className="workbench-shell">
+      <div className="workbench-shell__body">
+        <main className={workbench.workbenchClassName}>
+          {workbench.isLeftSidebarOpen ? (
+            <ProjectSidebar
+              draggingProjectRootPath={workbench.draggingProjectRootPath}
+              dropTargetRootPath={workbench.dropTargetRootPath}
+              onActivateProject={handleActivateProject}
+              onSelectProject={handleSelectProject}
+              onToggleSidebar={handleToggleLeftSidebar}
+              onDragOverProject={handleDragOverProject}
+              onDropProject={handleDropProject}
+              onEndDraggingProject={handleEndDraggingProject}
+              onStartDraggingProject={handleStartDraggingProject}
+              projectEntries={workbench.projectEntries}
+              isSelecting={workbench.isSelecting}
+              selectedPath={workbench.selectedPath}
+            />
+          ) : (
+            <button
+              aria-label="왼쪽 프로젝트 패널 열기"
+              className="sidebar-peek-button sidebar-peek-button--left"
+              onClick={handleToggleLeftSidebar}
+              type="button"
+            >
+              <span aria-hidden="true">›</span>
+            </button>
+          )}
 
-      <MainWorkspace
-        analysisStatus={workbench.analysisStatus}
-        canAnalyze={workbench.canAnalyze}
-        draftMessage={workbench.draftMessage}
-        errorMessage={workbench.errorMessage}
-        inspection={workbench.inspection}
-        isAnalyzing={workbench.isAnalyzing}
-        isCreatingSession={workbench.isCreatingSession}
-        isSelecting={workbench.isSelecting}
-        isSendingMessage={workbench.isSendingMessage}
-        message={workbench.message}
-        onAnalyzeProject={handleAnalyzeProject}
-        onChangeDraftMessage={handleChangeDraftMessage}
-        onCreateSession={handleCreateSession}
-        onSelectProject={handleSelectProject}
-        onSendMessage={handleSendMessage}
-        selectedSession={workbench.selectedSession}
-        sessionCount={workbench.sessions.length}
-        sessionMessages={workbench.sessionMessages}
-        storageStatus={workbench.storageStatus}
-      />
+          <MainWorkspace
+            activeWorkspacePage={workbench.activeWorkspacePage}
+            analysis={workbench.analysis}
+            analysisSessionKey={workbench.selectedPath ?? 'no-project'}
+            errorMessage={workbench.errorMessage}
+            onSaveAnalysisDocumentLayouts={handleSaveAnalysisDocumentLayouts}
+            onSelectAnalysisDocument={handleSelectAnalysisDocument}
+            onSelectSpec={handleSelectSpec}
+            onSelectWorkspacePage={handleSelectWorkspacePage}
+            selectedAnalysisDocumentId={workbench.selectedAnalysisDocumentId}
+            selectedSpecId={workbench.selectedSpecId}
+            specs={workbench.specs}
+          />
 
-      {workbench.isRightSidebarOpen ? (
-        <InfoSidebar
-          analysis={workbench.analysis}
+          {workbench.isRightSidebarOpen ? (
+            <InfoSidebar
+              activeWorkspacePage={workbench.activeWorkspacePage}
+              analysis={workbench.analysis}
+              canAnalyze={workbench.canAnalyze}
+              canCancelAnalysis={workbench.canCancelAnalysis}
+              canCreateSpec={
+                workbench.inspection?.initializationState === 'ready' &&
+                workbench.inspection.isWritable
+              }
+              chatModel={workbench.chatModel}
+              chatReasoningEffort={workbench.chatReasoningEffort}
+              draftMessage={workbench.draftMessage}
+              inspection={workbench.inspection}
+              isAnalyzing={workbench.isAnalyzing}
+              isCancellingAnalysis={workbench.isCancellingAnalysis}
+              isCreatingSpec={workbench.isCreatingSpec}
+              isCreatingSession={workbench.isCreatingSession}
+              isSavingChatRuntimeSettings={workbench.isSavingChatRuntimeSettings}
+              isSendingMessage={workbench.isSendingMessage}
+              onAnalyzeProject={handleAnalyzeProject}
+              onCancelAnalysis={handleCancelAnalysis}
+              onChangeChatModel={handleChangeChatModel}
+              onChangeChatReasoningEffort={handleChangeChatReasoningEffort}
+              onChangeDraftMessage={handleChangeDraftMessage}
+              onCreateSpec={handleCreateSpec}
+              onSendMessage={handleSendMessage}
+              onToggleSidebar={handleToggleRightSidebar}
+              selectedAnalysisDocumentId={workbench.selectedAnalysisDocumentId}
+              selectedSpec={workbench.selectedSpec}
+              selectedSession={workbench.selectedSession}
+              sessionMessages={workbench.sessionMessages}
+            />
+          ) : (
+            <button
+              aria-label="오른쪽 채팅 패널 열기"
+              className="sidebar-peek-button sidebar-peek-button--right"
+              onClick={handleToggleRightSidebar}
+              type="button"
+            >
+              <span aria-hidden="true">‹</span>
+            </button>
+          )}
+        </main>
+
+        <BottomStatusBar
+          activeAppView={props.activeAppView}
+          activeWorkspacePage={workbench.activeWorkspacePage}
+          analysisRunStatus={workbench.analysisRunStatus}
+          analysisStatus={workbench.analysisStatus}
+          errorMessage={workbench.errorMessage}
           inspection={workbench.inspection}
-          onToggleSidebar={handleToggleRightSidebar}
-          sessions={workbench.sessions}
+          message={workbench.message}
+          onCancelAnalysis={handleCancelAnalysis}
+          onSelectAppView={props.onSelectAppView}
+          storageStatus={workbench.storageStatus}
         />
-      ) : (
-        <button
-          aria-label="오른쪽 요약 패널 열기"
-          className="sidebar-peek-button sidebar-peek-button--right"
-          onClick={handleToggleRightSidebar}
-          type="button"
-        >
-          <span aria-hidden="true">‹</span>
-        </button>
-      )}
-    </main>
+      </div>
+    </div>
   );
 }

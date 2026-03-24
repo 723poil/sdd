@@ -4,6 +4,7 @@ import type {
   AgentCliConnectionCheck,
   AgentCliConnectionRecord,
   AgentCliId,
+  AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 
 export interface AgentCliConnectionDraft {
@@ -11,6 +12,8 @@ export interface AgentCliConnectionDraft {
   commandMode: AgentCliCommandMode;
   executablePath: string;
   authMode: AgentCliAuthMode;
+  model: string;
+  modelReasoningEffort: AgentCliModelReasoningEffort;
 }
 
 export interface AgentCliSettingsViewState {

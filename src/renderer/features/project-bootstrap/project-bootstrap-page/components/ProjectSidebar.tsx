@@ -1,70 +1,53 @@
-import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
-import type { ProjectSessionSummary } from '@/domain/project/project-session-model';
+import type { RecentProject } from '@/domain/project/project-model';
 
 interface ProjectSidebarProps {
-  inspection: ProjectInspection | null;
   selectedPath: string | null;
   projectEntries: RecentProject[];
-  expandedProjectRootPaths: string[];
-  selectedSessionId: string | null;
-  sessions: ProjectSessionSummary[];
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
-  isCreatingSession: boolean;
+  isSelecting: boolean;
   onActivateProject: (rootPath: string) => void;
-  onCreateSession: () => void;
+  onSelectProject: () => void;
   onToggleSidebar: () => void;
   onStartDraggingProject: (rootPath: string) => void;
   onDragOverProject: (rootPath: string) => void;
   onDropProject: (rootPath: string) => void;
   onEndDraggingProject: () => void;
-  onSelectSession: (sessionId: string) => void;
-  onToggleProjectExpansion: (rootPath: string) => void;
-}
-
-function createProjectSectionId(rootPath: string): string {
-  return `project-sidebar-section-${rootPath.replaceAll(/[^a-zA-Z0-9_-]/g, '-')}`;
-}
-
-function getSessionPreview(session: ProjectSessionSummary): string {
-  if (session.lastMessagePreview) {
-    return session.lastMessagePreview;
-  }
-
-  if (session.messageCount > 0) {
-    return `메시지 ${session.messageCount}개가 저장되어 있습니다.`;
-  }
-
-  return '아직 저장된 메시지가 없습니다.';
 }
 
 export function ProjectSidebar(props: ProjectSidebarProps) {
   return (
-    <aside className="sidebar sidebar--projects">
-      <section className="sidebar-section">
+    <aside className="sidebar sidebar--projects project-sidebar">
+      <section className="sidebar-section project-sidebar__section">
         <div className="sidebar-header">
           <p className="section-label">프로젝트</p>
-          <button
-            aria-label="왼쪽 프로젝트 패널 닫기"
-            className="sidebar-icon-button"
-            onClick={props.onToggleSidebar}
-            type="button"
-          >
-            <span aria-hidden="true">‹</span>
-          </button>
+          <div className="sidebar-header__actions">
+            <button
+              aria-label="프로젝트 추가"
+              className="sidebar-icon-button sidebar-icon-button--ghost"
+              disabled={props.isSelecting}
+              onClick={props.onSelectProject}
+              title="프로젝트 추가"
+              type="button"
+            >
+              <span aria-hidden="true">{props.isSelecting ? '…' : '+'}</span>
+            </button>
+            <button
+              aria-label="왼쪽 프로젝트 패널 닫기"
+              className="sidebar-icon-button"
+              onClick={props.onToggleSidebar}
+              type="button"
+            >
+              <span aria-hidden="true">‹</span>
+            </button>
+          </div>
         </div>
         <div className="project-list">
           {props.projectEntries.map((project) => {
             const isActive = props.selectedPath === project.rootPath;
-            const isExpanded = props.expandedProjectRootPaths.includes(project.rootPath);
-            const projectSectionId = createProjectSectionId(project.rootPath);
-            const isReady = isActive && props.inspection?.initializationState === 'ready';
 
             return (
-              <div
-                className={`project-stack ${isExpanded ? 'project-stack--expanded' : ''}`}
-                key={project.rootPath}
-              >
+              <div className="project-stack" key={project.rootPath}>
                 <div
                   className={`project-row-shell ${isActive ? 'project-row-shell--selected' : ''} ${
                     props.draggingProjectRootPath === project.rootPath
@@ -94,125 +77,29 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                     title={project.rootPath}
                     type="button"
                   >
-                    <span
-                      aria-hidden="true"
-                      className={`project-row-indicator ${isActive ? '' : 'project-row-indicator--placeholder'}`}
-                    />
+                    <span aria-hidden="true" className="project-row-icon">
+                      <svg viewBox="0 0 20 20">
+                        <path
+                          d="M3.5 5.5h4l1.4 1.7H16a1.5 1.5 0 0 1 1.5 1.5v5.8A1.5 1.5 0 0 1 16 16H4a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 4 5.5Z"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.35"
+                        />
+                      </svg>
+                    </span>
                     <span className="project-row-copy">
                       <span className="project-row-name">{project.projectName}</span>
-                      <span className="project-row-path">{project.rootPath}</span>
-                    </span>
-                    {isActive ? <span className="project-row-badge">현재</span> : null}
-                  </button>
-
-                  <button
-                    aria-controls={projectSectionId}
-                    aria-expanded={isExpanded}
-                    aria-label={`${project.projectName} ${isExpanded ? '접기' : '펼치기'}`}
-                    className={`project-row-toggle ${isExpanded ? 'project-row-toggle--expanded' : ''}`}
-                    onClick={() => {
-                      props.onToggleProjectExpansion(project.rootPath);
-                    }}
-                    type="button"
-                  >
-                    <span aria-hidden="true" className="project-row-toggle-icon">
-                      ›
                     </span>
                   </button>
                 </div>
-
-                {isExpanded ? (
-                  <div className="project-subsection" id={projectSectionId}>
-                    <div className="project-subsection-header">
-                      <p className="project-subsection-label">
-                        {isActive ? '대화 세션' : '빠른 이동'}
-                      </p>
-                      {isReady ? (
-                        <span className="project-subsection-count">{props.sessions.length}개</span>
-                      ) : null}
-                    </div>
-
-                    {isActive ? (
-                      props.inspection?.initializationState === 'ready' ? (
-                        <>
-                          <button
-                            className="project-subsection-button"
-                            onClick={props.onCreateSession}
-                            disabled={props.isCreatingSession}
-                            type="button"
-                          >
-                            {props.isCreatingSession ? '만드는 중...' : '새 대화'}
-                          </button>
-
-                          {props.sessions.length > 0 ? (
-                            <div className="project-session-list">
-                              {props.sessions.map((session) => (
-                                <button
-                                  className={`project-session-row ${
-                                    props.selectedSessionId === session.id
-                                      ? 'project-session-row--selected'
-                                      : ''
-                                  }`}
-                                  key={session.id}
-                                  onClick={() => {
-                                    props.onSelectSession(session.id);
-                                  }}
-                                  title={session.lastMessagePreview ?? session.title}
-                                  type="button"
-                                >
-                                  <span className="project-session-copy">
-                                    <span className="project-session-title">{session.title}</span>
-                                    <span className="project-session-preview">
-                                      {getSessionPreview(session)}
-                                    </span>
-                                  </span>
-                                  <span
-                                    aria-label={`메시지 ${session.messageCount}개`}
-                                    className="project-session-state"
-                                  >
-                                    {session.messageCount}
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="project-subsection-note">아직 저장된 대화가 없습니다.</p>
-                          )}
-                        </>
-                      ) : (
-                        <p className="project-subsection-note">
-                          {props.inspection?.isWritable
-                            ? '프로젝트 정보를 확인한 뒤 이 영역에서 대화 세션을 사용할 수 있습니다.'
-                            : '이 프로젝트 폴더에 쓰기 권한이 있어야 대화 세션을 저장할 수 있습니다.'}
-                        </p>
-                      )
-                    ) : (
-                      <>
-                        <p className="project-subsection-note">
-                          이 프로젝트를 열면 세션 목록과 분석 상태를 이 자리에서 바로 이어서 볼 수
-                          있습니다.
-                        </p>
-                        <button
-                          className="project-subsection-button"
-                          onClick={() => {
-                            void props.onActivateProject(project.rootPath);
-                          }}
-                          type="button"
-                        >
-                          이 프로젝트 열기
-                        </button>
-                      </>
-                    )}
-                  </div>
-                ) : null}
               </div>
             );
           })}
 
           {props.projectEntries.length === 0 ? (
-            <p className="sidebar-note">
-              프로젝트를 열면 이 목록에 그대로 추가되고, 순서도 직접 바꿀 수 있습니다.
-            </p>
+            <p className="sidebar-note">최근 프로젝트 없음</p>
           ) : null}
         </div>
       </section>

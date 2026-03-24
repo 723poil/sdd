@@ -12,7 +12,11 @@ import type {
 } from '@/application/project/project.ports';
 
 export interface CreateProjectSessionUseCase {
-  execute(input: { rootPath: string; title?: string }): Promise<Result<ProjectSessionMeta>>;
+  execute(input: {
+    rootPath: string;
+    specId?: string | null;
+    title?: string;
+  }): Promise<Result<ProjectSessionMeta>>;
 }
 
 export function createCreateProjectSessionUseCase(dependencies: {
@@ -23,7 +27,7 @@ export function createCreateProjectSessionUseCase(dependencies: {
   return {
     async execute(input) {
       const storageResult = await ensureProjectStorageReady(dependencies, {
-        notWritableMessage: '대화 세션을 만들려면 프로젝트 경로에 쓰기 권한이 필요합니다.',
+        notWritableMessage: '채팅을 준비하려면 프로젝트 경로에 쓰기 권한이 필요합니다.',
         rootPath: input.rootPath,
       });
       if (!storageResult.ok) {
@@ -45,6 +49,7 @@ export function createCreateProjectSessionUseCase(dependencies: {
 
       return dependencies.projectSessionStore.createSession({
         rootPath: input.rootPath,
+        specId: input.specId ?? null,
         title,
       });
     },

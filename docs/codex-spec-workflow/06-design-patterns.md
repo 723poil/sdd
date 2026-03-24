@@ -47,20 +47,22 @@
   - `ProjectRepository`
   - `SpecRepository`
   - `ChatLogRepository`
-  - `AnalyzerGateway`
+  - `ProjectAnalysisGateway`
   - `CodexGateway`
 - Adapter
   - `FsProjectRepository`
   - `FsSpecRepository`
   - `JsonlChatLogRepository`
   - `ElectronIpcAdapter`
-  - `OpenAICodexAdapter`
+  - `CodexExecAnalyzerAdapter`
 
 권장 규칙:
 
 - renderer는 파일 시스템을 직접 읽지 않는다
 - use case는 Electron API를 직접 호출하지 않는다
 - 도메인/유스케이스는 항상 port 인터페이스만 안다
+- 문서 맵처럼 프로젝트에 귀속되는 UI 배치 상태는 renderer 임시 state로 끝내지 말고 `.sdd/analysis/context.json`을 통해 저장한다
+- 문서 맵 연결선과 파일별 참조 관계도 분석 산출물로 함께 저장하고, renderer가 임의로 생성하지 않는다
 
 ### 2) Feature-based Module Structure
 
@@ -82,6 +84,7 @@
   - 명세 조회
   - 명세 저장
   - 명세 상태 전이
+  - 명세 단위 채팅 연결
 
 피해야 할 예:
 
@@ -208,11 +211,11 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 
 권장 단계:
 
-1. 파일 수집
-2. 스택 감지
-3. 엔트리포인트 탐지
-4. 핵심 파일 추출
-5. 구조 요약
+1. 프로젝트 문맥 수집
+2. 연결된 CLI 에이전트 입력 조립
+3. `codex exec` 분석 실행
+4. 구조화 결과 정규화
+5. `.sdd/analysis/*` 문서 저장
 6. 명세 초안 입력 생성
 
 왜 쓰는가:
@@ -220,6 +223,27 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 - 각 단계 실패 지점을 분리할 수 있다
 - 진행 상태를 UI에 보여주기 쉽다
 - 부분 재실행이 가능해진다
+
+권장 분석 산출물:
+
+- `summary.md`
+- `purpose.md`
+- `structure.md`
+- `layers.md`
+- `connectivity.md`
+- `file-index.json`
+- `context.json`
+
+추가 권장 구조화 데이터:
+
+- `context.documentLinks`
+- `context.fileReferences`
+- `file-index.json[].references`
+
+추가 규칙:
+
+- UI는 이 Markdown 문서를 직접 읽는 docs-style 페이지를 우선한다
+- Mermaid 코드 블록은 분석 문서 안에 함께 저장하고 렌더링 가능한 블록으로 취급한다
 
 ### 7) Strategy Pattern
 
@@ -288,6 +312,8 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 - 상태 전이 규칙이나 diff 생성 규칙은 repository 밖에 둔다
 - UI와 use case는 파일 경로를 직접 다루지 않는다
 - `.sdd` 내부 구조는 repository 뒤에 숨긴다
+- 분석 저장소는 사람이 읽는 Markdown 문서와 기계 판독용 JSON 집계를 함께 유지한다
+- 연결성 정보는 파일 목록이 아니라 참조 경로와 의존 방향까지 포함한다
 
 ### 9-1) Atomic Write Pattern
 

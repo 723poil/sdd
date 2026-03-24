@@ -12,6 +12,9 @@
 - 분석 결과, 명세서, 채팅 이력, 실행 준비 데이터를 여기에 저장
 - 앱 전역 상태는 최소화
 - 핵심 작업 데이터는 프로젝트와 함께 이동 가능해야 함
+- 프로젝트 분석은 연결된 CLI 에이전트가 생성한 구조화 결과를 저장하는 방식으로 유지
+- 분석 결과에는 문서 맵 연결선과 파일별 참조 관계가 함께 들어가야 한다
+- 사람이 읽는 분석 문서는 Markdown 을 기본으로 하고, 필요하면 Mermaid fenced block을 포함할 수 있다
 
 추가 원칙:
 
@@ -34,6 +37,10 @@
   project.json
   analysis/
     summary.md
+    purpose.md
+    structure.md
+    layers.md
+    connectivity.md
     context.json
     file-index.json
   sessions/
@@ -85,7 +92,7 @@
 
 역할:
 
-- 분석 원본 결과
+- 분석 원본 결과의 기계 판독용 집계본
 
 권장 필드:
 
@@ -96,22 +103,107 @@
 - `entrypoints`
 - `keyConfigs`
 - `modules`
+- `projectPurpose`
+- `architectureSummary`
+- `documentSummaries`
+- `documentLayouts`
+- `layers`
+- `directorySummaries`
+- `connections`
+- `documentLinks`
+- `fileReferences`
 - `unknowns`
 - `confidence`
+
+주의:
+
+- 이 파일은 분석 산출물 전체를 한 번에 다시 읽기 위한 집계 레이어다
+- UI 렌더링용 문서는 아래 개별 Markdown 파일을 우선 사용한다
+- `documentLayouts`는 문서 맵 카드의 사용자 배치 좌표를 저장하며, 재분석 후에도 유지한다
+- `documentLinks`는 분석 문서 간 연결선을 저장하는 구조화 데이터다
+- `fileReferences`는 파일 인덱스 기반의 파일 간 참조 관계를 저장하는 구조화 데이터다
 
 ### `.sdd/analysis/summary.md`
 
 역할:
 
-- 사람이 읽는 프로젝트 요약
+- 사람이 읽는 프로젝트 개요
 
 권장 내용:
 
 - 프로젝트 개요
 - 스택
+- 분석 범위
 - 핵심 모듈
 - 엔트리포인트
 - unknowns
+- 필요하면 Mermaid 다이어그램
+
+### `.sdd/analysis/structure.md`
+
+역할:
+
+- 디렉터리와 모듈 계층 요약
+
+권장 내용:
+
+- 루트 디렉터리
+- 주요 하위 디렉터리
+- 기능 단위 모듈
+- 상위/하위 계층 관계
+- 필요하면 Mermaid graph / flowchart
+
+### `.sdd/analysis/layers.md`
+
+역할:
+
+- 레이어별 책임과 의존성 정리
+
+권장 내용:
+
+- `main`
+- `preload`
+- `renderer`
+- `application`
+- `domain`
+- `infrastructure`
+- 레이어 간 허용/금지 연결
+- 필요하면 Mermaid graph
+
+### `.sdd/analysis/connectivity.md`
+
+역할:
+
+- 파일과 모듈의 연결성, 의존 관계, 진입점 정리
+
+권장 내용:
+
+- 엔트리포인트에서 시작되는 연결 경로
+- 핵심 모듈 간 참조 관계
+- 설정 파일과 런타임 경로
+- 자주 이어지는 흐름
+- 필요하면 Mermaid sequence / flowchart
+
+### `.sdd/analysis/file-index.json`
+
+역할:
+
+- 분석 대상 파일의 빠른 탐색용 인덱스
+
+권장 내용:
+
+- `path`
+- `role`
+- `layer`
+- `category`
+- `summary`
+- `references`
+
+주의:
+
+- `references`는 해당 파일이 참조하는 다른 인덱스 파일들의 목록이다
+- 각 참조는 `path`, `relationship`, `reason`을 가진다
+- 이 정보는 중앙 분석 화면에서 파일 간 연결 관계를 보여줄 때 사용한다
 
 ### `.sdd/specs/index.json`
 
@@ -149,6 +241,7 @@
 - `generatedAt`
 - `sessions`
   - `id`
+  - `specId`
   - `title`
   - `updatedAt`
   - `lastMessageAt`
@@ -170,6 +263,7 @@
 
 - `schemaVersion`
 - `id`
+- `specId`
 - `title`
 - `createdAt`
 - `updatedAt`
@@ -182,7 +276,7 @@
 
 역할:
 
-- 프로젝트 대화 세션의 append-only 메시지 로그
+- 명세 단위 대화 세션의 append-only 메시지 로그
 
 권장 레코드 필드:
 
@@ -208,15 +302,19 @@
 
 - `schemaVersion`
 - `id`
+- `slug`
 - `title`
-- `type`
 - `status`
 - `latestVersion`
 - `revision`
 - `createdAt`
 - `updatedAt`
-- `tags`
-- `relatedFiles`
+- `summary`
+
+주의:
+
+- 새 명세를 채팅으로 시작할 때도 먼저 `meta.json` 과 `versions/v1.md` 초안이 생성된다
+- 이후 채팅과 patch 는 이 명세 단위로 연결된다
 
 ### `.sdd/specs/<spec-slug>/versions/v1.md`
 

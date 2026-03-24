@@ -15,8 +15,23 @@ const sddApi: RendererSddApi = {
     readAnalysis(input) {
       return ipcRenderer.invoke(projectIpcChannels.readAnalysis, input);
     },
+    saveAnalysisDocumentLayouts(input) {
+      return ipcRenderer.invoke(projectIpcChannels.saveAnalysisDocumentLayouts, input);
+    },
+    readSpecs(input) {
+      return ipcRenderer.invoke(projectIpcChannels.readSpecs, input);
+    },
+    createSpec(input) {
+      return ipcRenderer.invoke(projectIpcChannels.createSpec, input);
+    },
+    readAnalysisRunStatus(input) {
+      return ipcRenderer.invoke(projectIpcChannels.readAnalysisRunStatus, input);
+    },
     analyze(input) {
       return ipcRenderer.invoke(projectIpcChannels.analyze, input);
+    },
+    cancelAnalysis(input) {
+      return ipcRenderer.invoke(projectIpcChannels.cancelAnalysis, input);
     },
     listSessions(input) {
       return ipcRenderer.invoke(projectIpcChannels.listSessions, input);

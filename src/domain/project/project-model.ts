@@ -76,6 +76,19 @@ export function createNextProjectMetaAfterAnalysis(input: {
   };
 }
 
+export function createNextProjectMetaAfterSpecCreation(input: {
+  current: ProjectMeta;
+  now: string;
+  specId: string;
+}): ProjectMeta {
+  return {
+    ...input.current,
+    updatedAt: input.now,
+    revision: input.current.revision + 1,
+    defaultSpecId: input.specId,
+  };
+}
+
 export function isProjectMeta(value: unknown): value is ProjectMeta {
   if (!value || typeof value !== 'object') {
     return false;

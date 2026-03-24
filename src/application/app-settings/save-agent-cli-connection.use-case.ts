@@ -1,10 +1,12 @@
 import type { AgentCliConnectionRecord } from '@/domain/app-settings/agent-cli-connection-model';
 import {
+  AGENT_CLI_MODEL_REASONING_EFFORTS,
   createAgentCliConnectionSettings,
   findAgentCliConnectionDefinition,
   type AgentCliAuthMode,
   type AgentCliCommandMode,
   type AgentCliId,
+  type AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import { err, type Result } from '@/shared/contracts/result';
 
@@ -16,6 +18,8 @@ interface SaveAgentCliConnectionUseCase {
     commandMode: AgentCliCommandMode;
     executablePath: string | null;
     authMode: AgentCliAuthMode;
+    model: string;
+    modelReasoningEffort: AgentCliModelReasoningEffort;
   }): Promise<Result<AgentCliConnectionRecord>>;
 }
 
@@ -49,11 +53,27 @@ export function createSaveAgentCliConnectionUseCase(dependencies: {
         });
       }
 
+      if (input.model.trim().length === 0) {
+        return err({
+          code: 'INVALID_AGENT_CLI_MODEL',
+          message: 'Codex 모델을 선택해야 합니다.',
+        });
+      }
+
+      if (!AGENT_CLI_MODEL_REASONING_EFFORTS.includes(input.modelReasoningEffort)) {
+        return err({
+          code: 'INVALID_AGENT_CLI_REASONING_EFFORT',
+          message: '지원하지 않는 추론 강도입니다.',
+        });
+      }
+
       const settings = createAgentCliConnectionSettings({
         agentId: input.agentId,
         commandMode: input.commandMode,
         executablePath: input.executablePath,
         authMode: input.authMode,
+        model: input.model,
+        modelReasoningEffort: input.modelReasoningEffort,
         updatedAt: new Date().toISOString(),
       });
       const saveResult = await dependencies.agentCliSettingsStore.saveAgentCliConnection(settings);

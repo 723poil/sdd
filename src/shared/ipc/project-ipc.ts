@@ -1,5 +1,10 @@
-import type { ProjectAnalysis } from '@/domain/project/project-analysis-model';
+import type {
+  ProjectAnalysis,
+  ProjectAnalysisDocumentLayoutMap,
+  ProjectAnalysisRunStatus,
+} from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
+import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMeta,
@@ -11,7 +16,12 @@ export const projectIpcChannels = {
   selectDirectory: 'project/select-directory',
   inspect: 'project/inspect',
   readAnalysis: 'project/read-analysis',
+  saveAnalysisDocumentLayouts: 'project/save-analysis-document-layouts',
+  readSpecs: 'project/read-specs',
+  createSpec: 'project/create-spec',
+  readAnalysisRunStatus: 'project/read-analysis-run-status',
   analyze: 'project/analyze',
+  cancelAnalysis: 'project/cancel-analysis',
   listSessions: 'project/list-sessions',
   createSession: 'project/create-session',
   readSessionMessages: 'project/read-session-messages',
@@ -38,12 +48,35 @@ export interface AnalyzeProjectInput {
   rootPath: string;
 }
 
+export interface SaveProjectAnalysisDocumentLayoutsInput {
+  rootPath: string;
+  documentLayouts: ProjectAnalysisDocumentLayoutMap;
+}
+
+export interface CancelProjectAnalysisInput {
+  rootPath: string;
+}
+
+export interface ReadProjectSpecsInput {
+  rootPath: string;
+}
+
+export interface CreateProjectSpecInput {
+  rootPath: string;
+  title?: string | null;
+}
+
+export interface ReadProjectAnalysisRunStatusInput {
+  rootPath: string;
+}
+
 export interface ListProjectSessionsInput {
   rootPath: string;
 }
 
 export interface CreateProjectSessionInput {
   rootPath: string;
+  specId?: string | null;
   title?: string;
 }
 
@@ -81,6 +114,11 @@ export interface SendProjectSessionMessageOutput {
   session: ProjectSessionMeta;
 }
 
+export interface CreateProjectSpecOutput {
+  inspection: ProjectInspection;
+  spec: ProjectSpecDocument;
+}
+
 export interface RendererProjectApi {
   selectDirectory(): Promise<Result<SelectProjectDirectoryOutput>>;
   inspect(input: InspectProjectInput): Promise<Result<ProjectInspection>>;
@@ -88,7 +126,16 @@ export interface RendererProjectApi {
   activate(input: ActivateProjectInput): Promise<Result<ActivateProjectOutput>>;
   reorderRecentProjects(input: ReorderRecentProjectsInput): Promise<Result<RecentProject[]>>;
   readAnalysis(input: ReadProjectAnalysisInput): Promise<Result<ProjectAnalysis | null>>;
+  saveAnalysisDocumentLayouts(
+    input: SaveProjectAnalysisDocumentLayoutsInput,
+  ): Promise<Result<ProjectAnalysisDocumentLayoutMap>>;
+  readSpecs(input: ReadProjectSpecsInput): Promise<Result<ProjectSpecDocument[]>>;
+  createSpec(input: CreateProjectSpecInput): Promise<Result<CreateProjectSpecOutput>>;
+  readAnalysisRunStatus(
+    input: ReadProjectAnalysisRunStatusInput,
+  ): Promise<Result<ProjectAnalysisRunStatus>>;
   analyze(input: AnalyzeProjectInput): Promise<Result<AnalyzeProjectOutput>>;
+  cancelAnalysis(input: CancelProjectAnalysisInput): Promise<Result<ProjectAnalysisRunStatus>>;
   listSessions(input: ListProjectSessionsInput): Promise<Result<ProjectSessionSummary[]>>;
   createSession(input: CreateProjectSessionInput): Promise<Result<ProjectSessionMeta>>;
   readSessionMessages(

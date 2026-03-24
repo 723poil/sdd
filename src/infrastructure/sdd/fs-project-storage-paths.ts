@@ -1,8 +1,11 @@
 import { join } from 'node:path';
 
+import type { ProjectAnalysisDocumentId } from '@/domain/project/project-analysis-model';
+
 export interface ProjectStoragePaths {
   analysisContextPath: string;
   analysisDirectoryPath: string;
+  analysisFileIndexPath: string;
   analysisSummaryPath: string;
   projectJsonPath: string;
   runsDirectoryPath: string;
@@ -22,6 +25,7 @@ export function getProjectStoragePaths(rootPath: string): ProjectStoragePaths {
   return {
     sddDirectoryPath,
     analysisDirectoryPath,
+    analysisFileIndexPath: join(analysisDirectoryPath, 'file-index.json'),
     sessionsDirectoryPath: join(sddDirectoryPath, 'sessions'),
     specsDirectoryPath,
     runsDirectoryPath,
@@ -31,4 +35,38 @@ export function getProjectStoragePaths(rootPath: string): ProjectStoragePaths {
     sessionsIndexPath: join(sddDirectoryPath, 'sessions', 'index.json'),
     specsIndexPath: join(specsDirectoryPath, 'index.json'),
   };
+}
+
+export function getProjectAnalysisDocumentPath(input: {
+  analysisDirectoryPath: string;
+  documentId: ProjectAnalysisDocumentId;
+}): string {
+  if (input.documentId === 'overview') {
+    return join(input.analysisDirectoryPath, 'summary.md');
+  }
+
+  return join(input.analysisDirectoryPath, `${input.documentId}.md`);
+}
+
+export function getSpecDirectoryPath(rootPath: string, specId: string): string {
+  return join(getProjectStoragePaths(rootPath).specsDirectoryPath, specId);
+}
+
+export function getSpecMetaPath(rootPath: string, specId: string): string {
+  return join(getSpecDirectoryPath(rootPath, specId), 'meta.json');
+}
+
+export function getSpecVersionsDirectoryPath(rootPath: string, specId: string): string {
+  return join(getSpecDirectoryPath(rootPath, specId), 'versions');
+}
+
+export function getSpecVersionPath(input: {
+  rootPath: string;
+  specId: string;
+  latestVersion: string;
+}): string {
+  return join(
+    getSpecVersionsDirectoryPath(input.rootPath, input.specId),
+    `${input.latestVersion}.md`,
+  );
 }

@@ -1,0 +1,172 @@
+:root {
+  color-scheme: light;
+  --left-sidebar-width: 252px;
+  --right-sidebar-width: 320px;
+  --window-top-safe-area: 0px;
+  --app-switcher-clearance: 16px;
+  --workspace-status-bar-height: 40px;
+  --bg: #fafbfc;
+  --bg-panel: rgba(255, 255, 255, 0.96);
+  --bg-panel-soft: #f3f5f7;
+  --border: rgba(15, 23, 42, 0.075);
+  --border-strong: rgba(15, 23, 42, 0.13);
+  --text-primary: #151d29;
+  --text-secondary: #5d697a;
+  --text-muted: #7b8798;
+  --accent: #111926;
+  --accent-soft: rgba(17, 25, 38, 0.06);
+  --warning: #8e611d;
+  --warning-soft: rgba(142, 97, 29, 0.1);
+  --neutral-soft: rgba(78, 101, 128, 0.08);
+  --danger: #cb6262;
+  --danger-soft: rgba(203, 98, 98, 0.08);
+  --button-primary-bg: #131a26;
+  --button-primary-border: #131a26;
+  --button-primary-text: #f7f9fc;
+  --button-secondary-bg: rgba(255, 255, 255, 0.82);
+  --button-secondary-border: rgba(15, 23, 42, 0.1);
+  --button-secondary-text: #17202b;
+  --shadow: none;
+  font-family: 'IBM Plex Sans', 'Pretendard', 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background: #f7f8fa;
+}
+
+html[data-platform='mac'] {
+  --window-top-safe-area: 40px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --bg-panel: rgba(17, 23, 31, 0.94);
+    --bg-panel-soft: #10161f;
+    --border: rgba(164, 179, 200, 0.14);
+    --border-strong: rgba(164, 179, 200, 0.22);
+    --text-primary: #eef3f9;
+    --text-secondary: #9ba9bc;
+    --text-muted: #78879a;
+    --accent: #eef3f9;
+    --accent-soft: rgba(238, 243, 249, 0.08);
+    --warning: #e8b874;
+    --warning-soft: rgba(232, 184, 116, 0.14);
+    --neutral-soft: rgba(125, 154, 186, 0.14);
+    --danger: #f0a0a0;
+    --danger-soft: rgba(240, 160, 160, 0.14);
+    --button-primary-bg: #edf2f8;
+    --button-primary-border: #edf2f8;
+    --button-primary-text: #0c1117;
+    --button-secondary-bg: rgba(255, 255, 255, 0.04);
+    --button-secondary-border: rgba(164, 179, 200, 0.18);
+    --button-secondary-text: #eef3f9;
+    --shadow: none;
+    background: #0d1117;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--bg);
+  overflow: hidden;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+button {
+  font: inherit;
+  -webkit-app-region: no-drag;
+}
+
+input,
+textarea,
+select {
+  -webkit-app-region: no-drag;
+}
+
+.window-drag-region {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  height: var(--window-top-safe-area);
+  -webkit-app-region: drag;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  background:
+    radial-gradient(circle at top left, rgba(125, 154, 186, 0.08), transparent 34%),
+    radial-gradient(circle at top right, rgba(125, 211, 176, 0.08), transparent 28%), var(--bg);
+  overflow: hidden;
+}
+
+.app-switcher {
+  display: inline-flex;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 94%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+  -webkit-app-region: no-drag;
+}
+
+.app-shell--workspace {
+  --app-switcher-clearance: 16px;
+}
+
+.app-switcher--embedded {
+  flex: none;
+  padding: 3px;
+}
+
+.app-switcher__tab {
+  min-height: 30px;
+  border: 1px solid var(--button-secondary-border);
+  border-radius: 999px;
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.app-switcher__tab:hover {
+  transform: translateY(-1px);
+}
+
+.app-switcher__tab--active {
+  border-color: var(--button-primary-border);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+

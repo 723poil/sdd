@@ -1,5 +1,6 @@
-export const PROJECT_SESSION_SCHEMA_VERSION = 1;
-export const PROJECT_SESSION_INDEX_SCHEMA_VERSION = 1;
+const LEGACY_PROJECT_SESSION_SCHEMA_VERSION = 1;
+export const PROJECT_SESSION_SCHEMA_VERSION = 2;
+export const PROJECT_SESSION_INDEX_SCHEMA_VERSION = 2;
 export const PROJECT_SESSION_MESSAGE_SCHEMA_VERSION = 1;
 
 export type ProjectSessionMessageRole = 'system' | 'user' | 'assistant';
@@ -7,6 +8,7 @@ export type ProjectSessionMessageRole = 'system' | 'user' | 'assistant';
 export interface ProjectSessionMeta {
   schemaVersion: typeof PROJECT_SESSION_SCHEMA_VERSION;
   id: string;
+  specId: string | null;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -18,6 +20,7 @@ export interface ProjectSessionMeta {
 
 export interface ProjectSessionSummary {
   id: string;
+  specId: string | null;
   title: string;
   updatedAt: string;
   lastMessageAt: string | null;
@@ -43,11 +46,13 @@ export interface ProjectSessionMessage {
 export function createProjectSessionMeta(input: {
   id: string;
   now: string;
+  specId: string | null;
   title: string;
 }): ProjectSessionMeta {
   return {
     schemaVersion: PROJECT_SESSION_SCHEMA_VERSION,
     id: input.id,
+    specId: input.specId,
     title: input.title,
     createdAt: input.now,
     updatedAt: input.now,
@@ -97,6 +102,7 @@ export function createNextProjectSessionMetaAfterMessage(input: {
 export function toProjectSessionSummary(meta: ProjectSessionMeta): ProjectSessionSummary {
   return {
     id: meta.id,
+    specId: meta.specId,
     title: meta.title,
     updatedAt: meta.updatedAt,
     lastMessageAt: meta.lastMessageAt,
@@ -113,8 +119,12 @@ export function isProjectSessionMeta(value: unknown): value is ProjectSessionMet
   const candidate = value as Record<string, unknown>;
 
   return (
-    candidate.schemaVersion === PROJECT_SESSION_SCHEMA_VERSION &&
+    (candidate.schemaVersion === PROJECT_SESSION_SCHEMA_VERSION ||
+      candidate.schemaVersion === LEGACY_PROJECT_SESSION_SCHEMA_VERSION) &&
     typeof candidate.id === 'string' &&
+    (typeof candidate.specId === 'string' ||
+      candidate.specId === null ||
+      typeof candidate.specId === 'undefined') &&
     typeof candidate.title === 'string' &&
     typeof candidate.createdAt === 'string' &&
     typeof candidate.updatedAt === 'string' &&
@@ -123,6 +133,20 @@ export function isProjectSessionMeta(value: unknown): value is ProjectSessionMet
     (typeof candidate.lastMessagePreview === 'string' || candidate.lastMessagePreview === null) &&
     typeof candidate.messageCount === 'number'
   );
+}
+
+export function normalizeProjectSessionMeta(value: unknown): ProjectSessionMeta | null {
+  if (!isProjectSessionMeta(value)) {
+    return null;
+  }
+
+  const candidate = value as ProjectSessionMeta & { specId?: string | null };
+
+  return {
+    ...candidate,
+    schemaVersion: PROJECT_SESSION_SCHEMA_VERSION,
+    specId: candidate.specId ?? null,
+  };
 }
 
 export function isProjectSessionMessage(value: unknown): value is ProjectSessionMessage {

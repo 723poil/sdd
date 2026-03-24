@@ -4,6 +4,7 @@ import type {
   AgentCliConnectionCheck,
   AgentCliConnectionRecord,
   AgentCliId,
+  AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import type { Result } from '@/shared/contracts/result';
 
@@ -18,6 +19,8 @@ export interface SaveAgentCliConnectionInput {
   commandMode: AgentCliCommandMode;
   executablePath: string | null;
   authMode: AgentCliAuthMode;
+  model: string;
+  modelReasoningEffort: AgentCliModelReasoningEffort;
 }
 
 export interface CheckAgentCliConnectionInput {

@@ -81,6 +81,7 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
       const sessionMeta = createProjectSessionMeta({
         id: sessionId,
         now,
+        specId: input.specId,
         title: input.title,
       });
 
