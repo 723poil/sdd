@@ -26,6 +26,7 @@ export type WorkbenchProgressTaskKind =
   | 'analysis'
   | 'project-activation'
   | 'spec-create'
+  | 'spec-save'
   | 'session-create'
   | 'message-send'
   | 'reference-tags-save'
@@ -86,11 +87,14 @@ export interface ProjectBootstrapWorkbenchState {
   sessionMessages: ProjectSessionMessage[];
   draftMessage: string;
   recentProjects: RecentProject[];
+  editingProjectRootPath: string | null;
+  editingProjectNameDraft: string;
   expandedProjectRootPaths: string[];
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
   isSelecting: boolean;
   isCreatingSpec: boolean;
+  isSavingSpec: boolean;
   isCreatingSession: boolean;
   isSavingReferenceTags: boolean;
   isSendingMessage: boolean;

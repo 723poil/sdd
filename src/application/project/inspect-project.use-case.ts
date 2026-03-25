@@ -31,8 +31,11 @@ export function createInspectProjectUseCase(dependencies: {
         projectMeta = projectMetaResult.value;
       }
 
+      const resolvedProjectName = projectMeta?.projectName ?? directoryStatus.projectName;
+
       return ok({
         ...directoryStatus,
+        projectName: resolvedProjectName,
         initializationState: projectMeta ? 'ready' : 'missing',
         projectMeta,
       });

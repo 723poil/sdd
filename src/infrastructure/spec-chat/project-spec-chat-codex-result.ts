@@ -2,7 +2,10 @@ import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok, type Result } from '@/shared/contracts/result';
 
 interface ProjectSpecChatReplyResult {
+  markdown: string;
   reply: string;
+  summary: string | null;
+  title: string;
 }
 
 export function parseProjectSpecChatCodexResult(raw: string): Result<ProjectSpecChatReplyResult> {
@@ -27,13 +30,24 @@ export function parseProjectSpecChatCodexResult(raw: string): Result<ProjectSpec
   }
 
   const candidate = parsed as Record<string, unknown>;
-  if (typeof candidate.reply !== 'string') {
+  if (
+    typeof candidate.reply !== 'string' ||
+    typeof candidate.title !== 'string' ||
+    typeof candidate.summary !== 'string' ||
+    typeof candidate.markdown !== 'string'
+  ) {
     return err(
-      createProjectError('PROJECT_SPEC_CHAT_FAILED', '에이전트 응답에 reply 필드가 없습니다.'),
+      createProjectError(
+        'PROJECT_SPEC_CHAT_FAILED',
+        '에이전트 응답에 필요한 명세 초안 필드가 없습니다.',
+      ),
     );
   }
 
   return ok({
+    markdown: candidate.markdown,
     reply: candidate.reply,
+    summary: candidate.summary.trim() || null,
+    title: candidate.title,
   });
 }

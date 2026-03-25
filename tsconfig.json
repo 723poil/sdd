@@ -32,5 +32,10 @@
     "scripts/**/*.ts",
     "electron.vite.config.ts",
     "eslint.config.mjs"
+  ],
+  "exclude": [
+    "src/main 2/**/*",
+    "src/preload 2/**/*",
+    "src/renderer 2/**/*"
   ]
 }

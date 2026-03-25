@@ -1,12 +1,201 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-03-24T13:32:06.786Z",
+  "generatedAt": "2026-03-25T14:47:09.480Z",
   "entries": [
     {
       "category": "source",
+      "layer": "main",
+      "path": "src/main/ipc/register-project-ipc.ts",
+      "references": [
+        {
+          "path": "src/application/project/activate-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/activate-project.use-case"
+        },
+        {
+          "path": "src/application/project/analyze-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/analyze-project.use-case"
+        },
+        {
+          "path": "src/application/project/cancel-project-analysis.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/cancel-project-analysis.use-case"
+        },
+        {
+          "path": "src/application/project/cancel-project-reference-tag-generation.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/cancel-project-reference-tag-generation.use-case"
+        },
+        {
+          "path": "src/application/project/create-project-session.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/create-project-session.use-case"
+        },
+        {
+          "path": "src/application/project/create-project-spec.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/create-project-spec.use-case"
+        },
+        {
+          "path": "src/application/project/generate-project-reference-tags.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/generate-project-reference-tags.use-case"
+        },
+        {
+          "path": "src/application/project/initialize-project-storage.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/initialize-project-storage.use-case"
+        },
+        {
+          "path": "src/application/project/inspect-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/inspect-project.use-case"
+        },
+        {
+          "path": "src/application/project/list-recent-projects.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/list-recent-projects.use-case"
+        },
+        {
+          "path": "src/application/project/list-project-sessions.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/list-project-sessions.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-analysis.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-analysis.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-analysis-run-status.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-session-messages.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-session-messages.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-specs.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-specs.use-case"
+        },
+        {
+          "path": "src/application/project/remove-recent-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/remove-recent-project.use-case"
+        },
+        {
+          "path": "src/application/project/rename-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/rename-project.use-case"
+        },
+        {
+          "path": "src/application/project/reorder-recent-projects.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/reorder-recent-projects.use-case"
+        },
+        {
+          "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/save-project-analysis-document-layouts.use-case"
+        },
+        {
+          "path": "src/application/project/save-project-spec.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/save-project-spec.use-case"
+        },
+        {
+          "path": "src/application/project/save-project-reference-tags.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/save-project-reference-tags.use-case"
+        },
+        {
+          "path": "src/application/project/select-project-directory.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/select-project-directory.use-case"
+        },
+        {
+          "path": "src/application/project/send-project-session-message.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/send-project-session-message.use-case"
+        },
+        {
+          "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/app-settings/fs-agent-cli-settings.repository"
+        },
+        {
+          "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/app-settings/fs-recent-projects.repository"
+        },
+        {
+          "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/in-memory-project-analysis-run-status.store"
+        },
+        {
+          "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/node-project-analyzer.adapter"
+        },
+        {
+          "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/dialog/electron-project-dialog.adapter"
+        },
+        {
+          "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/fs/node-project-inspector.adapter"
+        },
+        {
+          "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/reference-tags/node-project-reference-tag-generator.adapter"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-session.repository"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage.repository"
+        },
+        {
+          "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/spec-chat/node-project-spec-chat.adapter"
+        },
+        {
+          "path": "src/shared/ipc/ipc-bridge.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/ipc-bridge"
+        },
+        {
+          "path": "src/shared/ipc/project-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc"
+        }
+      ],
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 35건, 들어오는 참조 1건."
+    },
+    {
+      "category": "repository",
       "layer": "infrastructure",
       "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
       "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
         {
           "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
@@ -16,6 +205,11 @@
           "path": "src/domain/project/project-analysis-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
         },
         {
           "path": "src/domain/project/project-spec-model.ts",
@@ -58,8 +252,195 @@
           "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 10건, 들어오는 참조 없음."
+      "role": "인프라 레포지토리",
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/app-error.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/app-error"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/shared/ipc/sdd-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/sdd-ipc"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-prompt"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-result"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-draft"
+        },
+        {
+          "path": "src/infrastructure/analysis/node-project-analyzer-codex-execution.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/node-project-analyzer-codex-execution"
+        },
+        {
+          "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/node-project-analyzer-codex-settings"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/app-view.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/app-view"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -70,6 +451,11 @@
           "path": "src/domain/project/project-analysis-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
         },
         {
           "path": "src/domain/project/project-spec-model.ts",
@@ -107,58 +493,19 @@
           "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 8건, 들어오는 참조 1건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 1건."
     },
     {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/domain/project/project-errors.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-errors"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-prompt"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-codex-result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-codex-result"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-local-draft.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-draft"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 7건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
+      "category": "repository",
       "layer": "infrastructure",
       "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
       "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
         {
           "path": "src/domain/project/project-session-model.ts",
           "relationship": "imports",
@@ -195,8 +542,473 @@
           "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 7건, 들어오는 참조 없음."
+      "role": "인프라 레포지토리",
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "shared",
+      "path": "src/shared/ipc/project-ipc-api.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/ipc/project-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/shared/ipc/ipc-bridge.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/ipc-bridge"
+        }
+      ],
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/node-project-analyzer-codex-settings"
+        },
+        {
+          "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution"
+        },
+        {
+          "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt"
+        },
+        {
+          "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/reference-tags/project-reference-tag-generator-codex-result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/node-project-analyzer-codex-settings"
+        },
+        {
+          "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/spec-chat/node-project-spec-chat-codex-execution"
+        },
+        {
+          "path": "src/infrastructure/spec-chat/project-spec-chat-codex-prompt.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/spec-chat/project-spec-chat-codex-prompt"
+        },
+        {
+          "path": "src/infrastructure/spec-chat/project-spec-chat-codex-result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/spec-chat/project-spec-chat-codex-result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/project.ports.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 34건."
+    },
+    {
+      "category": "source",
+      "layer": "shared",
+      "path": "src/shared/ipc/project-ipc.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 4건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/analyze-project-workflow.ts",
+      "references": [
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/application/project/project-analysis-draft-merger.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project-analysis-draft-merger"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/send-project-session-message.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "main",
+      "path": "src/main/ipc/register-settings-ipc.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/check-agent-cli-connection.use-case"
+        },
+        {
+          "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/list-agent-cli-connections.use-case"
+        },
+        {
+          "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/save-agent-cli-connection.use-case"
+        },
+        {
+          "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/app-settings/fs-agent-cli-settings.repository"
+        },
+        {
+          "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/agent-cli/node-agent-cli-runtime.adapter"
+        },
+        {
+          "path": "src/shared/ipc/ipc-bridge.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/ipc-bridge"
+        },
+        {
+          "path": "src/shared/ipc/settings-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/settings-ipc"
+        }
+      ],
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -234,13 +1046,91 @@
           "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 6건, 들어오는 참조 1건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/analyze-project.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/renderer/app-view.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/app-view"
+        },
+        {
+          "path": "src/renderer/components/AppViewSwitcher.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/components/AppViewSwitcher"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/AgentCliConnectionCard"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -251,6 +1141,171 @@
           "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 13건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/agent-cli/resolve-agent-cli-executable-path"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 3건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/initialize-project-storage.use-case.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "extends",
+          "reason": "상속: ProjectStorageInitialization"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/activate-project.use-case.ts",
+      "references": [
+        {
+          "path": "src/application/project/inspect-project.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/inspect-project.use-case"
+        },
+        {
+          "path": "src/application/project/initialize-project-storage.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/initialize-project-storage.use-case"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/create-project-spec.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/generate-project-reference-tags.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
         },
         {
           "path": "src/domain/project/project-errors.ts",
@@ -268,23 +1323,33 @@
           "reason": "정적 import: @/application/project/ensure-project-storage-ready"
         },
         {
-          "path": "src/application/project/project-analysis-draft-merger.ts",
+          "path": "src/application/project/project.ports.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/application/project/project-analysis-draft-merger"
+          "reason": "정적 import: @/application/project/project.ports"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 6건, 들어오는 참조 없음."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "shared",
-      "path": "src/shared/ipc/project-ipc.ts",
+      "layer": "application",
+      "path": "src/application/project/rename-project.use-case.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/application/project/inspect-project.use-case.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/application/project/inspect-project.use-case"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
         },
         {
           "path": "src/domain/project/project-model.ts",
@@ -292,23 +1357,13 @@
           "reason": "정적 import: @/domain/project/project-model"
         },
         {
-          "path": "src/domain/project/project-spec-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-spec-model"
-        },
-        {
-          "path": "src/domain/project/project-session-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
-        },
-        {
           "path": "src/shared/contracts/result.ts",
           "relationship": "imports",
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 5건, 들어오는 참조 3건."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -341,8 +1396,42 @@
           "reason": "정적 import: @/infrastructure/analysis/project-analysis-summary"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 5건, 들어오는 참조 1건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-path-alias-resolver"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-vue-sfc"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -375,23 +1464,23 @@
           "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 5건, 들어오는 참조 1건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/project.ports.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
       "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
         {
           "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-model"
-        },
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
         },
         {
           "path": "src/domain/project/project-spec-model.ts",
@@ -404,17 +1493,17 @@
           "reason": "정적 import: @/domain/project/project-session-model"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 5건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
     },
     {
       "category": "entrypoint",
-      "layer": "main",
+      "layer": "entrypoint",
       "path": "src/main/main.ts",
       "references": [
         {
@@ -448,6 +1537,64 @@
     },
     {
       "category": "source",
+      "layer": "application",
+      "path": "src/application/project/ensure-project-storage-ready.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 8건."
+    },
+    {
+      "category": "repository",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store"
+        }
+      ],
+      "role": "인프라 레포지토리",
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
       "layer": "infrastructure",
       "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
       "references": [
@@ -472,8 +1619,327 @@
           "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 4건, 들어오는 참조 2건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+    },
+    {
+      "category": "repository",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store"
+        }
+      ],
+      "role": "인프라 레포지토리",
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "shared",
+      "path": "src/shared/ipc/settings-ipc-api.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/ipc/settings-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/settings-ipc"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/shared/ipc/ipc-bridge.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/ipc-bridge"
+        }
+      ],
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/create-project-session.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/save-project-reference-tags.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/save-project-spec.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+      "references": [
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        },
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/agent-cli/resolve-agent-cli-executable-path"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-execution.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -501,18 +1967,18 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 4건, 들어오는 참조 1건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
     },
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
       "references": [
         {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+          "reason": "정적 import: @/domain/project/project-model"
         },
         {
           "path": "src/renderer/app-view.ts",
@@ -525,95 +1991,42 @@
           "reason": "정적 import: @/renderer/components/AppViewSwitcher"
         },
         {
-          "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 4건, 들어오는 참조 1건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/create-project-spec.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
       "references": [
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        },
         {
           "path": "src/domain/project/project-spec-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
         },
         {
-          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 4건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/send-project-session-message.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-session-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
-        },
-        {
-          "path": "src/domain/project/project-errors.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-errors"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        },
-        {
-          "path": "src/application/project/ensure-project-storage-ready.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 4건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/ensure-project-storage-ready.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-errors.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-errors"
-        },
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 5건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -636,18 +2049,18 @@
           "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 5건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 5건."
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "layer": "application",
+      "path": "src/application/project/inspect-project.use-case.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/application/project/project.ports.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/application/project/project.ports"
         },
         {
           "path": "src/domain/project/project-model.ts",
@@ -655,13 +2068,13 @@
           "reason": "정적 import: @/domain/project/project-model"
         },
         {
-          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+          "path": "src/shared/contracts/result.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
+          "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 1건."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 3건."
     },
     {
       "category": "source",
@@ -684,8 +2097,440 @@
           "reason": "정적 import: @/renderer/app-view"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 1건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/app-settings/app-settings.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/app-settings/app-settings.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/cancel-project-analysis.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/list-project-sessions.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/list-recent-projects.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/read-project-analysis.use-case.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/read-project-session-messages.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/read-project-specs.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/remove-recent-project.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/reorder-recent-projects.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-result.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -708,148 +2553,100 @@
           "reason": "정적 import: @/renderer/features/agent-cli-settings/types"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 1건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/create-project-session.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
       "references": [
         {
-          "path": "src/domain/project/project-session-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument"
         },
         {
-          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/initialize-project-storage.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
       "references": [
         {
-          "path": "src/domain/project/project-errors.ts",
+          "path": "src/domain/project/project-spec-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-errors"
+          "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
-          "path": "src/domain/project/project-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils"
         },
         {
-          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/domain/project/project-errors.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-errors"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        },
-        {
-          "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 3건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
     },
     {
       "category": "entrypoint",
-      "layer": "preload",
+      "layer": "entrypoint",
       "path": "src/preload/index.ts",
       "references": [
+        {
+          "path": "src/shared/ipc/project-ipc-api.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc-api"
+        },
+        {
+          "path": "src/shared/ipc/settings-ipc-api.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/settings-ipc-api"
+        },
         {
           "path": "src/shared/ipc/sdd-ipc.ts",
           "relationship": "imports",
           "reason": "정적 import: @/shared/ipc/sdd-ipc"
-        },
-        {
-          "path": "src/shared/ipc/project-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/project-ipc"
-        },
-        {
-          "path": "src/shared/ipc/settings-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/settings-ipc"
         }
       ],
       "role": "진입점 후보",
@@ -857,60 +2654,22 @@
     },
     {
       "category": "source",
-      "layer": "shared",
-      "path": "src/shared/ipc/sdd-ipc.ts",
+      "layer": "domain/project/source",
+      "path": "src/domain/project/project-analysis-model.ts",
       "references": [
         {
-          "path": "src/shared/ipc/project-ipc.ts",
+          "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/project-ipc"
+          "reason": "정적 import: @/domain/project/project-model"
         },
         {
-          "path": "src/shared/ipc/settings-ipc.ts",
+          "path": "src/domain/project/project-reference-tag-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/settings-ipc"
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
         }
       ],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 3건."
-    },
-    {
-      "category": "source",
-      "layer": "shared",
-      "path": "src/shared/ipc/settings-ipc.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 3건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 1건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 30건."
     },
     {
       "category": "source",
@@ -928,13 +2687,32 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 9건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "layer": "shared",
+      "path": "src/shared/ipc/sdd-ipc.ts",
+      "references": [
+        {
+          "path": "src/shared/ipc/project-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc"
+        },
+        {
+          "path": "src/shared/ipc/settings-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/settings-ipc"
+        }
+      ],
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 4건."
+    },
+    {
+      "category": "source",
+      "layer": "shared",
+      "path": "src/shared/ipc/settings-ipc.ts",
       "references": [
         {
           "path": "src/domain/app-settings/agent-cli-connection-model.ts",
@@ -947,113 +2725,75 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
       "references": [
         {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/activate-project.use-case.ts",
-      "references": [
         {
           "path": "src/domain/project/project-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 2건."
     },
     {
       "category": "source",
       "layer": "application",
-      "path": "src/application/project/cancel-project-analysis.use-case.ts",
+      "path": "src/application/project/analyze-project.use-case.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
           "path": "src/shared/contracts/result.ts",
           "relationship": "imports",
           "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/analyze-project-workflow.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/analyze-project-workflow"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "source",
       "layer": "application",
-      "path": "src/application/project/inspect-project.use-case.ts",
+      "path": "src/application/project/cancel-project-reference-tag-generation.use-case.ts",
       "references": [
         {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        },
-        {
           "path": "src/shared/contracts/result.ts",
           "relationship": "imports",
           "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "source",
       "layer": "application",
-      "path": "src/application/project/list-project-sessions.use-case.ts",
+      "path": "src/application/project/select-project-directory.use-case.ts",
       "references": [
         {
-          "path": "src/domain/project/project-session-model.ts",
+          "path": "src/application/project/project.ports.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
+          "reason": "정적 import: @/application/project/project.ports"
         },
         {
           "path": "src/shared/contracts/result.ts",
@@ -1061,18 +2801,18 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/list-recent-projects.use-case.ts",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
       "references": [
         {
-          "path": "src/domain/project/project-model.ts",
+          "path": "src/application/project/project.ports.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
+          "reason": "정적 import: @/application/project/project.ports"
         },
         {
           "path": "src/shared/contracts/result.ts",
@@ -1080,70 +2820,13 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "source",
-      "layer": "application",
-      "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/read-project-analysis.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/read-project-session-messages.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-session-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/read-project-specs.use-case.ts",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-prompt.ts",
       "references": [
         {
           "path": "src/domain/project/project-spec-model.ts",
@@ -1151,75 +2834,18 @@
           "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/domain/project/project-session-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
+          "reason": "정적 import: @/domain/project/project-session-model"
         }
       ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/reorder-recent-projects.use-case.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "source",
       "layer": "infrastructure",
-      "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
-      "references": [
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        },
-        {
-          "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/app-settings/fs-app-settings-store"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-result.ts",
       "references": [
         {
           "path": "src/domain/project/project-errors.ts",
@@ -1232,12 +2858,69 @@
           "reason": "정적 import: @/shared/contracts/result"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 2건, 들어오는 참조 없음."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "entrypoint",
-      "layer": "renderer",
+      "layer": "entrypoint",
+      "path": "src/renderer 2/main.tsx",
+      "references": [
+        {
+          "path": "src/renderer/App.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/App"
+        },
+        {
+          "path": "src/renderer/styles/app.css",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/styles/app.css"
+        }
+      ],
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+    },
+    {
+      "category": "entrypoint",
+      "layer": "entrypoint",
       "path": "src/renderer/main.tsx",
       "references": [
         {
@@ -1265,26 +2948,12 @@
           "reason": "정적 import: @/shared/contracts/app-error"
         }
       ],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 40건."
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 58건."
     },
     {
       "category": "source",
-      "layer": "domain",
-      "path": "src/domain/project/project-analysis-model.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        }
-      ],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 18건."
-    },
-    {
-      "category": "source",
-      "layer": "domain",
+      "layer": "domain/project/source",
       "path": "src/domain/project/project-errors.ts",
       "references": [
         {
@@ -1293,12 +2962,12 @@
           "reason": "정적 import: @/shared/contracts/app-error"
         }
       ],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 14건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 24건."
     },
     {
       "category": "source",
-      "layer": "domain",
+      "layer": "domain/project/source",
       "path": "src/domain/project/project-spec-model.ts",
       "references": [
         {
@@ -1307,8 +2976,50 @@
           "reason": "정적 import: @/domain/project/project-model"
         }
       ],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 7건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 19건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+      "references": [
+        {
+          "path": "src/infrastructure/analysis/project-analysis.constants.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis.constants"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
     },
     {
       "category": "source",
@@ -1321,92 +3032,22 @@
           "reason": "정적 import: @/domain/project/project-analysis-model"
         }
       ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 3건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
     },
     {
-      "category": "source",
-      "layer": "scripts",
-      "path": "scripts/prepare-dev-mac-app.ts",
+      "category": "entrypoint",
+      "layer": "entrypoint",
+      "path": "src/renderer/features/project-bootstrap/index.ts",
       "references": [
         {
-          "path": "src/shared/app/app-display-name.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
           "relationship": "imports",
-          "reason": "정적 import: ../src/shared/app/app-display-name.ts"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage"
         }
       ],
-      "role": "TypeScript 소스",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/project-analysis-draft-merger.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-summary.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "main",
-      "path": "src/main/create-main-window.ts",
-      "references": [
-        {
-          "path": "src/shared/app/app-display-name.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/app/app-display-name"
-        }
-      ],
-      "role": "main 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "main",
-      "path": "src/main/ipc/register-project-ipc.ts",
-      "references": [
-        {
-          "path": "src/shared/ipc/project-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/project-ipc"
-        }
-      ],
-      "role": "main 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "main",
-      "path": "src/main/ipc/register-settings-ipc.ts",
-      "references": [
-        {
-          "path": "src/shared/ipc/settings-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/settings-ipc"
-        }
-      ],
-      "role": "main 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
     },
     {
       "category": "source",
@@ -1419,12 +3060,54 @@
           "reason": "정적 import: @/renderer/app-view"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
     },
     {
       "category": "entrypoint",
-      "layer": "renderer",
+      "layer": "entrypoint",
       "path": "src/renderer/features/agent-cli-settings/index.ts",
       "references": [
         {
@@ -1438,6 +3121,76 @@
     },
     {
       "category": "source",
+      "layer": "scripts/source",
+      "path": "scripts/prepare-dev-mac-app.ts",
+      "references": [
+        {
+          "path": "src/shared/app/app-display-name.ts",
+          "relationship": "imports",
+          "reason": "정적 import: ../src/shared/app/app-display-name.ts"
+        }
+      ],
+      "role": "scripts 소스",
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "application",
+      "path": "src/application/project/project-analysis-draft-merger.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-summary.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "main",
+      "path": "src/main/create-main-window.ts",
+      "references": [
+        {
+          "path": "src/shared/app/app-display-name.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/app/app-display-name"
+        }
+      ],
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
       "layer": "renderer",
       "path": "src/renderer/features/agent-cli-settings/types.ts",
       "references": [
@@ -1447,50 +3200,8 @@
           "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "scripts",
-      "path": "scripts/run-dev.ts",
-      "references": [
-        {
-          "path": "scripts/prepare-dev-mac-app.ts",
-          "relationship": "imports",
-          "reason": "정적 import: ./prepare-dev-mac-app.ts"
-        }
-      ],
-      "role": "TypeScript 소스",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "application",
-      "path": "src/application/project/select-project-directory.use-case.ts",
-      "references": [
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "application 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
-      "references": [
-        {
-          "path": "src/shared/contracts/result.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        }
-      ],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -1503,11 +3214,67 @@
           "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 없음."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
     },
     {
       "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+    },
+    {
+      "category": "type",
+      "layer": "renderer 2/type",
+      "path": "src/renderer 2/global.d.ts",
+      "references": [
+        {
+          "path": "src/shared/ipc/project-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc"
+        }
+      ],
+      "role": "renderer 2 타입",
+      "summary": "renderer 2 타입입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+    },
+    {
+      "category": "type",
       "layer": "renderer",
       "path": "src/renderer/global.d.ts",
       "references": [
@@ -1517,140 +3284,238 @@
           "reason": "정적 import: @/shared/ipc/sdd-ipc"
         }
       ],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 1건, 들어오는 참조 없음."
+      "role": "렌더러 타입",
+      "summary": "렌더러 타입입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
     },
     {
       "category": "source",
-      "layer": "domain",
+      "layer": "scripts/source",
+      "path": "scripts/run-dev.ts",
+      "references": [
+        {
+          "path": "scripts/prepare-dev-mac-app.ts",
+          "relationship": "imports",
+          "reason": "정적 import: ./prepare-dev-mac-app.ts"
+        }
+      ],
+      "role": "scripts 소스",
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+    },
+    {
+      "category": "source",
+      "layer": "renderer 2/source",
+      "path": "src/renderer 2/App.tsx",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/index.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap"
+        }
+      ],
+      "role": "renderer 2 소스",
+      "summary": "renderer 2 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
+      "references": [
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+    },
+    {
+      "category": "source",
+      "layer": "domain/project/source",
       "path": "src/domain/project/project-model.ts",
       "references": [],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 17건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 29건."
     },
     {
       "category": "source",
-      "layer": "domain",
+      "layer": "domain/app-settings/source",
       "path": "src/domain/app-settings/agent-cli-connection-model.ts",
       "references": [],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 13건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 24건."
     },
     {
       "category": "source",
-      "layer": "domain",
+      "layer": "domain/project/source",
       "path": "src/domain/project/project-session-model.ts",
       "references": [],
-      "role": "domain 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 9건."
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 15건."
+    },
+    {
+      "category": "source",
+      "layer": "domain/project/source",
+      "path": "src/domain/project/project-reference-tag-model.ts",
+      "references": [],
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 13건."
     },
     {
       "category": "source",
       "layer": "infrastructure",
       "path": "src/infrastructure/fs/write-json-atomically.ts",
       "references": [],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 5건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
-      "references": [],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 3건."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 5건."
     },
     {
       "category": "source",
       "layer": "renderer",
       "path": "src/renderer/app-view.ts",
       "references": [],
-      "role": "renderer 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 3건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 5건."
+    },
+    {
+      "category": "source",
+      "layer": "shared",
+      "path": "src/shared/ipc/ipc-bridge.ts",
+      "references": [],
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 4건."
     },
     {
       "category": "source",
       "layer": "shared",
       "path": "src/shared/app/app-display-name.ts",
       "references": [],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 3건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
-      "references": [],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 2건."
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건."
     },
     {
       "category": "source",
       "layer": "shared",
       "path": "src/shared/contracts/app-error.ts",
       "references": [],
-      "role": "shared 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
-      "references": [],
-      "role": "infrastructure 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "main",
-      "path": "src/main/apply-mac-app-icon.ts",
-      "references": [],
-      "role": "main 영역",
-      "summary": "TypeScript 파일입니다. 나가는 참조 없음, 들어오는 참조 1건."
+      "role": "공용 소스",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건."
     },
     {
       "category": "entrypoint",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/index.ts",
-      "references": [],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
-    },
-    {
-      "category": "entrypoint",
-      "layer": "renderer",
+      "layer": "entrypoint",
       "path": "src/renderer/styles/app.css",
       "references": [],
       "role": "진입점 후보",
       "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
     },
     {
-      "category": "config",
-      "layer": "electron.vite.config.ts",
-      "path": "electron.vite.config.ts",
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
       "references": [],
-      "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
     },
     {
-      "category": "config",
-      "layer": "eslint.config.mjs",
-      "path": "eslint.config.mjs",
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
       "references": [],
-      "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
     },
     {
-      "category": "config",
-      "layer": "package.json",
-      "path": "package.json",
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
       "references": [],
-      "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis/project-analysis.constants.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "main",
+      "path": "src/main/apply-mac-app-icon.ts",
+      "references": [],
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
     },
     {
       "category": "entrypoint",
-      "layer": "renderer",
+      "layer": "entrypoint",
+      "path": "src/renderer 2/index.html",
+      "references": [],
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+    },
+    {
+      "category": "entrypoint",
+      "layer": "entrypoint",
       "path": "src/renderer/index.html",
       "references": [],
       "role": "진입점 후보",
@@ -1658,11 +3523,51 @@
     },
     {
       "category": "config",
-      "layer": "tsconfig.json",
+      "layer": "config",
+      "path": "electron.vite.config.ts",
+      "references": [],
+      "role": "설정 파일",
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+    },
+    {
+      "category": "config",
+      "layer": "config",
+      "path": "eslint.config.mjs",
+      "references": [],
+      "role": "설정 파일",
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+    },
+    {
+      "category": "config",
+      "layer": "config",
+      "path": "package.json",
+      "references": [],
+      "role": "설정 파일",
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+    },
+    {
+      "category": "config",
+      "layer": "config",
       "path": "tsconfig.json",
       "references": [],
       "role": "설정 파일",
       "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+    },
+    {
+      "category": "source",
+      "layer": "scripts/source",
+      "path": "scripts/generate-icon-assets.ts",
+      "references": [],
+      "role": "scripts 소스",
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-system-color-scheme.ts",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음."
     }
   ]
 }

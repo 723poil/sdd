@@ -153,6 +153,7 @@ Codex를 MCP 서버로 실행하는 방식이다.
 - 첫 노출 대상은 `Codex CLI`이지만, 설정 모델은 다른 CLI 에이전트도 추가할 수 있게 잡는다
 - 저장 위치는 프로젝트 내부 `.sdd/`가 아니라 앱 전역 `~/.sdd-app/settings.json` 이다
 - 사용자는 PATH 자동 감지 또는 직접 실행 경로 입력을 선택하고 인증 방식, 모델, 추론 강도를 기록할 수 있다
+- `system` 실행 모드는 process PATH 만 보지 않고, macOS에서는 `/Applications/Codex.app/Contents/Resources/codex`, `~/Applications/Codex.app/Contents/Resources/codex`, `/opt/homebrew/bin/codex`, `/usr/local/bin/codex` 같은 대표 설치 위치도 함께 탐색한다
 - Codex 설정이 아직 앱에 저장되지 않았으면 첫 로드에서 `~/.codex/config.toml` 의 `model`, `model_reasoning_effort` 를 기본 참고값으로 읽는다
 - `main process`에서 간단한 연결 확인을 수행할 수 있다
 

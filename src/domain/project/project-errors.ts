@@ -2,6 +2,7 @@ import type { AppError } from '@/shared/contracts/app-error';
 
 export type ProjectErrorCode =
   | 'INVALID_PROJECT_PATH'
+  | 'INVALID_PROJECT_NAME'
   | 'PROJECT_NOT_DIRECTORY'
   | 'PROJECT_NOT_READABLE'
   | 'PROJECT_NOT_WRITABLE'

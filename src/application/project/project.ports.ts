@@ -104,17 +104,36 @@ export interface ProjectSpecChatPort {
     rootPath: string;
     sessionMessages: ProjectSessionMessage[];
     spec: ProjectSpecDocument;
-  }): Promise<Result<string>>;
+  }): Promise<
+    Result<{
+      markdown: string;
+      reply: string;
+      summary: string | null;
+      title: string;
+    }>
+  >;
 }
 
 export interface ProjectStoragePort {
   readProjectMeta(input: { rootPath: string }): Promise<Result<ProjectMeta | null>>;
+  renameProject(input: {
+    rootPath: string;
+    projectName: string;
+  }): Promise<Result<ProjectMeta | null>>;
   readProjectAnalysis(input: { rootPath: string }): Promise<Result<ProjectAnalysis | null>>;
   readProjectSpecs(input: { rootPath: string }): Promise<Result<ProjectSpecDocument[]>>;
   createProjectSpec(input: {
     rootPath: string;
     title?: string | null;
   }): Promise<Result<{ projectMeta: ProjectMeta; spec: ProjectSpecDocument }>>;
+  saveProjectSpec(input: {
+    rootPath: string;
+    specId: string;
+    revision: number;
+    title: string;
+    markdown: string;
+    summary?: string | null;
+  }): Promise<Result<ProjectSpecDocument>>;
   initializeStorage(input: { rootPath: string }): Promise<Result<ProjectStorageInitialization>>;
   writeProjectAnalysis(input: {
     rootPath: string;
@@ -133,5 +152,10 @@ export interface ProjectStoragePort {
 export interface RecentProjectsStorePort {
   listRecentProjects(): Promise<Result<RecentProject[]>>;
   upsertRecentProject(input: { rootPath: string; projectName: string }): Promise<Result<void>>;
+  renameRecentProject(input: {
+    rootPath: string;
+    projectName: string;
+  }): Promise<Result<RecentProject[]>>;
+  removeRecentProject(input: { rootPath: string }): Promise<Result<RecentProject[]>>;
   reorderRecentProjects(input: { rootPaths: string[] }): Promise<Result<RecentProject[]>>;
 }

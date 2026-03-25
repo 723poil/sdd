@@ -8,6 +8,8 @@ import type {
 import { findAgentCliConnectionDefinition } from '@/domain/app-settings/agent-cli-connection-model';
 import { err, ok } from '@/shared/contracts/result';
 
+import { resolveAgentCliExecutablePath } from '@/infrastructure/agent-cli/resolve-agent-cli-executable-path';
+
 const execFileAsync = promisify(execFile);
 const CONNECTION_CHECK_TIMEOUT_MS = 5_000;
 
@@ -22,13 +24,33 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
         });
       }
 
-      const executablePath = input.executablePath ?? definition.defaultExecutableName;
+      const requestedExecutablePath = input.executablePath ?? definition.defaultExecutableName;
       const checkedAt = new Date().toISOString();
+      const resolvedExecutablePath = await resolveAgentCliExecutablePath({
+        executablePath: requestedExecutablePath,
+      });
+
+      if (!resolvedExecutablePath) {
+        return ok(
+          createConnectionCheck({
+            agentId: input.agentId,
+            status: 'missing',
+            message: '실행 파일을 찾지 못했습니다. 경로나 PATH를 확인해 주세요.',
+            checkedAt,
+            resolvedCommand: requestedExecutablePath,
+            version: null,
+          }),
+        );
+      }
 
       try {
-        const { stderr, stdout } = await execFileAsync(executablePath, definition.connectionCheckArgs, {
-          timeout: CONNECTION_CHECK_TIMEOUT_MS,
-        });
+        const { stderr, stdout } = await execFileAsync(
+          resolvedExecutablePath,
+          definition.connectionCheckArgs,
+          {
+            timeout: CONNECTION_CHECK_TIMEOUT_MS,
+          },
+        );
         const version = extractVersion(stdout, stderr);
 
         return ok(
@@ -37,7 +59,7 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
             status: 'ready',
             message: 'CLI 실행을 확인했습니다.',
             checkedAt,
-            resolvedCommand: executablePath,
+            resolvedCommand: resolvedExecutablePath,
             version,
           }),
         );
@@ -49,7 +71,7 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
               status: 'missing',
               message: '실행 파일을 찾지 못했습니다. 경로나 PATH를 확인해 주세요.',
               checkedAt,
-              resolvedCommand: executablePath,
+              resolvedCommand: resolvedExecutablePath,
               version: null,
             }),
           );
@@ -62,7 +84,7 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
               status: 'error',
               message: '연결 확인이 시간 초과되었습니다. CLI 실행 상태를 다시 확인해 주세요.',
               checkedAt,
-              resolvedCommand: executablePath,
+              resolvedCommand: resolvedExecutablePath,
               version: null,
             }),
           );
@@ -74,7 +96,7 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
             status: 'error',
             message: 'CLI를 실행했지만 연결 확인에 실패했습니다.',
             checkedAt,
-            resolvedCommand: executablePath,
+            resolvedCommand: resolvedExecutablePath,
             version: null,
           }),
         );

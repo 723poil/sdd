@@ -18,6 +18,7 @@ import type { Result } from '@/shared/contracts/result';
 export const projectIpcChannels = {
   selectDirectory: 'project/select-directory',
   inspect: 'project/inspect',
+  renameProject: 'project/rename-project',
   readAnalysis: 'project/read-analysis',
   saveAnalysisDocumentLayouts: 'project/save-analysis-document-layouts',
   saveReferenceTags: 'project/save-reference-tags',
@@ -25,6 +26,7 @@ export const projectIpcChannels = {
   cancelReferenceTagGeneration: 'project/cancel-reference-tag-generation',
   readSpecs: 'project/read-specs',
   createSpec: 'project/create-spec',
+  saveSpec: 'project/save-spec',
   readAnalysisRunStatus: 'project/read-analysis-run-status',
   analyze: 'project/analyze',
   cancelAnalysis: 'project/cancel-analysis',
@@ -33,6 +35,7 @@ export const projectIpcChannels = {
   readSessionMessages: 'project/read-session-messages',
   sendSessionMessage: 'project/send-session-message',
   listRecentProjects: 'project/list-recent-projects',
+  removeRecentProject: 'project/remove-recent-project',
   activate: 'project/activate',
   reorderRecentProjects: 'project/reorder-recent-projects',
 } as const;
@@ -48,6 +51,11 @@ export interface InspectProjectInput {
 
 export interface ReadProjectAnalysisInput {
   rootPath: string;
+}
+
+export interface RenameProjectInput {
+  rootPath: string;
+  projectName: string;
 }
 
 export interface AnalyzeProjectInput {
@@ -86,6 +94,14 @@ export interface CreateProjectSpecInput {
   title?: string | null;
 }
 
+export interface SaveProjectSpecInput {
+  rootPath: string;
+  specId: string;
+  revision: number;
+  title: string;
+  markdown: string;
+}
+
 export interface ReadProjectAnalysisRunStatusInput {
   rootPath: string;
 }
@@ -117,6 +133,10 @@ export interface ActivateProjectInput {
   rootPath: string;
 }
 
+export interface RemoveRecentProjectInput {
+  rootPath: string;
+}
+
 export interface ReorderRecentProjectsInput {
   rootPaths: string[];
 }
@@ -131,9 +151,15 @@ export interface AnalyzeProjectOutput {
   inspection: ProjectInspection;
 }
 
+export interface RenameProjectOutput {
+  projectMeta: ProjectInspection['projectMeta'];
+  recentProjects: RecentProject[];
+}
+
 export interface SendProjectSessionMessageOutput {
   assistantErrorMessage: string | null;
   messages: ProjectSessionMessage[];
+  spec: ProjectSpecDocument | null;
   session: ProjectSessionMeta;
 }
 
@@ -145,7 +171,9 @@ export interface CreateProjectSpecOutput {
 export interface RendererProjectApi {
   selectDirectory(): Promise<Result<SelectProjectDirectoryOutput>>;
   inspect(input: InspectProjectInput): Promise<Result<ProjectInspection>>;
+  renameProject(input: RenameProjectInput): Promise<Result<RenameProjectOutput>>;
   listRecentProjects(): Promise<Result<RecentProject[]>>;
+  removeRecentProject(input: RemoveRecentProjectInput): Promise<Result<RecentProject[]>>;
   activate(input: ActivateProjectInput): Promise<Result<ActivateProjectOutput>>;
   reorderRecentProjects(input: ReorderRecentProjectsInput): Promise<Result<RecentProject[]>>;
   readAnalysis(input: ReadProjectAnalysisInput): Promise<Result<ProjectAnalysis | null>>;
@@ -163,6 +191,7 @@ export interface RendererProjectApi {
   ): Promise<Result<void>>;
   readSpecs(input: ReadProjectSpecsInput): Promise<Result<ProjectSpecDocument[]>>;
   createSpec(input: CreateProjectSpecInput): Promise<Result<CreateProjectSpecOutput>>;
+  saveSpec(input: SaveProjectSpecInput): Promise<Result<ProjectSpecDocument>>;
   readAnalysisRunStatus(
     input: ReadProjectAnalysisRunStatusInput,
   ): Promise<Result<ProjectAnalysisRunStatus>>;

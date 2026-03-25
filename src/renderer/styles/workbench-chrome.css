@@ -80,15 +80,18 @@
   width: 1px;
   transform: translateX(-50%);
   background: color-mix(in srgb, var(--border-strong) 76%, transparent);
+  opacity: 0;
   transition:
     background-color 140ms ease,
-    width 140ms ease;
+    width 140ms ease,
+    opacity 140ms ease;
 }
 
 .workbench-resize-handle:hover::after,
 .workbench-resize-handle:focus-visible::after,
 .workbench-resize-handle--active::after {
   width: 3px;
+  opacity: 1;
   background: color-mix(in srgb, var(--accent) 28%, var(--border-strong));
 }
 
@@ -111,11 +114,11 @@
 }
 
 .sidebar--projects {
-  border-right: 1px solid var(--border);
+  border-right: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
 }
 
 .sidebar--sessions {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid color-mix(in srgb, var(--border) 52%, transparent);
 }
 
 .info-sidebar {

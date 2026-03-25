@@ -7,11 +7,6 @@ const sourceRoot = resolve(__dirname, 'src');
 
 export default defineConfig({
   main: {
-    build: {
-      rollupOptions: {
-        external: ['typescript'],
-      },
-    },
     plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {

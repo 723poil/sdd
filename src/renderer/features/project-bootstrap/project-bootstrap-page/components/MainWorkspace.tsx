@@ -29,6 +29,7 @@ interface MainWorkspaceProps {
   isCancellingReferenceTags: boolean;
   isGeneratingReferenceTags: boolean;
   isSavingReferenceTags: boolean;
+  isSavingSpec: boolean;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpecId: string | null;
   errorMessage: string | null;
@@ -36,6 +37,12 @@ interface MainWorkspaceProps {
   onSelectAnalysisDocument: (documentId: ProjectAnalysisDocumentId) => void;
   onGenerateReferenceTags: () => Promise<'succeeded' | 'failed' | 'cancelled'>;
   onSaveAnalysisDocumentLayouts: (documentLayouts: ProjectAnalysisDocumentLayoutMap) => void;
+  onSaveSpec: (input: {
+    markdown: string;
+    revision: number;
+    specId: string;
+    title: string;
+  }) => Promise<boolean>;
   onSaveReferenceTags: (referenceTags: ProjectReferenceTagDocument) => Promise<boolean>;
   onSelectSpec: (specId: string) => void;
   onSelectWorkspacePage: (page: WorkspacePageId) => void;
@@ -89,7 +96,9 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           <SpecsWorkspace
             isActive={props.activeWorkspacePage === 'specs'}
             onSelectSpec={props.onSelectSpec}
+            onSaveSpec={props.onSaveSpec}
             onViewModeChange={setSpecsViewMode}
+            isSavingSpec={props.isSavingSpec}
             selectedSpecId={props.selectedSpecId}
             specs={props.specs}
             viewMode={specsViewMode}

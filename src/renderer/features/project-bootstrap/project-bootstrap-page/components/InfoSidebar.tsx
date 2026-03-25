@@ -99,9 +99,9 @@ export function InfoSidebar(props: InfoSidebarProps) {
               {!props.inspection
                 ? '프로젝트를 선택하면 채팅을 시작할 수 있습니다.'
                 : props.activeWorkspacePage !== 'specs'
-                  ? '명세 페이지에서 채팅을 사용할 수 있습니다.'
+                ? '명세 페이지에서 채팅을 사용할 수 있습니다.'
                   : hasProjectContext
-                  ? '질문을 입력해 주세요.'
+                  ? '질문이나 요구사항을 입력하면 명세 초안을 함께 갱신합니다.'
                   : '채팅을 준비하는 중입니다.'}
             </p>
           </div>
@@ -199,7 +199,11 @@ export function InfoSidebar(props: InfoSidebarProps) {
                 onChange={(event) => {
                   props.onChangeDraftMessage(event.target.value);
                 }}
-                placeholder={canWriteMessage ? '메시지를 입력하세요.' : '명세를 선택하면 채팅할 수 있습니다.'}
+                placeholder={
+                  canWriteMessage
+                    ? '명세에 반영할 요구사항이나 질문을 입력하세요.'
+                    : '명세를 선택하면 채팅할 수 있습니다.'
+                }
                 readOnly={!canWriteMessage}
                 rows={canWriteMessage ? 3 : 1}
                 value={props.draftMessage}
@@ -342,7 +346,7 @@ function getEmptyStateTitle(
     return '명세 페이지에서 채팅할 수 있습니다.';
   }
 
-  return '질문을 입력해 주세요.';
+  return '명세 초안을 같이 만들어 보세요.';
 }
 
 function getEmptyStateDescription(
@@ -368,7 +372,7 @@ function getEmptyStateDescription(
     return '명세 페이지에서 채팅할 명세를 먼저 선택해 주세요.';
   }
 
-  return '오른쪽 아래 입력창에 질문을 남겨 주세요.';
+  return '오른쪽 아래 입력창에 요구사항, 변경점, 제약, 확인할 내용을 남겨 주세요.';
 }
 
 function getTimelineMessages(input: {

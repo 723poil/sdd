@@ -37,9 +37,24 @@ export function createActivateProjectUseCase(dependencies: {
         inspection = initializationResult.value.inspection;
       }
 
+      const existingRecentProjectsResult =
+        await dependencies.recentProjectsStore.listRecentProjects();
+      if (!existingRecentProjectsResult.ok) {
+        return existingRecentProjectsResult;
+      }
+
+      const rememberedProjectName =
+        existingRecentProjectsResult.value.find(
+          (project) => project.rootPath === inspection.rootPath,
+        )?.projectName ?? inspection.projectName;
+      inspection = {
+        ...inspection,
+        projectName: rememberedProjectName,
+      };
+
       const rememberResult = await dependencies.recentProjectsStore.upsertRecentProject({
         rootPath: inspection.rootPath,
-        projectName: inspection.projectName,
+        projectName: rememberedProjectName,
       });
       if (!rememberResult.ok) {
         return rememberResult;

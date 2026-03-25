@@ -12,6 +12,7 @@
 
 .helper-text--alert {
   color: var(--danger);
+  white-space: pre-wrap;
 }
 
 .status-row {
@@ -40,4 +41,3 @@
   overflow-wrap: anywhere;
   text-align: right;
 }
-

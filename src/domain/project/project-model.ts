@@ -44,14 +44,20 @@ export interface RecentProject {
   sortOrder: number;
 }
 
+export function normalizeProjectName(value: string): string {
+  return value.trim();
+}
+
 export function createInitialProjectMeta(input: {
   projectName: string;
   rootPath: string;
   now: string;
 }): ProjectMeta {
+  const normalizedProjectName = normalizeProjectName(input.projectName);
+
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
-    projectName: input.projectName,
+    projectName: normalizedProjectName,
     rootPath: input.rootPath,
     createdAt: input.now,
     updatedAt: input.now,
@@ -86,6 +92,19 @@ export function createNextProjectMetaAfterSpecCreation(input: {
     updatedAt: input.now,
     revision: input.current.revision + 1,
     defaultSpecId: input.specId,
+  };
+}
+
+export function createNextProjectMetaAfterRename(input: {
+  current: ProjectMeta;
+  now: string;
+  projectName: string;
+}): ProjectMeta {
+  return {
+    ...input.current,
+    projectName: normalizeProjectName(input.projectName),
+    updatedAt: input.now,
+    revision: input.current.revision + 1,
   };
 }
 

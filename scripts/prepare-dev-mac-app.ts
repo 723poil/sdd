@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -19,7 +20,7 @@ const projectRootPath = dirname(scriptDirectoryPath);
 const electronPackagePath = require.resolve('electron/package.json');
 const electronModulePath = dirname(electronPackagePath);
 const sourceAppPath = join(electronModulePath, 'dist', 'Electron.app');
-const devAppDirectoryPath = join(projectRootPath, 'out', 'dev-app');
+const devAppDirectoryPath = join(tmpdir(), 'sdd-dev-app');
 const targetAppPath = join(devAppDirectoryPath, `${APP_DISPLAY_NAME}.app`);
 const targetInfoPlistPath = join(targetAppPath, 'Contents', 'Info.plist');
 const sourcePreviewIconPath = join(projectRootPath, 'build', 'icon', 'sdd-icon.png');
@@ -27,6 +28,10 @@ const sourceIconPath = join(projectRootPath, 'build', 'icon', 'sdd.icns');
 const targetElectronIconPath = join(targetAppPath, 'Contents', 'Resources', 'electron.icns');
 const targetAppIconPath = join(targetAppPath, 'Contents', 'Resources', 'sdd.icns');
 const metadataFilePath = join(devAppDirectoryPath, 'metadata.json');
+
+type ExecFileSyncError = Error & {
+  stderr?: Buffer | string;
+};
 
 async function readElectronVersion(): Promise<string> {
   const packageJson = await readFile(electronPackagePath, 'utf8');
@@ -73,7 +78,15 @@ function upsertPlistStringKey(key: string, value: string): void {
 async function copyFreshAppBundle(): Promise<void> {
   await mkdir(devAppDirectoryPath, { recursive: true });
   await rm(targetAppPath, { recursive: true, force: true });
-  execFileSync('ditto', ['--clone', sourceAppPath, targetAppPath]);
+  execFileSync('ditto', [
+    '--norsrc',
+    '--noextattr',
+    '--noqtn',
+    '--noacl',
+    '--noclone',
+    sourceAppPath,
+    targetAppPath,
+  ]);
 }
 
 async function renameExecutableIfNeeded(): Promise<void> {
@@ -97,9 +110,22 @@ function updateMainBundleMetadata(): void {
 }
 
 function adHocSignAppBundle(): void {
-  execFileSync('codesign', ['--force', '--deep', '--sign', '-', targetAppPath], {
-    stdio: 'ignore',
-  });
+  try {
+    execFileSync('codesign', ['--force', '--deep', '--sign', '-', targetAppPath], {
+      encoding: 'utf8',
+    });
+  } catch (error: unknown) {
+    const codesignError = error as ExecFileSyncError;
+    const stderr =
+      typeof codesignError.stderr === 'string'
+        ? codesignError.stderr.trim()
+        : codesignError.stderr?.toString().trim();
+    const detailSuffix = stderr ? `\n${stderr}` : '';
+
+    throw new Error(`dev app 재서명에 실패했습니다.${detailSuffix}`, {
+      cause: error instanceof Error ? error : undefined,
+    });
+  }
 }
 
 function clearBundleExtendedAttributes(): void {

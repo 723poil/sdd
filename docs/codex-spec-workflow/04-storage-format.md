@@ -355,6 +355,7 @@
 
 - 새 명세를 채팅으로 시작할 때도 먼저 `meta.json` 과 `versions/v1.md` 초안이 생성된다
 - 이후 채팅과 patch 는 이 명세 단위로 연결된다
+- 직접 편집 저장과 채팅 기반 초안 갱신 모두 `latestVersion` 을 새 버전으로 올리고 `revision` 을 증가시킨다
 
 ### `.sdd/specs/<spec-slug>/versions/v1.md`
 
@@ -365,13 +366,25 @@
 권장 구조:
 
 - 제목
-- 배경
+- 요약
+- 배경 / 문제
 - 목표
-- 범위
+- 비목표
+- 사용자 시나리오
 - 기능 요구사항
-- acceptance criteria
-- 관련 파일
-- 오픈 이슈
+- 비기능 요구사항
+- 참조 태그
+- 영향도 분석
+- 사용 스킬
+- 수용 기준
+- 오픈 질문
+
+주의:
+
+- Markdown 첫 줄 `# 제목` 과 `meta.json.title` 은 일치시킨다
+- `참조 태그` 는 기존 reference-tag 를 우선 적고, 현재 기능이 기존 태그로 충분히 설명되지 않으면 제안 태그를 함께 남긴다
+- `영향도 분석` 은 `analysis/context.json`, `analysis/file-index.json`, `analysis/manual-reference-tags.json` 을 참고해 관련 파일, 모듈, 흐름, 리스크를 정리한다
+- `사용 스킬` 은 `AGENTS.md` 와 `.codex/skills/` 를 참고해 이번 명세/구현에 사용할 프로젝트 전용 스킬을 적는다
 
 ### `.sdd/specs/<spec-slug>/chat.jsonl`
 

@@ -38,7 +38,7 @@ npm install
 npm run dev
 ```
 
-macOS에서는 `npm run dev` 가 메뉴바 이름 표시를 위해 로컬 dev wrapper app(`out/dev-app/SDD.app`)을 준비한 뒤 실행합니다.
+macOS에서는 `npm run dev` 가 메뉴바 이름 표시를 위해 시스템 임시 폴더 아래 dev wrapper app을 준비한 뒤 실행합니다.
 기존 기본 실행 경로가 필요하면 `npm run dev:raw` 를 사용합니다.
 
 ## macOS 패키징

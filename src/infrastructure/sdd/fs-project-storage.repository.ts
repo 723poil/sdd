@@ -18,16 +18,23 @@ import {
   type ProjectReferenceTagDocument,
 } from '@/domain/project/project-reference-tag-model';
 import {
+  createNextProjectSpecMeta,
+  createNextProjectSpecVersionId,
   createDefaultProjectSpecSlug,
   createDefaultProjectSpecTitle,
+  extractProjectSpecSummary,
   createInitialProjectSpecMarkdown,
   createProjectSpecMeta,
+  normalizeProjectSpecMarkdown,
+  normalizeProjectSpecTitle,
 } from '@/domain/project/project-spec-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import {
   createInitialProjectMeta,
   createNextProjectMetaAfterSpecCreation,
   createNextProjectMetaAfterAnalysis,
+  createNextProjectMetaAfterRename,
+  normalizeProjectName,
 } from '@/domain/project/project-model';
 import { err, ok, type Result } from '@/shared/contracts/result';
 
@@ -38,6 +45,7 @@ import {
   readProjectReferenceTagDocument,
 } from '@/infrastructure/sdd/fs-project-storage-documents';
 import {
+  readSpecMetaDocument,
   readProjectSpecDocuments,
   toProjectSpecIndexEntries,
 } from '@/infrastructure/sdd/fs-project-spec-documents';
@@ -70,6 +78,39 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       return readProjectMetaDocument({
         rootPath: input.rootPath,
       });
+    },
+
+    async renameProject(input) {
+      const rootPath = resolve(input.rootPath);
+      const { projectJsonPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return ok(null);
+      }
+
+      const projectName = normalizeProjectName(input.projectName);
+      if (projectName.length === 0) {
+        return err(createProjectError('INVALID_PROJECT_NAME', '프로젝트 이름을 입력해 주세요.'));
+      }
+
+      if (existingProjectMetaResult.value.projectName === projectName) {
+        return ok(existingProjectMetaResult.value);
+      }
+
+      const nextProjectMeta = createNextProjectMetaAfterRename({
+        current: existingProjectMetaResult.value,
+        now: new Date().toISOString(),
+        projectName,
+      });
+
+      await writeJsonAtomically(projectJsonPath, nextProjectMeta);
+
+      return ok(nextProjectMeta);
     },
 
     async readProjectAnalysis(input) {
@@ -165,6 +206,96 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
           meta: specMeta,
           markdown: specMarkdown,
         },
+      });
+    },
+
+    async saveProjectSpec(input) {
+      const rootPath = resolve(input.rootPath);
+      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return err(
+          createProjectError(
+            'PROJECT_NOT_INITIALIZED',
+            'project.json 이 없어 명세를 저장할 수 없습니다.',
+            projectJsonPath,
+          ),
+        );
+      }
+
+      const existingSpecMetaResult = await readSpecMetaDocument({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!existingSpecMetaResult.ok) {
+        return existingSpecMetaResult;
+      }
+
+      if (!existingSpecMetaResult.value) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '저장할 명세 메타를 찾지 못했습니다.',
+            input.specId,
+          ),
+        );
+      }
+
+      const existingSpecMeta = existingSpecMetaResult.value;
+      if (existingSpecMeta.revision !== input.revision) {
+        return err(
+          createProjectError(
+            'PROJECT_WRITE_CONFLICT',
+            '명세가 다른 변경과 충돌했습니다. 다시 불러온 뒤 저장해 주세요.',
+          ),
+        );
+      }
+
+      const now = new Date().toISOString();
+      const normalizedTitle = normalizeProjectSpecTitle(input.title);
+      const normalizedMarkdown = normalizeProjectSpecMarkdown({
+        markdown: input.markdown,
+        title: normalizedTitle,
+      });
+      const summary = input.summary?.trim() || extractProjectSpecSummary(normalizedMarkdown);
+      const latestVersion = createNextProjectSpecVersionId(existingSpecMeta.latestVersion);
+      const nextSpecMeta = createNextProjectSpecMeta({
+        current: existingSpecMeta,
+        latestVersion,
+        now,
+        summary,
+        title: normalizedTitle,
+      });
+
+      await writeTextAtomically(
+        getSpecVersionPath({
+          latestVersion,
+          rootPath,
+          specId: input.specId,
+        }),
+        normalizedMarkdown,
+      );
+      await writeJsonAtomically(getSpecMetaPath(rootPath, input.specId), nextSpecMeta);
+
+      const nextSpecsResult = await readProjectSpecDocuments({ rootPath });
+      if (!nextSpecsResult.ok) {
+        return nextSpecsResult;
+      }
+
+      await writeJsonAtomically(specsIndexPath, {
+        schemaVersion: 1,
+        generatedAt: now,
+        specs: toProjectSpecIndexEntries(nextSpecsResult.value),
+      });
+
+      return ok({
+        meta: nextSpecMeta,
+        markdown: normalizedMarkdown,
       });
     },
 

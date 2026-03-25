@@ -19,6 +19,7 @@ import type {
   ProjectSessionMessage,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
+import type { AppError } from '@/shared/contracts/app-error';
 import { err, ok, type Result } from '@/shared/contracts/result';
 import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
@@ -82,6 +83,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onCancelAnalysis(rootPath?: string): void;
     onCancelReferenceTagGeneration(rootPath?: string): void;
     onChangeDraftMessage(value: string): void;
+    onChangeEditingProjectName(value: string): void;
     onCreateSpec(): void;
     onDragOverProject(rootPath: string): void;
     onDropProject(rootPath: string): void;
@@ -89,10 +91,20 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onChangeChatModel(model: string): void;
     onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort): void;
     onGenerateReferenceTags(): Promise<'succeeded' | 'failed' | 'cancelled'>;
+    onBeginRenameProject(rootPath: string): void;
+    onCancelRenameProject(): void;
+    onCommitRenameProject(rootPath: string): void;
+    onRemoveProject(rootPath: string): void;
     onSelectProject(): void;
     onSelectAnalysisDocument(documentId: ProjectAnalysisDocumentId): void;
     onSelectProgressTask(taskId: string): void;
     onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap): void;
+    onSaveSpec(input: {
+      markdown: string;
+      revision: number;
+      specId: string;
+      title: string;
+    }): Promise<boolean>;
     onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument): Promise<boolean>;
     onSelectSpec(specId: string): void;
     onSelectWorkspacePage(page: WorkspacePageId): void;
@@ -126,11 +138,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [sessionMessages, setSessionMessages] = useState<ProjectSessionMessage[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [editingProjectRootPath, setEditingProjectRootPath] = useState<string | null>(null);
+  const [editingProjectNameDraft, setEditingProjectNameDraft] = useState('');
   const [expandedProjectRootPaths, setExpandedProjectRootPaths] = useState<string[]>([]);
   const [draggingProjectRootPath, setDraggingProjectRootPath] = useState<string | null>(null);
   const [dropTargetRootPath, setDropTargetRootPath] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCreatingSpec, setIsCreatingSpec] = useState(false);
+  const [isSavingSpec, setIsSavingSpec] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSavingReferenceTags, setIsSavingReferenceTags] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -365,6 +380,20 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       current.filter((rootPath) => recentProjects.some((project) => project.rootPath === rootPath)),
     );
   }, [recentProjects]);
+
+  useEffect(() => {
+    if (!editingProjectRootPath) {
+      return;
+    }
+
+    const editingProject = recentProjects.find(
+      (project) => project.rootPath === editingProjectRootPath,
+    );
+    if (!editingProject) {
+      setEditingProjectRootPath(null);
+      setEditingProjectNameDraft('');
+    }
+  }, [editingProjectRootPath, recentProjects]);
 
   useEffect(() => {
     if (!selectedPath) {
@@ -633,6 +662,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setSelectedSessionId(null);
     setSessionMessages([]);
     setDraftMessage('');
+    setEditingProjectRootPath(null);
+    setEditingProjectNameDraft('');
     setErrorMessage(null);
     setMessage(describeInitializationState(result.value.inspection));
 
@@ -749,7 +780,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
               mode === 'references' ? '참조 분석이 취소되었습니다.' : '전체 분석이 취소되었습니다.',
             );
           } else {
-            setErrorMessage(result.error.message);
+            setErrorMessage(formatAppErrorMessage(result.error));
             setMessage(
               mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.',
             );
@@ -948,6 +979,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
 
       setSessionMessages((current) => [...current, ...result.value.messages]);
+      const updatedSpec = result.value.spec;
+      if (updatedSpec) {
+        setSpecs((current) => upsertProjectSpec(current, updatedSpec));
+      }
       setSessions((current) =>
         current
           .map((session) =>
@@ -987,6 +1022,61 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       });
     } finally {
       setIsSendingMessage(false);
+    }
+  }
+
+  async function handleSaveSpec(input: {
+    markdown: string;
+    revision: number;
+    specId: string;
+    title: string;
+  }): Promise<boolean> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.saveSpec !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return false;
+    }
+
+    const saveSpecTask = startRequestProgressTask({
+      detail: '명세 제목과 본문을 새 버전으로 저장하고 있습니다.',
+      kind: 'spec-save',
+      projectName: inspection?.projectName ?? null,
+      rootPath,
+      title: '명세 저장',
+    });
+
+    setIsSavingSpec(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.project.saveSpec({
+        markdown: input.markdown,
+        revision: input.revision,
+        rootPath,
+        specId: input.specId,
+        title: input.title,
+      });
+      if (!result.ok) {
+        updateRequestProgressTask(saveSpecTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          status: 'failed',
+        });
+        setErrorMessage(result.error.message);
+        setMessage('명세를 저장하지 못했습니다.');
+        return false;
+      }
+
+      setSpecs((current) => upsertProjectSpec(current, result.value));
+      setMessage(`"${result.value.meta.title}" 명세를 저장했습니다.`);
+      updateRequestProgressTask(saveSpecTask, {
+        detail: `"${result.value.meta.title}" 명세를 새 버전으로 저장했습니다.`,
+        status: 'succeeded',
+      });
+      return true;
+    } finally {
+      setIsSavingSpec(false);
     }
   }
 
@@ -1303,6 +1393,122 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setDropTargetRootPath(null);
   }
 
+  function handleBeginRenameProject(rootPath: string): void {
+    const recentProject = recentProjects.find((project) => project.rootPath === rootPath);
+    if (!recentProject) {
+      return;
+    }
+
+    setEditingProjectRootPath(rootPath);
+    setEditingProjectNameDraft(recentProject.projectName);
+    setErrorMessage(null);
+  }
+
+  function handleCancelRenameProject(): void {
+    setEditingProjectRootPath(null);
+    setEditingProjectNameDraft('');
+  }
+
+  async function handleCommitRenameProject(rootPath: string): Promise<void> {
+    const recentProject = recentProjects.find((project) => project.rootPath === rootPath);
+    if (!recentProject) {
+      return;
+    }
+
+    const projectName = editingProjectNameDraft.trim();
+    if (projectName.length === 0) {
+      setErrorMessage('프로젝트 이름을 입력해 주세요.');
+      setMessage('프로젝트 이름을 변경하지 못했습니다.');
+      return;
+    }
+
+    if (projectName === recentProject.projectName) {
+      handleCancelRenameProject();
+      return;
+    }
+
+    const sddApi = getSddApi();
+    if (!sddApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      setMessage('프로젝트 이름을 변경할 수 없습니다.');
+      return;
+    }
+
+    const result = await sddApi.project.renameProject({
+      rootPath,
+      projectName,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      setMessage('프로젝트 이름을 변경하지 못했습니다.');
+      return;
+    }
+
+    setRecentProjects(result.value.recentProjects);
+    setEditingProjectRootPath(null);
+    setEditingProjectNameDraft('');
+    if (selectedPathRef.current === rootPath) {
+      setInspection((current) => {
+        if (!current || current.rootPath !== rootPath) {
+          return current;
+        }
+
+        return {
+          ...current,
+          projectName,
+          projectMeta: result.value.projectMeta ?? current.projectMeta,
+        };
+      });
+    }
+
+    setErrorMessage(null);
+    setMessage('프로젝트 이름을 변경했습니다.');
+  }
+
+  async function handleRemoveRecentProject(rootPath: string): Promise<void> {
+    const recentProject = recentProjects.find((project) => project.rootPath === rootPath);
+    if (!recentProject) {
+      return;
+    }
+
+    const isSelectedProject = selectedPathRef.current === rootPath;
+    const shouldRemove = window.confirm(
+      isSelectedProject
+        ? '현재 프로젝트는 열어 둔 상태로 최근 목록에서만 제거할까요?\n프로젝트 폴더와 .sdd 데이터는 삭제하지 않습니다.'
+        : '최근 프로젝트 목록에서 제거할까요?\n프로젝트 폴더와 .sdd 데이터는 삭제하지 않습니다.',
+    );
+    if (!shouldRemove) {
+      return;
+    }
+
+    const sddApi = getSddApi();
+    if (!sddApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      setMessage('프로젝트를 최근 목록에서 제거할 수 없습니다.');
+      return;
+    }
+
+    const result = await sddApi.project.removeRecentProject({
+      rootPath,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      setMessage('프로젝트를 최근 목록에서 제거하지 못했습니다.');
+      return;
+    }
+
+    setRecentProjects(result.value);
+    if (editingProjectRootPath === rootPath) {
+      handleCancelRenameProject();
+    }
+    setErrorMessage(null);
+    setMessage(
+      isSelectedProject
+        ? '현재 프로젝트는 유지하고 최근 목록에서만 제거했습니다.'
+        : '프로젝트를 최근 목록에서 제거했습니다.',
+    );
+  }
+
   return {
     state: {
       selectedPath,
@@ -1321,11 +1527,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       sessionMessages,
       draftMessage,
       recentProjects,
+      editingProjectRootPath,
+      editingProjectNameDraft,
       expandedProjectRootPaths,
       draggingProjectRootPath,
       dropTargetRootPath,
       isSelecting,
       isCreatingSpec,
+      isSavingSpec,
       isCreatingSession,
       isSavingReferenceTags,
       isSendingMessage,
@@ -1354,6 +1563,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onChangeDraftMessage(value: string) {
         setDraftMessage(value);
       },
+      onChangeEditingProjectName(value: string) {
+        setEditingProjectNameDraft(value);
+      },
       onCreateSpec() {
         void handleCreateSpec();
       },
@@ -1365,6 +1577,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
       onGenerateReferenceTags() {
         return handleGenerateReferenceTags();
+      },
+      onBeginRenameProject(rootPath: string) {
+        handleBeginRenameProject(rootPath);
+      },
+      onCancelRenameProject() {
+        handleCancelRenameProject();
+      },
+      onCommitRenameProject(rootPath: string) {
+        void handleCommitRenameProject(rootPath);
+      },
+      onRemoveProject(rootPath: string) {
+        void handleRemoveRecentProject(rootPath);
       },
       onDragOverProject(rootPath: string) {
         if (draggingProjectRootPath && draggingProjectRootPath !== rootPath) {
@@ -1389,6 +1613,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
       onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap) {
         void handleSaveAnalysisDocumentLayouts(documentLayouts);
+      },
+      onSaveSpec(input: { markdown: string; revision: number; specId: string; title: string }) {
+        return handleSaveSpec(input);
       },
       onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument) {
         return handleSaveReferenceTags(referenceTags);
@@ -1499,4 +1726,26 @@ async function readCodexConnectionSettings(
       result.value.find((connection) => connection.definition.agentId === 'codex')?.settings ??
       createDefaultAgentCliConnectionSettings('codex'),
   };
+}
+
+function upsertProjectSpec(
+  specs: ProjectSpecDocument[],
+  nextSpec: ProjectSpecDocument,
+): ProjectSpecDocument[] {
+  const didExist = specs.some((spec) => spec.meta.id === nextSpec.meta.id);
+  const mergedSpecs = didExist
+    ? specs.map((spec) => (spec.meta.id === nextSpec.meta.id ? nextSpec : spec))
+    : [...specs, nextSpec];
+
+  return [...mergedSpecs].sort((left, right) =>
+    right.meta.updatedAt.localeCompare(left.meta.updatedAt),
+  );
+}
+
+function formatAppErrorMessage(error: AppError): string {
+  if (!error.details || error.details.trim().length === 0) {
+    return error.message;
+  }
+
+  return `${error.message}\n${error.details.trim()}`;
 }

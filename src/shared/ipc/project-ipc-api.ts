@@ -26,11 +26,15 @@ import type {
   GenerateProjectReferenceTagsInput,
   InspectProjectInput,
   ListProjectSessionsInput,
+  RemoveRecentProjectInput,
   ReadProjectAnalysisInput,
   ReadProjectAnalysisRunStatusInput,
   ReadProjectSessionMessagesInput,
   ReadProjectSpecsInput,
+  RenameProjectInput,
+  RenameProjectOutput,
   ReorderRecentProjectsInput,
+  SaveProjectSpecInput,
   SaveProjectAnalysisDocumentLayoutsInput,
   SaveProjectReferenceTagsInput,
   SelectProjectDirectoryOutput,
@@ -50,9 +54,17 @@ export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): R
       invoke,
       projectIpcChannels.inspect,
     ),
+    renameProject: bindIpcInvoke1<RenameProjectInput, Result<RenameProjectOutput>>(
+      invoke,
+      projectIpcChannels.renameProject,
+    ),
     listRecentProjects: bindIpcInvoke0<Result<RecentProject[]>>(
       invoke,
       projectIpcChannels.listRecentProjects,
+    ),
+    removeRecentProject: bindIpcInvoke1<RemoveRecentProjectInput, Result<RecentProject[]>>(
+      invoke,
+      projectIpcChannels.removeRecentProject,
     ),
     activate: bindIpcInvoke1<ActivateProjectInput, Result<ActivateProjectOutput>>(
       invoke,
@@ -89,6 +101,10 @@ export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): R
     createSpec: bindIpcInvoke1<CreateProjectSpecInput, Result<CreateProjectSpecOutput>>(
       invoke,
       projectIpcChannels.createSpec,
+    ),
+    saveSpec: bindIpcInvoke1<SaveProjectSpecInput, Result<ProjectSpecDocument>>(
+      invoke,
+      projectIpcChannels.saveSpec,
     ),
     readAnalysisRunStatus: bindIpcInvoke1<
       ReadProjectAnalysisRunStatusInput,

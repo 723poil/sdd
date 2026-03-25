@@ -69,6 +69,8 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
           }
 
           const reply = parsedResult.value.reply.trim();
+          const title = parsedResult.value.title.trim();
+          const markdown = parsedResult.value.markdown.trim();
           if (reply.length === 0) {
             return err(
               createProjectError(
@@ -78,7 +80,21 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
             );
           }
 
-          return ok(reply);
+          if (title.length === 0 || markdown.length === 0) {
+            return err(
+              createProjectError(
+                'PROJECT_SPEC_CHAT_FAILED',
+                '에이전트 응답에 저장할 명세 제목 또는 본문이 비어 있습니다.',
+              ),
+            );
+          }
+
+          return ok({
+            markdown,
+            reply,
+            summary: parsedResult.value.summary,
+            title,
+          });
         } catch (error) {
           return err(
             createProjectError(

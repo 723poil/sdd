@@ -1,4 +1,5 @@
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
+import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMeta,
@@ -18,6 +19,7 @@ import type {
 export interface SendProjectSessionMessageOutput {
   assistantErrorMessage: string | null;
   messages: ProjectSessionMessage[];
+  spec: ProjectSpecDocument | null;
   session: ProjectSessionMeta;
 }
 
@@ -66,10 +68,14 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
 
       const userMessage = result.value.message;
       const userSession = result.value.session;
-      const partialSuccess = (assistantErrorMessage: string) =>
+      const partialSuccess = (
+        assistantErrorMessage: string,
+        spec: ProjectSpecDocument | null = null,
+      ) =>
         ok({
           assistantErrorMessage,
           messages: [userMessage],
+          spec,
           session: userSession,
         });
 
@@ -118,10 +124,25 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         return partialSuccess(replyResult.error.message);
       }
 
-      const assistantText = replyResult.value.trim();
+      const saveSpecResult = await dependencies.projectStorage.saveProjectSpec({
+        markdown: replyResult.value.markdown,
+        revision: selectedSpec.meta.revision,
+        rootPath: input.rootPath,
+        specId: selectedSpec.meta.id,
+        summary: replyResult.value.summary,
+        title: replyResult.value.title,
+      });
+      if (!saveSpecResult.ok) {
+        return partialSuccess(
+          `메시지는 저장했지만 명세 초안을 저장하지 못했습니다. ${saveSpecResult.error.message}`,
+        );
+      }
+
+      const assistantText = replyResult.value.reply.trim();
       if (assistantText.length === 0) {
         return partialSuccess(
           '메시지는 저장했지만 에이전트 응답이 비어 있어 대화 로그에 추가하지 않았습니다.',
+          saveSpecResult.value,
         );
       }
 
@@ -134,12 +155,14 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       if (!assistantAppendResult.ok) {
         return partialSuccess(
           `메시지는 저장했지만 에이전트 응답을 기록하지 못했습니다. ${assistantAppendResult.error.message}`,
+          saveSpecResult.value,
         );
       }
 
       return ok({
         assistantErrorMessage: null,
         messages: [userMessage, assistantAppendResult.value.message],
+        spec: saveSpecResult.value,
         session: assistantAppendResult.value.session,
       });
     },

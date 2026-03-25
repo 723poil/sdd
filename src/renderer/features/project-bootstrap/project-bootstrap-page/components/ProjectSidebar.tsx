@@ -3,10 +3,17 @@ import type { RecentProject } from '@/domain/project/project-model';
 interface ProjectSidebarProps {
   selectedPath: string | null;
   projectEntries: RecentProject[];
+  editingProjectRootPath: string | null;
+  editingProjectNameDraft: string;
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
   isSelecting: boolean;
   onActivateProject: (rootPath: string) => void;
+  onBeginRenameProject: (rootPath: string) => void;
+  onCancelRenameProject: () => void;
+  onChangeEditingProjectName: (value: string) => void;
+  onCommitRenameProject: (rootPath: string) => void;
+  onRemoveProject: (rootPath: string) => void;
   onSelectProject: () => void;
   onToggleSidebar: () => void;
   onStartDraggingProject: (rootPath: string) => void;
@@ -45,6 +52,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
         <div className="project-list">
           {props.projectEntries.map((project) => {
             const isActive = props.selectedPath === project.rootPath;
+            const isEditing = props.editingProjectRootPath === project.rootPath;
 
             return (
               <div className="project-stack" key={project.rootPath}>
@@ -55,44 +63,141 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                       : ''
                   } ${props.dropTargetRootPath === project.rootPath ? 'project-row-shell--drop-target' : ''}`}
                 >
-                  <button
-                    aria-label={`${project.projectName} 프로젝트 열기`}
-                    className="project-row"
-                    draggable
-                    onClick={() => {
-                      void props.onActivateProject(project.rootPath);
-                    }}
-                    onDragEnd={props.onEndDraggingProject}
-                    onDragOver={(event) => {
-                      event.preventDefault();
-                      props.onDragOverProject(project.rootPath);
-                    }}
-                    onDragStart={() => {
-                      props.onStartDraggingProject(project.rootPath);
-                    }}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      props.onDropProject(project.rootPath);
-                    }}
-                    title={project.rootPath}
-                    type="button"
-                  >
-                    <span aria-hidden="true" className="project-row-icon">
-                      <svg viewBox="0 0 20 20">
-                        <path
-                          d="M3.5 5.5h4l1.4 1.7H16a1.5 1.5 0 0 1 1.5 1.5v5.8A1.5 1.5 0 0 1 16 16H4a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 4 5.5Z"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.35"
+                  <div className="project-row-content">
+                    {isEditing ? (
+                      <div className="project-row-editor">
+                        <span aria-hidden="true" className="project-row-icon">
+                          <svg viewBox="0 0 20 20">
+                            <path
+                              d="M3.5 5.5h4l1.4 1.7H16a1.5 1.5 0 0 1 1.5 1.5v5.8A1.5 1.5 0 0 1 16 16H4a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 4 5.5Z"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="1.35"
+                            />
+                          </svg>
+                        </span>
+                        <input
+                          aria-label={`${project.projectName} 새 프로젝트 이름`}
+                          autoFocus
+                          className="project-row-editor__input"
+                          onChange={(event) => {
+                            props.onChangeEditingProjectName(event.target.value);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              props.onCommitRenameProject(project.rootPath);
+                              return;
+                            }
+
+                            if (event.key === 'Escape') {
+                              event.preventDefault();
+                              props.onCancelRenameProject();
+                            }
+                          }}
+                          value={props.editingProjectNameDraft}
                         />
-                      </svg>
-                    </span>
-                    <span className="project-row-copy">
-                      <span className="project-row-name">{project.projectName}</span>
-                    </span>
-                  </button>
+                        <div className="project-row-actions project-row-actions--editing">
+                          <button
+                            aria-label={`${project.projectName} 프로젝트명 저장`}
+                            className="project-row-action project-row-action--confirm"
+                            onClick={() => {
+                              props.onCommitRenameProject(project.rootPath);
+                            }}
+                            title="프로젝트명 저장"
+                            type="button"
+                          >
+                            <span aria-hidden="true" className="project-row-action-icon">
+                              ✓
+                            </span>
+                          </button>
+                          <button
+                            aria-label={`${project.projectName} 프로젝트명 수정 취소`}
+                            className="project-row-action"
+                            onClick={props.onCancelRenameProject}
+                            title="프로젝트명 수정 취소"
+                            type="button"
+                          >
+                            <span aria-hidden="true" className="project-row-action-icon">
+                              ×
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          aria-label={`${project.projectName} 프로젝트 열기`}
+                          className="project-row"
+                          draggable
+                          onClick={() => {
+                            void props.onActivateProject(project.rootPath);
+                          }}
+                          onDragEnd={props.onEndDraggingProject}
+                          onDragOver={(event) => {
+                            event.preventDefault();
+                            props.onDragOverProject(project.rootPath);
+                          }}
+                          onDragStart={() => {
+                            props.onStartDraggingProject(project.rootPath);
+                          }}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            props.onDropProject(project.rootPath);
+                          }}
+                          title={project.rootPath}
+                          type="button"
+                        >
+                          <span aria-hidden="true" className="project-row-icon">
+                            <svg viewBox="0 0 20 20">
+                              <path
+                                d="M3.5 5.5h4l1.4 1.7H16a1.5 1.5 0 0 1 1.5 1.5v5.8A1.5 1.5 0 0 1 16 16H4a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 4 5.5Z"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.35"
+                              />
+                            </svg>
+                          </span>
+                          <span className="project-row-copy">
+                            <span className="project-row-name">{project.projectName}</span>
+                          </span>
+                        </button>
+
+                        <div className="project-row-actions">
+                          <button
+                            aria-label={`${project.projectName} 프로젝트명 변경`}
+                            className="project-row-action"
+                            onClick={() => {
+                              props.onBeginRenameProject(project.rootPath);
+                            }}
+                            title="프로젝트명 변경"
+                            type="button"
+                          >
+                            <span aria-hidden="true" className="project-row-action-icon">
+                              ✎
+                            </span>
+                          </button>
+                          <button
+                            aria-label={`${project.projectName} 최근 목록에서 제거`}
+                            className="project-row-action project-row-action--danger"
+                            onClick={() => {
+                              props.onRemoveProject(project.rootPath);
+                            }}
+                            title="최근 목록에서 제거"
+                            type="button"
+                          >
+                            <span aria-hidden="true" className="project-row-action-icon">
+                              ×
+                            </span>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             );

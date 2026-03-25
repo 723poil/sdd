@@ -57,9 +57,7 @@ export async function scanProjectAnalysis(input: {
     return;
   }
 
-  const entries = await readdir(input.currentPath, {
-    withFileTypes: true,
-  });
+  const entries = await readDirectoryEntries(input);
 
   const sortedEntries = [...entries].sort((left, right) =>
     compareScanEntries({
@@ -152,6 +150,23 @@ export async function scanProjectAnalysis(input: {
     }
 
     input.scanState.files.add(relativePath);
+  }
+}
+
+async function readDirectoryEntries(input: {
+  currentPath: string;
+  depth: number;
+}): Promise<Dirent[]> {
+  try {
+    return await readdir(input.currentPath, {
+      withFileTypes: true,
+    });
+  } catch (error) {
+    if (input.depth === 0) {
+      throw error;
+    }
+
+    return [];
   }
 }
 

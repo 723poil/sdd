@@ -76,7 +76,7 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 240px);
+  min-height: 0;
   padding: 28px 18px;
   background:
     radial-gradient(
@@ -138,7 +138,8 @@
   position: relative;
   flex: 1;
   isolation: isolate;
-  min-height: calc(100vh - 88px - var(--window-top-safe-area) - var(--app-switcher-clearance));
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
   background-color: color-mix(in srgb, var(--bg-panel) 99%, white 1%);
   background-image:
@@ -404,8 +405,8 @@
   display: grid;
   gap: 16px;
   min-width: 0;
-  height: min(100%, calc(100vh - 180px));
-  max-height: calc(100vh - 180px);
+  height: 100%;
+  max-height: 100%;
   overflow: auto;
   padding: 18px;
   border: 1px solid color-mix(in srgb, var(--border) 84%, white 16%);
@@ -1489,6 +1490,12 @@
   gap: 8px;
 }
 
+.analysis-document-page__toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .analysis-document-page__toolbar-hint {
   display: inline-flex;
   align-items: center;
@@ -1731,6 +1738,60 @@
   min-height: 320px;
   overflow: visible;
   color: var(--text-primary);
+}
+
+.analysis-document-editor {
+  display: grid;
+  gap: 18px;
+}
+
+.analysis-document-editor__field {
+  display: grid;
+  gap: 8px;
+}
+
+.analysis-document-editor__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.analysis-document-editor__label {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.analysis-document-editor__hint {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.analysis-document-editor__title-input,
+.analysis-document-editor__textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-panel) 96%, white 4%);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.analysis-document-editor__title-input {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
+.analysis-document-editor__textarea {
+  min-height: 420px;
+  padding: 14px 16px;
+  line-height: 1.65;
+  resize: vertical;
+  white-space: pre-wrap;
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
 }
 
 .markdown-document {

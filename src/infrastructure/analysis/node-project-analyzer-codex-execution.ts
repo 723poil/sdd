@@ -125,14 +125,6 @@ export async function executeCodexProjectAnalysis(input: {
       const text = chunk.toString();
       stderrTail = appendOutputTail(stderrTail, text);
       refreshIdleTimeout();
-      const stderrMessage = text.trim();
-      if (stderrMessage.length > 0) {
-        input.analysisRunStatusStore.updateAnalysisRunStatus({
-          rootPath: input.rootPath,
-          progressMessage: truncateProgressMessage(stderrMessage),
-          stepIndex: 3,
-        });
-      }
     });
 
     childProcess.on('error', (error) => {
@@ -314,14 +306,14 @@ function describeCodexProgressLine(line: string): string | null {
       candidate.phase,
     );
     if (directMessage) {
-      return truncateProgressMessage(directMessage);
+      return sanitizeCodexProgressMessage(directMessage);
     }
 
     if (candidate.delta && typeof candidate.delta === 'object') {
       const delta = candidate.delta as Record<string, unknown>;
       const deltaMessage = findFirstHumanReadableString(delta.message, delta.summary, delta.text);
       if (deltaMessage) {
-        return truncateProgressMessage(deltaMessage);
+        return sanitizeCodexProgressMessage(deltaMessage);
       }
     }
 
@@ -337,7 +329,7 @@ function describeCodexProgressLine(line: string): string | null {
 
     return null;
   } catch {
-    return truncateProgressMessage(trimmedLine);
+    return sanitizeCodexProgressMessage(trimmedLine);
   }
 }
 
@@ -348,7 +340,11 @@ function findFirstHumanReadableString(...values: unknown[]): string | null {
     }
 
     const trimmedValue = value.trim();
-    if (trimmedValue.length === 0 || isMachineProgressToken(trimmedValue)) {
+    if (
+      trimmedValue.length === 0 ||
+      isMachineProgressToken(trimmedValue) ||
+      looksLikeInternalCodexDiagnostic(trimmedValue)
+    ) {
       continue;
     }
 
@@ -396,4 +392,24 @@ function describeCodexProgressToken(...values: unknown[]): string | null {
 
 function truncateProgressMessage(value: string): string {
   return value.length > 240 ? `${value.slice(0, 237)}...` : value;
+}
+
+function sanitizeCodexProgressMessage(value: string): string | null {
+  const trimmedValue = value.trim();
+  if (trimmedValue.length === 0 || looksLikeInternalCodexDiagnostic(trimmedValue)) {
+    return null;
+  }
+
+  return truncateProgressMessage(trimmedValue);
+}
+
+function looksLikeInternalCodexDiagnostic(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+
+  return (
+    /\b(trace|debug|info|warn|warning|error)\b/.test(normalizedValue) &&
+    (normalizedValue.includes('codex_core::') ||
+      normalizedValue.includes('exec_command_failed') ||
+      normalizedValue.includes("for '/bin/"))
+  );
 }

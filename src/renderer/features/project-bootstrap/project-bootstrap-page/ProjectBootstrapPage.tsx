@@ -33,6 +33,21 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleDropProject = (rootPath: string) => {
     workbench.onDropProject(rootPath);
   };
+  const handleBeginRenameProject = (rootPath: string) => {
+    workbench.onBeginRenameProject(rootPath);
+  };
+  const handleCancelRenameProject = () => {
+    workbench.onCancelRenameProject();
+  };
+  const handleChangeEditingProjectName = (value: string) => {
+    workbench.onChangeEditingProjectName(value);
+  };
+  const handleCommitRenameProject = (rootPath: string) => {
+    workbench.onCommitRenameProject(rootPath);
+  };
+  const handleRemoveProject = (rootPath: string) => {
+    workbench.onRemoveProject(rootPath);
+  };
   const handleChangeChatModel = (model: string) => {
     workbench.onChangeChatModel(model);
   };
@@ -83,6 +98,9 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   ) => {
     workbench.onSaveAnalysisDocumentLayouts(documentLayouts);
   };
+  const handleSaveSpec = (input: Parameters<typeof workbench.onSaveSpec>[0]) => {
+    return workbench.onSaveSpec(input);
+  };
   const handleSaveReferenceTags = (
     referenceTags: Parameters<typeof workbench.onSaveReferenceTags>[0],
   ) => {
@@ -119,9 +137,16 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
         >
           {workbench.isLeftSidebarOpen ? (
             <ProjectSidebar
+              editingProjectNameDraft={workbench.editingProjectNameDraft}
+              editingProjectRootPath={workbench.editingProjectRootPath}
               draggingProjectRootPath={workbench.draggingProjectRootPath}
               dropTargetRootPath={workbench.dropTargetRootPath}
               onActivateProject={handleActivateProject}
+              onBeginRenameProject={handleBeginRenameProject}
+              onCancelRenameProject={handleCancelRenameProject}
+              onChangeEditingProjectName={handleChangeEditingProjectName}
+              onCommitRenameProject={handleCommitRenameProject}
+              onRemoveProject={handleRemoveProject}
               onSelectProject={handleSelectProject}
               onToggleSidebar={handleToggleLeftSidebar}
               onDragOverProject={handleDragOverProject}
@@ -173,9 +198,11 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             isCancellingReferenceTags={workbench.isCancellingReferenceTags}
             isGeneratingReferenceTags={workbench.isGeneratingReferenceTags}
             isSavingReferenceTags={workbench.isSavingReferenceTags}
+            isSavingSpec={workbench.isSavingSpec}
             onCancelReferenceTagGeneration={handleCancelReferenceTagGeneration}
             onGenerateReferenceTags={handleGenerateReferenceTags}
             onSaveAnalysisDocumentLayouts={handleSaveAnalysisDocumentLayouts}
+            onSaveSpec={handleSaveSpec}
             onSaveReferenceTags={handleSaveReferenceTags}
             onSelectAnalysisDocument={handleSelectAnalysisDocument}
             onSelectSpec={handleSelectSpec}

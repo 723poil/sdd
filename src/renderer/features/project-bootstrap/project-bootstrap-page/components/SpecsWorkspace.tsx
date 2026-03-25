@@ -20,7 +20,14 @@ import {
 
 interface SpecsWorkspaceProps {
   isActive: boolean;
+  isSavingSpec: boolean;
   onViewModeChange: (viewMode: SpecsWorkspaceViewMode) => void;
+  onSaveSpec: (input: {
+    markdown: string;
+    revision: number;
+    specId: string;
+    title: string;
+  }) => Promise<boolean>;
   selectedSpecId: string | null;
   specs: ProjectSpecDocument[];
   onSelectSpec: (specId: string) => void;
@@ -74,7 +81,16 @@ const INITIAL_VIEWPORT: SpecsViewport = {
 };
 
 export function SpecsWorkspace(props: SpecsWorkspaceProps) {
-  const { isActive, onSelectSpec, onViewModeChange, selectedSpecId, specs, viewMode } = props;
+  const {
+    isActive,
+    isSavingSpec,
+    onSaveSpec,
+    onSelectSpec,
+    onViewModeChange,
+    selectedSpecId,
+    specs,
+    viewMode,
+  } = props;
   const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
   const specsKey = useMemo(() => specs.map((spec) => spec.meta.id).join('|'), [specs]);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -277,6 +293,8 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     return (
       <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
         <SpecsWorkspaceDocumentView
+          isSavingSpec={isSavingSpec}
+          onSaveSpec={onSaveSpec}
           onReturnToMap={() => {
             onViewModeChange('map');
           }}

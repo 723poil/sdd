@@ -1,0 +1,1131 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-03-25T15:12:17.815Z",
+  "revision": 1,
+  "tags": [
+    {
+      "id": "cli-연결-확인",
+      "label": "CLI 연결 확인",
+      "description": "저장된 설정으로 실행 파일을 찾고 실제 Codex CLI 호출 가능 여부를 판정합니다.",
+      "color": "#6d28d9",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "codex-연결-설정",
+      "label": "Codex 연결 설정",
+      "description": "Codex CLI 경로, 인증 방식, 모델, 추론 강도를 조회하고 저장합니다.",
+      "color": "#be185d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "electron-빌드-설정",
+      "label": "Electron 빌드 설정",
+      "description": "electron-vite 번들 진입과 패키징 구성을 정의합니다.",
+      "color": "#be185d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "macos-아이콘-번들",
+      "label": "macOS 아이콘 번들",
+      "description": "개발·배포용 macOS 앱 이름과 아이콘 자산 반영을 다룹니다.",
+      "color": "#15803d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "tseslint-규칙",
+      "label": "TS·ESLint 규칙",
+      "description": "strict TypeScript와 레이어 import 제한 같은 정적 품질 규칙입니다.",
+      "color": "#6d28d9",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "개발-실행",
+      "label": "개발 실행",
+      "description": "로컬 Electron dev 실행과 dev app 준비 스크립트를 묶습니다.",
+      "color": "#b45309",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "결과오류-계약",
+      "label": "결과·오류 계약",
+      "description": "레이어 전반에서 공통으로 쓰는 Result와 AppError 계약입니다.",
+      "color": "#0f766e",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "레거시-렌더러-복제본",
+      "label": "레거시 렌더러 복제본",
+      "description": "tsconfig에서 제외된 이전 renderer 복제본 정리 범위입니다.",
+      "color": "#b91c1c",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "명세-문서-편집",
+      "label": "명세 문서 편집",
+      "description": "명세 초안 생성, 저장, 보드 탐색과 Markdown 편집을 다룹니다.",
+      "color": "#0f766e",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "명세-채팅",
+      "label": "명세 채팅",
+      "description": "세션 로그와 Codex 응답으로 명세 초안을 대화형으로 갱신합니다.",
+      "color": "#b45309",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "분석-문서-맵",
+      "label": "분석 문서 맵",
+      "description": "분석 Markdown 문서 보드, 문서 카드 배치, Mermaid 렌더링을 다룹니다.",
+      "color": "#b91c1c",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "설정-ipc",
+      "label": "설정 IPC",
+      "description": "renderer 설정 화면이 Codex 설정 use case를 호출하도록 묶는 typed IPC 경계입니다.",
+      "color": "#0f172a",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "앱-설정-저장소",
+      "label": "앱 설정 저장소",
+      "description": "최근 프로젝트와 Codex 연결 설정을 함께 보관하는 앱 전역 설정 문서 경계입니다.",
+      "color": "#15803d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "앱-셸",
+      "label": "앱 셸",
+      "description": "Electron 창과 renderer 루트, 화면 전환을 묶는 바깥 셸입니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "참조-맵-탐색",
+      "label": "참조 맵 탐색",
+      "description": "파일 간 참조 구조를 시각화하고 관련 구현 범위를 좁혀 봅니다.",
+      "color": "#0f172a",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "참조-태그-관리",
+      "label": "참조 태그 관리",
+      "description": "파일 태그를 수동 편집하거나 Codex로 자동 생성해 참조 맵에 반영합니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "최근-프로젝트-목록",
+      "label": "최근 프로젝트 목록",
+      "description": "최근 프로젝트의 표시, 이름 변경, 제거, 드래그 순서 보존을 다룹니다.",
+      "color": "#0f766e",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-공통-계약",
+      "label": "프로젝트 공통 계약",
+      "description": "프로젝트 전반에서 공유하는 포트, 오류, 기본 메타 계약을 모읍니다.",
+      "color": "#be185d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-분석-실행",
+      "label": "프로젝트 분석 실행",
+      "description": "로컬 스캔과 Codex 보강을 합쳐 분석 결과를 생성하고 실행 상태를 추적합니다.",
+      "color": "#15803d",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-선택활성화",
+      "label": "프로젝트 선택·활성화",
+      "description": "프로젝트 경로 선택, 상태 점검, .sdd 초기화 준비와 활성화를 다룹니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-작업-ipc",
+      "label": "프로젝트 작업 IPC",
+      "description": "renderer workbench가 프로젝트 use case를 호출하도록 묶는 typed IPC 경계입니다.",
+      "color": "#b91c1c",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-작업공간-저장소",
+      "label": "프로젝트 작업공간 저장소",
+      "description": "`.sdd` 작업공간의 초기화와 분석·명세 문서 I/O를 담당합니다.",
+      "color": "#6d28d9",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    },
+    {
+      "id": "프로젝트-작업화면",
+      "label": "프로젝트 작업화면",
+      "description": "좌측 프로젝트 목록, 중앙 작업 페이지, 우측 채팅 패널을 조립하는 워크벤치 셸입니다.",
+      "color": "#b45309",
+      "createdAt": "2026-03-25T15:12:17.804Z",
+      "updatedAt": "2026-03-25T15:12:17.804Z"
+    }
+  ],
+  "assignments": [
+    {
+      "path": "electron.vite.config.ts",
+      "tagIds": [
+        "electron-빌드-설정"
+      ]
+    },
+    {
+      "path": "eslint.config.mjs",
+      "tagIds": [
+        "tseslint-규칙"
+      ]
+    },
+    {
+      "path": "package.json",
+      "tagIds": [
+        "electron-빌드-설정",
+        "macos-아이콘-번들",
+        "개발-실행"
+      ]
+    },
+    {
+      "path": "scripts/generate-icon-assets.ts",
+      "tagIds": [
+        "macos-아이콘-번들"
+      ]
+    },
+    {
+      "path": "scripts/prepare-dev-mac-app.ts",
+      "tagIds": [
+        "macos-아이콘-번들",
+        "개발-실행"
+      ]
+    },
+    {
+      "path": "scripts/run-dev.ts",
+      "tagIds": [
+        "macos-아이콘-번들",
+        "개발-실행"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/app-settings.ports.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "tagIds": [
+        "cli-연결-확인"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/project/activate-project.use-case.ts",
+      "tagIds": [
+        "최근-프로젝트-목록",
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/application/project/analyze-project-workflow.ts",
+      "tagIds": [
+        "참조-맵-탐색",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/analyze-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/cancel-project-analysis.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/cancel-project-reference-tag-generation.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/create-project-session.use-case.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/application/project/create-project-spec.use-case.ts",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/application/project/ensure-project-storage-ready.ts",
+      "tagIds": [
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/application/project/generate-project-reference-tags.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/initialize-project-storage.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택활성화",
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/application/project/inspect-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/application/project/list-project-sessions.use-case.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/application/project/list-recent-projects.use-case.ts",
+      "tagIds": [
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/project-analysis-draft-merger.ts",
+      "tagIds": [
+        "참조-맵-탐색",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/project.ports.ts",
+      "tagIds": [
+        "프로젝트-공통-계약"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-analysis.use-case.ts",
+      "tagIds": [
+        "분석-문서-맵",
+        "참조-맵-탐색",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-session-messages.use-case.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-specs.use-case.ts",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/application/project/remove-recent-project.use-case.ts",
+      "tagIds": [
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/rename-project.use-case.ts",
+      "tagIds": [
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/reorder-recent-projects.use-case.ts",
+      "tagIds": [
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-reference-tags.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-spec.use-case.ts",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/application/project/select-project-directory.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/application/project/send-project-session-message.use-case.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정",
+        "앱-설정-저장소"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-analysis-model.ts",
+      "tagIds": [
+        "분석-문서-맵",
+        "참조-맵-탐색",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-errors.ts",
+      "tagIds": [
+        "프로젝트-공통-계약"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-model.ts",
+      "tagIds": [
+        "최근-프로젝트-목록",
+        "프로젝트-공통-계약",
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-reference-tag-model.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-session-model.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-spec-model.ts",
+      "tagIds": [
+        "명세-문서-편집",
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+      "tagIds": [
+        "cli-연결-확인"
+      ]
+    },
+    {
+      "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
+      "tagIds": [
+        "cli-연결-확인"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-execution.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+      "tagIds": [
+        "명세-채팅",
+        "참조-태그-관리",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "tagIds": [
+        "참조-맵-탐색",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-summary.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis.constants.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "앱-설정-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "앱-설정-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+      "tagIds": [
+        "앱-설정-저장소",
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
+      "tagIds": [
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "tagIds": [
+        "프로젝트-선택활성화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/fs/write-json-atomically.ts",
+      "tagIds": [
+        "앱-설정-저장소",
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-result.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "tagIds": [
+        "명세-문서-편집",
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "tagIds": [
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
+      "tagIds": [
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "tagIds": [
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "tagIds": [
+        "프로젝트-작업공간-저장소"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-prompt.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-result.ts",
+      "tagIds": [
+        "명세-채팅"
+      ]
+    },
+    {
+      "path": "src/main/apply-mac-app-icon.ts",
+      "tagIds": [
+        "macos-아이콘-번들"
+      ]
+    },
+    {
+      "path": "src/main/create-main-window.ts",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/main/ipc/register-project-ipc.ts",
+      "tagIds": [
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/main/ipc/register-settings-ipc.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정",
+        "설정-ipc"
+      ]
+    },
+    {
+      "path": "src/main/main.ts",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/preload/index.ts",
+      "tagIds": [
+        "설정-ipc",
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/renderer 2/App.tsx",
+      "tagIds": [
+        "레거시-렌더러-복제본"
+      ]
+    },
+    {
+      "path": "src/renderer 2/global.d.ts",
+      "tagIds": [
+        "레거시-렌더러-복제본"
+      ]
+    },
+    {
+      "path": "src/renderer 2/index.html",
+      "tagIds": [
+        "레거시-렌더러-복제본"
+      ]
+    },
+    {
+      "path": "src/renderer 2/main.tsx",
+      "tagIds": [
+        "레거시-렌더러-복제본"
+      ]
+    },
+    {
+      "path": "src/renderer/app-view.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/App.tsx",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/components/AppViewSwitcher.tsx",
+      "tagIds": [
+        "codex-연결-설정",
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/index.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/types.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/utils.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/index.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+      "tagIds": [
+        "참조-맵-탐색",
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "tagIds": [
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
+      "tagIds": [
+        "명세-문서-편집",
+        "명세-채팅",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace.tsx",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
+      "tagIds": [
+        "명세-문서-편집",
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+      "tagIds": [
+        "명세-문서-편집",
+        "분석-문서-맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
+      "tagIds": [
+        "최근-프로젝트-목록"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+      "tagIds": [
+        "명세-문서-편집"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
+      "tagIds": [
+        "최근-프로젝트-목록",
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
+      "tagIds": [
+        "최근-프로젝트-목록",
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-system-color-scheme.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
+      "tagIds": [
+        "프로젝트-작업화면"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+      "tagIds": [
+        "명세-문서-편집",
+        "분석-문서-맵",
+        "참조-맵-탐색"
+      ]
+    },
+    {
+      "path": "src/renderer/global.d.ts",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/index.html",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/main.tsx",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/styles/app.css",
+      "tagIds": [
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/shared/app/app-display-name.ts",
+      "tagIds": [
+        "macos-아이콘-번들",
+        "앱-셸"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/app-error.ts",
+      "tagIds": [
+        "결과오류-계약"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/result.ts",
+      "tagIds": [
+        "결과오류-계약"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/ipc-bridge.ts",
+      "tagIds": [
+        "설정-ipc",
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/project-ipc-api.ts",
+      "tagIds": [
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/project-ipc.ts",
+      "tagIds": [
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/sdd-ipc.ts",
+      "tagIds": [
+        "설정-ipc",
+        "프로젝트-작업-ipc"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/settings-ipc-api.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정",
+        "설정-ipc"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/settings-ipc.ts",
+      "tagIds": [
+        "cli-연결-확인",
+        "codex-연결-설정",
+        "설정-ipc"
+      ]
+    },
+    {
+      "path": "tsconfig.json",
+      "tagIds": [
+        "tseslint-규칙"
+      ]
+    }
+  ]
+}

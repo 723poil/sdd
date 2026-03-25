@@ -9,6 +9,8 @@ import {
 import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok, type Result } from '@/shared/contracts/result';
 
+import { resolveAgentCliExecutablePath } from '@/infrastructure/agent-cli/resolve-agent-cli-executable-path';
+
 export interface CodexRuntimeSettings {
   connectionSettings: AgentCliConnectionSettings;
   executablePath: string;
@@ -61,14 +63,40 @@ export async function resolveCodexRuntimeSettings(input: {
       );
     }
 
-    return ok({
-      connectionSettings: codexSettings,
+    const resolvedCustomExecutablePath = await resolveAgentCliExecutablePath({
       executablePath: codexSettings.executablePath,
     });
+    if (!resolvedCustomExecutablePath) {
+      return err(
+        createProjectError(
+          'AGENT_CLI_NOT_AVAILABLE',
+          '선택한 Codex CLI 실행 파일을 찾지 못했습니다. 앱 설정에서 경로나 PATH를 확인해 주세요.',
+          codexSettings.executablePath,
+        ),
+      );
+    }
+
+    return ok({
+      connectionSettings: codexSettings,
+      executablePath: resolvedCustomExecutablePath,
+    });
+  }
+
+  const resolvedSystemExecutablePath = await resolveAgentCliExecutablePath({
+    executablePath: definition.defaultExecutableName,
+  });
+  if (!resolvedSystemExecutablePath) {
+    return err(
+      createProjectError(
+        'AGENT_CLI_NOT_AVAILABLE',
+        'Codex CLI 실행 파일을 찾지 못했습니다. PATH 또는 기본 설치 위치를 확인해 주세요.',
+        definition.defaultExecutableName,
+      ),
+    );
   }
 
   return ok({
     connectionSettings: codexSettings,
-    executablePath: definition.defaultExecutableName,
+    executablePath: resolvedSystemExecutablePath,
   });
 }

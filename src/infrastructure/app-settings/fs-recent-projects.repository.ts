@@ -1,4 +1,5 @@
 import type { RecentProjectsStorePort } from '@/application/project/project.ports';
+import { normalizeProjectName } from '@/domain/project/project-model';
 import { ok } from '@/shared/contracts/result';
 
 import {
@@ -52,6 +53,72 @@ export function createFsRecentProjectsRepository(): RecentProjectsStorePort {
       });
 
       return ok(undefined);
+    },
+
+    async renameRecentProject(input) {
+      const settingsDocumentResult = await readAppSettingsDocument();
+      if (!settingsDocumentResult.ok) {
+        return settingsDocumentResult;
+      }
+
+      const normalizedProjectName = normalizeProjectName(input.projectName);
+      const didMatchProject = settingsDocumentResult.value.recentProjects.some(
+        (project) => project.rootPath === input.rootPath,
+      );
+
+      if (!didMatchProject) {
+        return {
+          ok: false,
+          error: {
+            code: 'INVALID_APP_SETTINGS',
+            message: '이름을 변경할 최근 프로젝트를 찾지 못했습니다.',
+          },
+        };
+      }
+
+      const nextRecentProjects = settingsDocumentResult.value.recentProjects.map((project) =>
+        project.rootPath === input.rootPath
+          ? {
+              ...project,
+              projectName: normalizedProjectName,
+            }
+          : project,
+      );
+
+      await writeAppSettingsDocument({
+        recentProjects: nextRecentProjects,
+        agentCliConnections: settingsDocumentResult.value.agentCliConnections,
+      });
+
+      return ok(nextRecentProjects);
+    },
+
+    async removeRecentProject(input) {
+      const settingsDocumentResult = await readAppSettingsDocument();
+      if (!settingsDocumentResult.ok) {
+        return settingsDocumentResult;
+      }
+
+      const nextRecentProjects = settingsDocumentResult.value.recentProjects.filter(
+        (project) => project.rootPath !== input.rootPath,
+      );
+
+      if (nextRecentProjects.length === settingsDocumentResult.value.recentProjects.length) {
+        return {
+          ok: false,
+          error: {
+            code: 'INVALID_APP_SETTINGS',
+            message: '제거할 최근 프로젝트를 찾지 못했습니다.',
+          },
+        };
+      }
+
+      await writeAppSettingsDocument({
+        recentProjects: nextRecentProjects,
+        agentCliConnections: settingsDocumentResult.value.agentCliConnections,
+      });
+
+      return ok(nextRecentProjects);
     },
 
     async reorderRecentProjects(input) {

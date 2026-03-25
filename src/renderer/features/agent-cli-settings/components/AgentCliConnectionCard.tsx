@@ -128,7 +128,7 @@ export function AgentCliConnectionCard(props: AgentCliConnectionCardProps) {
             value={props.draft.executablePath}
           />
           <p className="field-hint">
-            시스템 기본값은 PATH 에서 `codex`를 찾습니다. 직접 지정은 실행 파일 경로를 명시할 때 사용합니다.
+            시스템 기본값은 PATH 와 기본 설치 위치에서 `codex`를 찾습니다. 직접 지정은 실행 파일 경로를 명시할 때 사용합니다.
           </p>
         </div>
 
