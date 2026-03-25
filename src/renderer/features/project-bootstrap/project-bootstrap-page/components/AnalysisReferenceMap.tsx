@@ -169,10 +169,15 @@ interface AnalysisReferenceBuildOptions {
 interface AnalysisRoleGroupEntry {
   allPaths: string[];
   category: string;
-  height: number;
   hiddenCount: number;
   isExpanded: boolean;
   visiblePaths: string[];
+}
+
+interface AnalysisRoleGroupLayout extends AnalysisRoleGroupEntry {
+  height: number;
+  nodeHeights: number[];
+  nodeOffsets: number[];
 }
 
 const EMPTY_STAGE_SIZE: AnalysisStageSize = {
@@ -208,10 +213,25 @@ const ROLE_GROUP_PADDING_TOP = 10;
 const ROLE_GROUP_PADDING_BOTTOM = 12;
 const ROLE_GROUP_PREVIEW_FOOTER_HEIGHT = 28;
 const ROLE_GROUP_PREVIEW_FOOTER_GAP = 8;
-const NODE_HEIGHT = 172;
+const NODE_MIN_HEIGHT = 188;
 const NODE_VERTICAL_GAP = 10;
 const MIN_AREA_HEIGHT = 260;
 const OVERVIEW_PREVIEW_NODE_LIMIT = 2;
+const NODE_CARD_VERTICAL_PADDING = 14;
+const NODE_CARD_CONTENT_GAP = 8;
+const NODE_FILE_LINE_HEIGHT = 16;
+const NODE_PATH_LINE_HEIGHT = 18;
+const NODE_SUMMARY_LINE_HEIGHT = 18;
+const NODE_META_CHIP_HEIGHT = 24;
+const NODE_META_CHIP_GAP = 6;
+const NODE_FILE_MAX_LINES = 2;
+const NODE_PATH_MAX_LINES = 3;
+const NODE_SUMMARY_MAX_LINES = 3;
+const NODE_TEXT_PIXEL_WIDTH = 6.9;
+const NODE_SUMMARY_PIXEL_WIDTH = 7.2;
+const NODE_META_PIXEL_WIDTH = 6.2;
+const NODE_META_MIN_WIDTH = 52;
+const NODE_META_HORIZONTAL_PADDING = 18;
 
 export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -260,6 +280,10 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const graphResetKey = useMemo(
     () => createReferenceGraphResetKey(props.analysis),
     [props.analysis],
+  );
+  const filterViewportResetKey = useMemo(
+    () => `${activeAreaNames.join('|')}#${activeTagIds.join('|')}`,
+    [activeAreaNames, activeTagIds],
   );
   const expandedGroupKeySet = useMemo(() => new Set(expandedGroupKeys), [expandedGroupKeys]);
 
@@ -348,7 +372,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   useEffect(() => {
     hasAdjustedViewportRef.current = false;
     setViewport(INITIAL_VIEWPORT);
-  }, [activeAreaNames]);
+  }, [filterViewportResetKey]);
 
   useEffect(() => {
     if (selectedPath && !visibleGraph.nodes.some((node) => node.path === selectedPath)) {
@@ -493,7 +517,6 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     description: string;
     label: string;
   }): Promise<ReferenceTagCreateResult> => {
-
     const normalizedLabel = input.label.trim();
     const existingLabels = new Set(
       tagSummaries.map((summary) => summary.tag.label.trim().toLowerCase()),
@@ -520,7 +543,6 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   };
 
   const handleDeleteTag = async (tagId: string): Promise<void> => {
-
     const didSave = await saveReferenceTags(removeReferenceTagFromDocument(referenceTags, tagId));
     if (didSave) {
       setActiveTagIds((current) => current.filter((currentTagId) => currentTagId !== tagId));
@@ -767,8 +789,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                   {visibleGraph.areas.map((area) => (
                     <div
                       className={`analysis-reference-map__area ${
-                        selectedNode?.area === area.name ||
-                        activeAreaNameSet.has(area.name)
+                        selectedNode?.area === area.name || activeAreaNameSet.has(area.name)
                           ? 'analysis-reference-map__area--active'
                           : ''
                       }`}
@@ -981,7 +1002,9 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                   <button
                     aria-pressed={activeAreaNames.length === 0}
                     className={`analysis-reference-map__layer-chip ${
-                      activeAreaNames.length === 0 ? 'analysis-reference-map__layer-chip--active' : ''
+                      activeAreaNames.length === 0
+                        ? 'analysis-reference-map__layer-chip--active'
+                        : ''
                     }`}
                     onClick={() => {
                       setActiveAreaNames([]);
@@ -1207,10 +1230,7 @@ function buildReferenceGraph(
       .filter(
         (path) =>
           options.activeTagIds.size === 0 ||
-          (tagIdsByPath
-            .get(path)
-            ?.some((tagId) => options.activeTagIds.has(tagId)) ??
-            false),
+          (tagIdsByPath.get(path)?.some((tagId) => options.activeTagIds.has(tagId)) ?? false),
       ),
   );
   const edges = deduplicateFileReferences(analysis.context.fileReferences).filter(
@@ -1320,11 +1340,61 @@ function buildReferenceGraph(
           ROLE_GROUP_GAP * Math.max(0, groupColumnCount - 1)) /
           groupColumnCount,
       );
+      const nodeWidth = groupWidth - ROLE_GROUP_PADDING_X * 2;
+      const groupLayouts: AnalysisRoleGroupLayout[] = groupEntries.map((groupEntry) => {
+        const nodeHeights = groupEntry.visiblePaths.map((path) => {
+          const entry = entryByPath.get(path);
+          const summary = getReferenceSummary(entry);
+          const role = entry?.role ?? '참조 파일';
+          const incomingCount = incomingCounts.get(path) ?? 0;
+          const outgoingCount = outgoingCounts.get(path) ?? 0;
+          const tagLabels = resolveReferenceNodeTagLabels({
+            path,
+            tagIdsByPath,
+            tagLabelById,
+          });
+          const metaLabels = buildReferenceNodeMetaLabels({
+            groupCategory: groupEntry.category,
+            incomingCount,
+            outgoingCount,
+            role,
+            tagCount: tagLabels.length,
+          });
+
+          return estimateReferenceNodeHeight({
+            availableWidth: nodeWidth,
+            fileName: getPathDisplayName(path),
+            metaLabels,
+            path,
+            summary,
+          });
+        });
+        const nodeOffsets = buildRowOffsets(nodeHeights, NODE_VERTICAL_GAP);
+        const footerHeight =
+          groupEntry.hiddenCount > 0
+            ? ROLE_GROUP_PREVIEW_FOOTER_GAP + ROLE_GROUP_PREVIEW_FOOTER_HEIGHT
+            : 0;
+        const nodesHeight =
+          nodeHeights.reduce((sum, height) => sum + height, 0) +
+          Math.max(0, nodeHeights.length - 1) * NODE_VERTICAL_GAP;
+
+        return {
+          ...groupEntry,
+          height:
+            ROLE_GROUP_HEADER_HEIGHT +
+            ROLE_GROUP_PADDING_TOP +
+            ROLE_GROUP_PADDING_BOTTOM +
+            nodesHeight +
+            footerHeight,
+          nodeHeights,
+          nodeOffsets,
+        };
+      });
       const groupRowHeights: number[] = [];
 
-      groupEntries.forEach((groupEntry, groupIndex) => {
+      groupLayouts.forEach((groupLayout, groupIndex) => {
         const rowIndex = Math.floor(groupIndex / groupColumnCount);
-        groupRowHeights[rowIndex] = Math.max(groupRowHeights[rowIndex] ?? 0, groupEntry.height);
+        groupRowHeights[rowIndex] = Math.max(groupRowHeights[rowIndex] ?? 0, groupLayout.height);
       });
 
       const clusterBodyHeight =
@@ -1336,7 +1406,7 @@ function buildReferenceGraph(
           CLUSTER_HEADER_HEIGHT + CLUSTER_PADDING_TOP + clusterBodyHeight + CLUSTER_PADDING_BOTTOM,
         clusterName,
         groupColumnCount,
-        groupEntries,
+        groupLayouts,
         groupRowOffsets: buildRowOffsets(groupRowHeights, ROLE_GROUP_GAP),
         groupWidth,
         orderedPaths,
@@ -1354,7 +1424,7 @@ function buildReferenceGraph(
       clusters.push({
         areaName,
         count: clusterLayout.orderedPaths.length,
-        groupCount: clusterLayout.groupEntries.length,
+        groupCount: clusterLayout.groupLayouts.length,
         height: clusterLayout.clusterHeight,
         key: clusterName,
         label: resolveClusterDisplayName(clusterName),
@@ -1364,7 +1434,7 @@ function buildReferenceGraph(
         y: clusterY,
       });
 
-      clusterLayout.groupEntries.forEach((groupEntry, groupIndex) => {
+      clusterLayout.groupLayouts.forEach((groupLayout, groupIndex) => {
         const groupColumnIndex = groupIndex % clusterLayout.groupColumnCount;
         const groupRowIndex = Math.floor(groupIndex / clusterLayout.groupColumnCount);
         const groupX =
@@ -1379,49 +1449,52 @@ function buildReferenceGraph(
         const nodeWidth = clusterLayout.groupWidth - ROLE_GROUP_PADDING_X * 2;
 
         roleGroups.push({
-          category: groupEntry.category,
+          category: groupLayout.category,
           clusterKey: clusterName,
-          count: groupEntry.allPaths.length,
-          height: groupEntry.height,
-          hiddenCount: groupEntry.hiddenCount,
-          isExpanded: groupEntry.isExpanded,
-          key: `${clusterName}|${groupEntry.category}`,
-          label: resolveRoleGroupDisplayName(groupEntry.category),
+          count: groupLayout.allPaths.length,
+          height: groupLayout.height,
+          hiddenCount: groupLayout.hiddenCount,
+          isExpanded: groupLayout.isExpanded,
+          key: `${clusterName}|${groupLayout.category}`,
+          label: resolveRoleGroupDisplayName(groupLayout.category),
           width: clusterLayout.groupWidth,
           x: groupX,
           y: groupY,
         });
 
-        groupEntry.allPaths.forEach((path) => {
-          groupCategoryByPath.set(path, groupEntry.category);
+        groupLayout.allPaths.forEach((path) => {
+          groupCategoryByPath.set(path, groupLayout.category);
         });
 
-        groupEntry.visiblePaths.forEach((path, nodeIndex) => {
+        groupLayout.visiblePaths.forEach((path, nodeIndex) => {
           const entry = entryByPath.get(path);
+          const tagLabels = resolveReferenceNodeTagLabels({
+            path,
+            tagIdsByPath,
+            tagLabelById,
+          });
 
           nodes.push({
             area: areaName,
-            category: entry?.category ?? groupEntry.category,
+            category: entry?.category ?? groupLayout.category,
             cluster: clusterName,
             fileName: getPathDisplayName(path),
-            groupCategory: groupEntry.category,
-            height: NODE_HEIGHT,
+            groupCategory: groupLayout.category,
+            height: groupLayout.nodeHeights[nodeIndex] ?? NODE_MIN_HEIGHT,
             incomingCount: incomingCounts.get(path) ?? 0,
             layer: entry?.layer ?? null,
             outgoingCount: outgoingCounts.get(path) ?? 0,
             path,
             role: entry?.role ?? '참조 파일',
             summary: getReferenceSummary(entry),
-            tagLabels: (tagIdsByPath.get(path) ?? [])
-              .map((tagId) => tagLabelById.get(tagId))
-              .filter((tagLabel): tagLabel is string => Boolean(tagLabel)),
+            tagLabels,
             width: nodeWidth,
             x: groupX + ROLE_GROUP_PADDING_X,
             y:
               groupY +
               ROLE_GROUP_HEADER_HEIGHT +
               ROLE_GROUP_PADDING_TOP +
-              nodeIndex * (NODE_HEIGHT + NODE_VERTICAL_GAP),
+              (groupLayout.nodeOffsets[nodeIndex] ?? 0),
           });
         });
       });
@@ -1487,11 +1560,102 @@ function filterReferenceGraphByAreas(
     (summary) => clusterKeys.has(summary.fromCluster) && clusterKeys.has(summary.toCluster),
   );
 
-  return {
+  return compactReferenceGraphLayout({
     areas,
     clusterSummaries,
     clusters,
     edges,
+    nodes,
+    roleGroups,
+  });
+}
+
+function compactReferenceGraphLayout(graph: AnalysisReferenceGraph): AnalysisReferenceGraph {
+  if (graph.areas.length === 0) {
+    return graph;
+  }
+
+  const areaOffsets = new Map<string, { x: number; y: number }>();
+  const areaColumnCount = resolveAreaColumnCount({
+    areaCount: graph.areas.length,
+    stageWidth: 0,
+  });
+  let areaX = 0;
+  let areaY = 0;
+  let currentAreaRowHeight = 0;
+
+  graph.areas.forEach((area, index) => {
+    if (index > 0 && index % areaColumnCount === 0) {
+      areaX = 0;
+      areaY += currentAreaRowHeight + AREA_GAP;
+      currentAreaRowHeight = 0;
+    }
+
+    areaOffsets.set(area.name, {
+      x: areaX - area.x,
+      y: areaY - area.y,
+    });
+    currentAreaRowHeight = Math.max(currentAreaRowHeight, area.height);
+    areaX += area.width + AREA_GAP;
+  });
+
+  const areas = graph.areas.map((area) => {
+    const offset = areaOffsets.get(area.name);
+    if (!offset) {
+      return area;
+    }
+
+    return {
+      ...area,
+      x: area.x + offset.x,
+      y: area.y + offset.y,
+    };
+  });
+  const clusterAreaByKey = new Map(
+    graph.clusters.map((cluster) => [cluster.key, cluster.areaName] as const),
+  );
+  const clusters = graph.clusters.map((cluster) => {
+    const offset = areaOffsets.get(cluster.areaName);
+    if (!offset) {
+      return cluster;
+    }
+
+    return {
+      ...cluster,
+      x: cluster.x + offset.x,
+      y: cluster.y + offset.y,
+    };
+  });
+  const roleGroups = graph.roleGroups.map((group) => {
+    const areaName = clusterAreaByKey.get(group.clusterKey);
+    const offset = areaName ? areaOffsets.get(areaName) : undefined;
+    if (!offset) {
+      return group;
+    }
+
+    return {
+      ...group,
+      x: group.x + offset.x,
+      y: group.y + offset.y,
+    };
+  });
+  const nodes = graph.nodes.map((node) => {
+    const offset = areaOffsets.get(node.area);
+    if (!offset) {
+      return node;
+    }
+
+    return {
+      ...node,
+      x: node.x + offset.x,
+      y: node.y + offset.y,
+    };
+  });
+
+  return {
+    ...graph,
+    areas,
+    clusters,
     nodes,
     roleGroups,
   };
@@ -1546,24 +1710,156 @@ function buildRoleGroupEntries(input: {
         input.expandedGroupKeys.has(groupKey) || allPaths.length <= OVERVIEW_PREVIEW_NODE_LIMIT;
       const visiblePaths = isExpanded ? allPaths : allPaths.slice(0, OVERVIEW_PREVIEW_NODE_LIMIT);
       const hiddenCount = Math.max(0, allPaths.length - visiblePaths.length);
-      const footerHeight =
-        hiddenCount > 0 ? ROLE_GROUP_PREVIEW_FOOTER_GAP + ROLE_GROUP_PREVIEW_FOOTER_HEIGHT : 0;
 
       return {
         allPaths,
         category,
-        height:
-          ROLE_GROUP_HEADER_HEIGHT +
-          ROLE_GROUP_PADDING_TOP +
-          ROLE_GROUP_PADDING_BOTTOM +
-          visiblePaths.length * NODE_HEIGHT +
-          Math.max(0, visiblePaths.length - 1) * NODE_VERTICAL_GAP +
-          footerHeight,
         hiddenCount,
         isExpanded,
         visiblePaths,
       };
     });
+}
+
+function resolveReferenceNodeTagLabels(input: {
+  path: string;
+  tagIdsByPath: Map<string, string[]>;
+  tagLabelById: Map<string, string>;
+}): string[] {
+  return (input.tagIdsByPath.get(input.path) ?? [])
+    .map((tagId) => input.tagLabelById.get(tagId))
+    .filter((tagLabel): tagLabel is string => Boolean(tagLabel));
+}
+
+function buildReferenceNodeMetaLabels(input: {
+  groupCategory: string;
+  incomingCount: number;
+  outgoingCount: number;
+  role: string;
+  tagCount: number;
+}): string[] {
+  const labels = [input.role, resolveRoleGroupDisplayName(input.groupCategory)];
+
+  if (input.tagCount > 0) {
+    labels.push(`태그 ${input.tagCount}`);
+  }
+
+  labels.push(`나감 ${input.outgoingCount}`);
+  labels.push(`들어옴 ${input.incomingCount}`);
+
+  return labels;
+}
+
+function estimateReferenceNodeHeight(input: {
+  availableWidth: number;
+  fileName: string;
+  metaLabels: string[];
+  path: string;
+  summary: string;
+}): number {
+  const contentWidth = Math.max(120, input.availableWidth);
+  const fileLineCount = estimateTextLineCount({
+    availableWidth: contentWidth,
+    maxLines: NODE_FILE_MAX_LINES,
+    pixelWidthPerUnit: NODE_TEXT_PIXEL_WIDTH,
+    text: input.fileName,
+  });
+  const pathLineCount = estimateTextLineCount({
+    availableWidth: contentWidth,
+    maxLines: NODE_PATH_MAX_LINES,
+    pixelWidthPerUnit: NODE_TEXT_PIXEL_WIDTH,
+    text: input.path,
+  });
+  const summaryLineCount = estimateTextLineCount({
+    availableWidth: contentWidth,
+    maxLines: NODE_SUMMARY_MAX_LINES,
+    pixelWidthPerUnit: NODE_SUMMARY_PIXEL_WIDTH,
+    text: input.summary,
+  });
+  const metaRowCount = estimateChipRowCount({
+    availableWidth: contentWidth,
+    labels: input.metaLabels,
+  });
+  const height =
+    NODE_CARD_VERTICAL_PADDING * 2 +
+    fileLineCount * NODE_FILE_LINE_HEIGHT +
+    NODE_CARD_CONTENT_GAP +
+    pathLineCount * NODE_PATH_LINE_HEIGHT +
+    NODE_CARD_CONTENT_GAP +
+    summaryLineCount * NODE_SUMMARY_LINE_HEIGHT +
+    NODE_CARD_CONTENT_GAP +
+    metaRowCount * NODE_META_CHIP_HEIGHT +
+    Math.max(0, metaRowCount - 1) * NODE_META_CHIP_GAP;
+
+  return Math.max(NODE_MIN_HEIGHT, Math.ceil(height));
+}
+
+function estimateTextLineCount(input: {
+  availableWidth: number;
+  maxLines: number;
+  pixelWidthPerUnit: number;
+  text: string;
+}): number {
+  const safeWidth = Math.max(input.availableWidth, 1);
+  const estimatedWidth = estimateTextVisualUnits(input.text) * input.pixelWidthPerUnit;
+  return clamp(Math.ceil(estimatedWidth / safeWidth), 1, input.maxLines);
+}
+
+function estimateChipRowCount(input: { availableWidth: number; labels: string[] }): number {
+  if (input.labels.length === 0) {
+    return 1;
+  }
+
+  const safeWidth = Math.max(input.availableWidth, 1);
+  let currentRowWidth = 0;
+  let rowCount = 1;
+
+  for (const label of input.labels) {
+    const chipWidth = Math.min(
+      safeWidth,
+      Math.max(
+        NODE_META_MIN_WIDTH,
+        Math.ceil(
+          estimateTextVisualUnits(label) * NODE_META_PIXEL_WIDTH + NODE_META_HORIZONTAL_PADDING,
+        ),
+      ),
+    );
+
+    if (currentRowWidth > 0 && currentRowWidth + NODE_META_CHIP_GAP + chipWidth > safeWidth) {
+      rowCount += 1;
+      currentRowWidth = chipWidth;
+      continue;
+    }
+
+    currentRowWidth += currentRowWidth > 0 ? NODE_META_CHIP_GAP + chipWidth : chipWidth;
+  }
+
+  return rowCount;
+}
+
+function estimateTextVisualUnits(text: string): number {
+  let total = 0;
+
+  for (const character of text) {
+    if (character === ' ') {
+      total += 0.45;
+      continue;
+    }
+
+    if (character <= '\u007f') {
+      if (character === '/' || character === '.' || character === '_' || character === '-') {
+        total += 0.72;
+        continue;
+      }
+
+      total += 0.96;
+      continue;
+    }
+
+    total += 1.68;
+  }
+
+  return total;
 }
 
 function buildRowOffsets(rowHeights: number[], gap: number): number[] {
