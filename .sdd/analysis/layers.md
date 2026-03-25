@@ -1,38 +1,50 @@
-이 저장소의 런타임 구조는 Electron 프로세스 분리와 use case/port 패턴을 함께 쓰는 형태다. 핵심은 renderer에서 파일 시스템과 Codex 실행을 몰아내고, main이 use case와 adapter를 조립해 IPC 뒤로 숨기는 것이다.
+# 계층과 책임
+
+주요 경로는 application, config, domain/app-settings/source, domain/project/source, entrypoint, infrastructure, main, renderer, scripts/source, shared 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계를 함께 저장합니다.
 
 ## 의존 방향
+
 ```mermaid
-graph LR
-  R[Renderer UI] --> P[Preload IPC Bridge]
-  R --> X[Shared Contracts & IPC]
-  R --> D[Domain Models]
-  P --> X
-  M[Main Composition] --> A[Application Use Cases]
-  M --> I[Infrastructure Adapters & Repositories]
-  M --> X
-  A --> D
-  A --> X
-  I --> A
-  I --> D
-  I --> X
-  X --> D
+flowchart LR
+  layer0["entrypoint"]
+  layer1["main"]
+  layer2["renderer"]
+  layer3["application"]
+  layer4["infrastructure"]
+  layer5["shared"]
+  layer6["config"]
+  layer7["domain/app-settings/source"]
+  layer0 --> layer1
+  layer0 --> layer2
+  layer0 --> layer5
+  layer1 --> layer3
+  layer1 --> layer4
+  layer1 --> layer5
+  layer2 --> layer7
+  layer2 --> layer0
+  layer2 --> layer5
+  layer3 --> layer7
+  layer3 --> layer5
+  layer4 --> layer3
+  layer4 --> layer7
+  layer4 --> layer5
+  layer5 --> layer7
 ```
-- renderer는 `window.sdd`와 domain/shared 타입만 사용하고, `eslint.config.mjs`가 `@/infrastructure/*`, `@/main/*`, `electron`, `node:fs` 직접 import를 막는다.
-- preload는 비즈니스 로직 없이 typed IPC facade만 만든다.
-- main은 use case와 adapter를 동시에 아는 composition root다.
-- application은 port 계약과 흐름 제어만 하고 concrete 구현을 모른다.
-- infrastructure는 application port를 구현하면서 Node/Electron/fs/Codex에 접근한다.
 
 ## 레이어별 책임
-- `Renderer UI`: `use-project-bootstrap-workbench.workflow.ts`와 `use-agent-cli-settings-workflow.ts`가 화면 상태, progress card, 선택 컨텍스트를 묶는다.
-- `Preload IPC Bridge`: `src/preload/index.ts`가 `createRendererProjectApi`, `createRendererSettingsApi`를 `window.sdd`로 노출한다.
-- `Main Composition`: `register-project-ipc.ts`, `register-settings-ipc.ts`가 저장소, 분석기, CLI runtime, use case 조립을 끝낸다.
-- `Application Use Cases`: `analyze-project-workflow.ts`, `send-project-session-message.use-case.ts`, `ensure-project-storage-ready.ts`가 저장 준비, 분석, spec update, 세션 append를 orchestration 한다.
-- `Domain Models`: schemaVersion, revision, latestVersion, run status, default model 같은 규칙을 domain에 고정한다.
-- `Infrastructure Adapters & Repositories`: `.sdd` 저장, 전역 설정 저장, Codex 실행, 실행 파일 탐색, Electron dialog, 정적 스캔을 실제 구현한다.
-- `Shared Contracts & IPC`: project/settings channel 이름과 payload 타입을 양쪽 프로세스가 같이 본다.
 
-## 경계 메모
-- `shared/ipc`는 완전히 독립적인 lowest-level shared라기보다, domain 타입을 재사용하는 프로세스 간 계약층에 가깝다. IPC 계약 변경은 domain, preload, renderer에 동시에 파급된다.
-- 분석 진행 상태는 별도 저장이 아니라 main process 메모리 store에만 존재하고, renderer polling이 그것을 읽는다.
-- `src/infrastructure/sdd/fs-project-storage.repository.ts`는 storage layer이면서 revision conflict, backup/restore, 문서 layout 보존까지 담당하므로 현재 구조에서 가장 무거운 infrastructure 모듈이다.
+- entrypoint: 진입점 관련 코드 7개. 의존: main, renderer, shared.
+- main: 메인 프로세스 관련 코드 5개. 대표 경로: `src/main`. 의존: application, infrastructure, shared.
+- renderer: renderer UI 관련 코드 48개. 대표 경로: `src/renderer`. 의존: domain/app-settings/source, domain/project/source, entrypoint, shared.
+- application: 애플리케이션 유스케이스 관련 코드 31개. 대표 경로: `src/application`. 의존: domain/app-settings/source, domain/project/source, shared.
+- infrastructure: 인프라 연동 관련 코드 41개. 대표 경로: `src/infrastructure`. 의존: application, domain/app-settings/source, domain/project/source, shared.
+- shared: 공용 계약 및 유틸리티 9개. 대표 경로: `src/shared`. 의존: domain/app-settings/source, domain/project/source.
+- config: 설정 관련 코드 4개.
+- domain/app-settings/source: 도메인 app-settings 소스 관련 코드 1개.
+
+## 경계에서 주의할 점
+
+- renderer -> renderer: 정적 참조 87건. 예시: `src/renderer/App.tsx -> src/renderer/app-view.ts`.
+- infrastructure -> infrastructure: 정적 참조 52건. 예시: `src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts`.
+- infrastructure -> domain/project/source: 정적 참조 50건. 예시: `src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts`.
+- application -> application: 정적 참조 40건. 예시: `src/application/app-settings/check-agent-cli-connection.use-case.ts -> src/application/app-settings/app-settings.ports.ts`.

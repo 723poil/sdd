@@ -5,7 +5,12 @@ import type {
   AgentCliConnectionRecord,
   AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
-import { AGENT_CLI_MODEL_OPTIONS } from '@/domain/app-settings/agent-cli-connection-model';
+import {
+  AGENT_CLI_MODEL_OPTIONS,
+  AGENT_CLI_MODEL_REASONING_EFFORTS,
+} from '@/domain/app-settings/agent-cli-connection-model';
+
+export const AGENT_CLI_REASONING_EFFORT_OPTIONS = [...AGENT_CLI_MODEL_REASONING_EFFORTS];
 
 export function describeAgentCliCommandMode(commandMode: AgentCliCommandMode): string {
   return commandMode === 'custom' ? '직접 지정' : '시스템 기본값';

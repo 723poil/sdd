@@ -233,7 +233,6 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
           {workbench.isRightSidebarOpen ? (
             <InfoSidebar
               activeWorkspacePage={workbench.activeWorkspacePage}
-              analysis={workbench.analysis}
               canAnalyzeProject={workbench.canAnalyzeProject}
               canAnalyzeReferences={workbench.canAnalyzeReferences}
               canCancelAnalysis={workbench.canCancelAnalysis}
@@ -260,7 +259,6 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               onCreateSpec={handleCreateSpec}
               onSendMessage={handleSendMessage}
               onToggleSidebar={handleToggleRightSidebar}
-              selectedAnalysisDocumentId={workbench.selectedAnalysisDocumentId}
               selectedSpec={workbench.selectedSpec}
               selectedSession={workbench.selectedSession}
               sessionMessages={workbench.sessionMessages}

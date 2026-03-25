@@ -17,6 +17,10 @@ import {
   getSpecSummary,
   resolveSelectedSpec,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils';
+import {
+  EMPTY_WORKSPACE_STAGE_SIZE,
+  useWorkspaceStageSize,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size';
 
 interface SpecsWorkspaceProps {
   isActive: boolean;
@@ -69,11 +73,6 @@ interface SpecsPanState {
   startOffsetY: number;
 }
 
-const EMPTY_STAGE_SIZE: SpecsStageSize = {
-  width: 0,
-  height: 0,
-};
-
 const INITIAL_VIEWPORT: SpecsViewport = {
   scale: 1,
   offsetX: 0,
@@ -97,7 +96,7 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const hasAdjustedViewportRef = useRef(false);
   const interactionRef = useRef<SpecsPanState | null>(null);
   const [isPanning, setIsPanning] = useState(false);
-  const [stageSize, setStageSize] = useState<SpecsStageSize>(EMPTY_STAGE_SIZE);
+  const [stageSize, setStageSize] = useState<SpecsStageSize>(EMPTY_WORKSPACE_STAGE_SIZE);
   const [viewport, setViewport] = useState<SpecsViewport>(INITIAL_VIEWPORT);
   const boardNodes = useMemo(() => buildSpecBoardNodes(specs), [specs]);
   const worldStyle = useMemo<CSSProperties>(
@@ -117,47 +116,14 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     onViewModeChange('map');
   }, [onViewModeChange, specsKey]);
 
+  const observedStageSize = useWorkspaceStageSize({
+    isEnabled: isActive && specs.length > 0 && viewMode === 'map',
+    stageRef,
+  });
+
   useEffect(() => {
-    if (!isActive || specs.length === 0 || viewMode !== 'map') {
-      return;
-    }
-
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    let animationFrameId = 0;
-    const updateStageSize = () => {
-      const stageRect = stageElement.getBoundingClientRect();
-      setStageSize({
-        width: stageRect.width,
-        height: stageRect.height,
-      });
-    };
-
-    updateStageSize();
-    animationFrameId = window.requestAnimationFrame(updateStageSize);
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        updateStageSize();
-        return;
-      }
-
-      setStageSize({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      });
-    });
-
-    resizeObserver.observe(stageElement);
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-    };
-  }, [isActive, specs.length, viewMode]);
+    setStageSize(observedStageSize);
+  }, [observedStageSize]);
 
   useEffect(() => {
     if (

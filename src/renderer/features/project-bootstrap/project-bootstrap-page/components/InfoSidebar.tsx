@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 
 import {
-  AGENT_CLI_MODEL_OPTIONS,
   AGENT_CLI_MODEL_REASONING_EFFORTS,
   type AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
@@ -13,14 +12,16 @@ import type {
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
 import type {
-  SelectedProjectAnalysisDocumentId,
-  StructuredProjectAnalysis,
   WorkspacePageId,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import {
+  describeAgentCliModel,
+  describeAgentCliReasoningEffort,
+  getAgentCliModelOptions,
+} from '@/renderer/features/agent-cli-settings';
 
 interface InfoSidebarProps {
   activeWorkspacePage: WorkspacePageId;
-  analysis: StructuredProjectAnalysis | null;
   canAnalyzeProject: boolean;
   canAnalyzeReferences: boolean;
   canCancelAnalysis: boolean;
@@ -29,7 +30,6 @@ interface InfoSidebarProps {
   isAnalyzing: boolean;
   isCancellingAnalysis: boolean;
   isCreatingSpec: boolean;
-  selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpec: ProjectSpecDocument | null;
   selectedSession: ProjectSessionSummary | null;
   sessionMessages: ProjectSessionMessage[];
@@ -226,7 +226,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
                   >
                     {getChatModelOptions(props.chatModel).map((model) => (
                       <option key={model} value={model}>
-                        {describeChatModel(model)}
+                        {describeAgentCliModel(model)}
                       </option>
                     ))}
                   </select>
@@ -243,7 +243,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
                   >
                     {AGENT_CLI_MODEL_REASONING_EFFORTS.map((modelReasoningEffort) => (
                       <option key={modelReasoningEffort} value={modelReasoningEffort}>
-                        {describeChatReasoningEffort(modelReasoningEffort)}
+                        {describeAgentCliReasoningEffort(modelReasoningEffort)}
                       </option>
                     ))}
                   </select>
@@ -426,33 +426,5 @@ function formatMessageTimestamp(value: string): string {
 }
 
 function getChatModelOptions(currentModel: string): string[] {
-  return [...new Set([currentModel, ...AGENT_CLI_MODEL_OPTIONS])];
-}
-
-function describeChatModel(model: string): string {
-  const knownLabels: Record<string, string> = {
-    'gpt-5.4': 'GPT-5.4',
-    'gpt-5.4-mini': 'GPT-5.4 Mini',
-    'gpt-5.3-codex': 'GPT-5.3 Codex',
-    'gpt-5.3-codex-spark': 'GPT-5.3 Codex Spark',
-    'gpt-5.2': 'GPT-5.2',
-    'gpt-5.2-codex': 'GPT-5.2 Codex',
-  };
-
-  return knownLabels[model] ?? model;
-}
-
-function describeChatReasoningEffort(
-  modelReasoningEffort: AgentCliModelReasoningEffort,
-): string {
-  switch (modelReasoningEffort) {
-    case 'low':
-      return '낮음';
-    case 'medium':
-      return '보통';
-    case 'high':
-      return '높음';
-    case 'xhigh':
-      return '매우 높음';
-  }
+  return getAgentCliModelOptions(currentModel);
 }

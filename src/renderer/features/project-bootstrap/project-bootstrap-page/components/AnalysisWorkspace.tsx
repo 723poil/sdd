@@ -27,7 +27,6 @@ import {
   EMPTY_ANALYSIS_DOCUMENTS,
   EMPTY_DOCUMENT_LAYOUTS,
   EMPTY_DOCUMENT_LINKS,
-  EMPTY_STAGE_SIZE,
   INITIAL_VIEWPORT,
   buildAnalysisDocumentBoardNodes,
   buildAnalysisLinkPaths,
@@ -40,6 +39,10 @@ import {
   toDocumentLayoutMap,
   toWorldPoint,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils';
+import {
+  EMPTY_WORKSPACE_STAGE_SIZE,
+  useWorkspaceStageSize,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size';
 
 const NODE_DRAG_THRESHOLD_PX = 3;
 
@@ -75,7 +78,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
   const hasAdjustedViewportRef = useRef(false);
   const [draggingNodeId, setDraggingNodeId] = useState<ProjectAnalysisDocumentId | null>(null);
   const [isPanning, setIsPanning] = useState(false);
-  const [stageSize, setStageSize] = useState<AnalysisStageSize>(EMPTY_STAGE_SIZE);
+  const [stageSize, setStageSize] = useState<AnalysisStageSize>(EMPTY_WORKSPACE_STAGE_SIZE);
   const [viewport, setViewport] = useState<AnalysisViewport>(INITIAL_VIEWPORT);
   const [draftBoardPositions, setDraftBoardPositions] = useState<ProjectAnalysisDocumentLayoutMap>(
     {},
@@ -114,47 +117,14 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
     onViewModeChange('map');
   }, [analysisSessionKey, documentsKey, onViewModeChange]);
 
+  const observedStageSize = useWorkspaceStageSize({
+    isEnabled: isActive && viewMode === 'map' && Boolean(analysis),
+    stageRef,
+  });
+
   useEffect(() => {
-    if (!isActive || viewMode !== 'map' || !analysis) {
-      return;
-    }
-
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    let animationFrameId = 0;
-    const updateStageSize = () => {
-      const stageRect = stageElement.getBoundingClientRect();
-      setStageSize({
-        width: stageRect.width,
-        height: stageRect.height,
-      });
-    };
-
-    updateStageSize();
-    animationFrameId = window.requestAnimationFrame(updateStageSize);
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        updateStageSize();
-        return;
-      }
-
-      setStageSize({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      });
-    });
-
-    resizeObserver.observe(stageElement);
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-    };
-  }, [analysis, isActive, viewMode]);
+    setStageSize(observedStageSize);
+  }, [observedStageSize]);
 
   const boardNodes = useMemo(
     () => buildAnalysisDocumentBoardNodes(documents, boardPositions),

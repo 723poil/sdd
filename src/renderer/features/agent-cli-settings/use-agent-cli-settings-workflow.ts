@@ -8,56 +8,22 @@ import type {
   AgentCliId,
   AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
-import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
 import type {
   AgentCliConnectionDraft,
+  AgentCliConnectionDraftMap,
   AgentCliSettingsWorkbenchState,
 } from '@/renderer/features/agent-cli-settings/types';
-
-function getSddApi(): RendererSddApi | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  if (typeof window.sdd === 'undefined') {
-    return null;
-  }
-
-  if (
-    typeof window.sdd.settings?.listAgentCliConnections !== 'function' ||
-    typeof window.sdd.settings?.saveAgentCliConnection !== 'function' ||
-    typeof window.sdd.settings?.checkAgentCliConnection !== 'function'
-  ) {
-    return null;
-  }
-
-  return window.sdd;
-}
-
-function createDraftFromRecord(connection: AgentCliConnectionRecord): AgentCliConnectionDraft {
-  return {
-    agentId: connection.definition.agentId,
-    commandMode: connection.settings.commandMode,
-    executablePath: connection.settings.executablePath ?? '',
-    authMode: connection.settings.authMode,
-    model: connection.settings.model,
-    modelReasoningEffort: connection.settings.modelReasoningEffort,
-  };
-}
-
-function buildDraftsByAgentId(
-  connections: AgentCliConnectionRecord[],
-): Partial<Record<AgentCliId, AgentCliConnectionDraft>> {
-  return connections.reduce<Partial<Record<AgentCliId, AgentCliConnectionDraft>>>((accumulator, connection) => {
-    accumulator[connection.definition.agentId] = createDraftFromRecord(connection);
-    return accumulator;
-  }, {});
-}
+import {
+  buildDraftsByAgentId,
+  createDraftFromRecord,
+  getAgentCliSettingsApi,
+  patchDraftByAgentId,
+} from '@/renderer/features/agent-cli-settings/agent-cli-settings.api';
 
 export function useAgentCliSettingsWorkflow(): {
   connections: AgentCliConnectionRecord[];
-  draftsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionDraft>>;
+  draftsByAgentId: AgentCliConnectionDraftMap;
   checkResultsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionCheck>>;
   loadingMessage: string;
   errorMessage: string | null;
@@ -81,9 +47,7 @@ export function useAgentCliSettingsWorkflow(): {
   };
 } {
   const [connections, setConnections] = useState<AgentCliConnectionRecord[]>([]);
-  const [draftsByAgentId, setDraftsByAgentId] = useState<
-    Partial<Record<AgentCliId, AgentCliConnectionDraft>>
-  >({});
+  const [draftsByAgentId, setDraftsByAgentId] = useState<AgentCliConnectionDraftMap>({});
   const [checkResultsByAgentId, setCheckResultsByAgentId] = useState<
     Partial<Record<AgentCliId, AgentCliConnectionCheck>>
   >({});
@@ -93,9 +57,13 @@ export function useAgentCliSettingsWorkflow(): {
   const [savingAgentIds, setSavingAgentIds] = useState<Partial<Record<AgentCliId, boolean>>>({});
   const [checkingAgentIds, setCheckingAgentIds] = useState<Partial<Record<AgentCliId, boolean>>>({});
 
+  const applyDraftPatch = (agentId: AgentCliId, patch: Partial<AgentCliConnectionDraft>) => {
+    setDraftsByAgentId((current) => patchDraftByAgentId(current, agentId, patch));
+  };
+
   async function loadConnections(): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi) {
+    const settingsApi = getAgentCliSettingsApi();
+    if (!settingsApi) {
       setConnections([]);
       setDraftsByAgentId({});
       setCheckResultsByAgentId({});
@@ -109,7 +77,7 @@ export function useAgentCliSettingsWorkflow(): {
     setErrorMessage(null);
     setLoadingMessage('Codex CLI 연결 설정을 불러오는 중입니다.');
 
-    const result = await sddApi.settings.listAgentCliConnections();
+    const result = await settingsApi.listAgentCliConnections();
     if (!result.ok) {
       setConnections([]);
       setDraftsByAgentId({});
@@ -121,10 +89,7 @@ export function useAgentCliSettingsWorkflow(): {
     }
 
     setConnections(result.value);
-    setDraftsByAgentId((current) => ({
-      ...buildDraftsByAgentId(result.value),
-      ...current,
-    }));
+    setDraftsByAgentId(buildDraftsByAgentId(result.value));
     setLoadingMessage('연결 설정을 확인했습니다.');
     setIsLoading(false);
   }
@@ -134,8 +99,8 @@ export function useAgentCliSettingsWorkflow(): {
   }, []);
 
   async function handleSaveConnection(agentId: AgentCliId): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi) {
+    const settingsApi = getAgentCliSettingsApi();
+    if (!settingsApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
       return;
     }
@@ -149,7 +114,7 @@ export function useAgentCliSettingsWorkflow(): {
     setErrorMessage(null);
 
     try {
-      const result = await sddApi.settings.saveAgentCliConnection({
+      const result = await settingsApi.saveAgentCliConnection({
         agentId,
         commandMode: draft.commandMode,
         executablePath: draft.commandMode === 'custom' ? draft.executablePath : null,
@@ -180,8 +145,8 @@ export function useAgentCliSettingsWorkflow(): {
   }
 
   async function handleCheckConnection(agentId: AgentCliId): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi) {
+    const settingsApi = getAgentCliSettingsApi();
+    if (!settingsApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
       return;
     }
@@ -195,7 +160,7 @@ export function useAgentCliSettingsWorkflow(): {
     setErrorMessage(null);
 
     try {
-      const result = await sddApi.settings.checkAgentCliConnection({
+      const result = await settingsApi.checkAgentCliConnection({
         agentId,
         commandMode: draft.commandMode,
         executablePath: draft.commandMode === 'custom' ? draft.executablePath : null,
@@ -241,82 +206,26 @@ export function useAgentCliSettingsWorkflow(): {
             return current;
           }
 
-          return {
-            ...current,
-            [agentId]: {
-              ...existing,
-              commandMode,
-              executablePath: commandMode === 'custom' ? existing.executablePath : '',
-            },
-          };
+          return patchDraftByAgentId(current, agentId, {
+            commandMode,
+            executablePath: commandMode === 'custom' ? existing.executablePath : '',
+          });
         });
       },
       onChangeExecutablePath(agentId: AgentCliId, executablePath: string) {
-        setDraftsByAgentId((current) => {
-          const existing = current[agentId];
-          if (!existing) {
-            return current;
-          }
-
-          return {
-            ...current,
-            [agentId]: {
-              ...existing,
-              executablePath,
-            },
-          };
-        });
+        applyDraftPatch(agentId, { executablePath });
       },
       onChangeAuthMode(agentId: AgentCliId, authMode: AgentCliAuthMode) {
-        setDraftsByAgentId((current) => {
-          const existing = current[agentId];
-          if (!existing) {
-            return current;
-          }
-
-          return {
-            ...current,
-            [agentId]: {
-              ...existing,
-              authMode,
-            },
-          };
-        });
+        applyDraftPatch(agentId, { authMode });
       },
       onChangeModel(agentId: AgentCliId, model: string) {
-        setDraftsByAgentId((current) => {
-          const existing = current[agentId];
-          if (!existing) {
-            return current;
-          }
-
-          return {
-            ...current,
-            [agentId]: {
-              ...existing,
-              model,
-            },
-          };
-        });
+        applyDraftPatch(agentId, { model });
       },
       onChangeModelReasoningEffort(
         agentId: AgentCliId,
         modelReasoningEffort: AgentCliModelReasoningEffort,
       ) {
-        setDraftsByAgentId((current) => {
-          const existing = current[agentId];
-          if (!existing) {
-            return current;
-          }
-
-          return {
-            ...current,
-            [agentId]: {
-              ...existing,
-              modelReasoningEffort,
-            },
-          };
-        });
+        applyDraftPatch(agentId, { modelReasoningEffort });
       },
       onCheckConnection(agentId: AgentCliId) {
         return handleCheckConnection(agentId);

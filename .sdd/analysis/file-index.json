@@ -1,12 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-03-25T14:47:09.480Z",
+  "generatedAt": "2026-03-25T23:18:51.233Z",
   "entries": [
     {
       "category": "source",
       "layer": "main",
-      "path": "src/main/ipc/register-project-ipc.ts",
+      "path": "src/main/ipc/project-ipc-registration.ts",
       "references": [
+        {
+          "path": "src/shared/ipc/ipc-bridge.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/ipc-bridge"
+        },
+        {
+          "path": "src/shared/ipc/project-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/project-ipc"
+        },
         {
           "path": "src/application/project/activate-project.use-case.ts",
           "relationship": "imports",
@@ -63,14 +73,14 @@
           "reason": "정적 import: @/application/project/list-project-sessions.use-case"
         },
         {
-          "path": "src/application/project/read-project-analysis.use-case.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/application/project/read-project-analysis.use-case"
-        },
-        {
           "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/read-project-analysis-run-status.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-analysis.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-analysis.use-case"
         },
         {
           "path": "src/application/project/read-project-session-messages.use-case.ts",
@@ -103,14 +113,14 @@
           "reason": "정적 import: @/application/project/save-project-analysis-document-layouts.use-case"
         },
         {
-          "path": "src/application/project/save-project-spec.use-case.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/application/project/save-project-spec.use-case"
-        },
-        {
           "path": "src/application/project/save-project-reference-tags.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/save-project-reference-tags.use-case"
+        },
+        {
+          "path": "src/application/project/save-project-spec.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/save-project-spec.use-case"
         },
         {
           "path": "src/application/project/select-project-directory.use-case.ts",
@@ -126,11 +136,6 @@
           "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
           "relationship": "imports",
           "reason": "정적 import: @/infrastructure/app-settings/fs-agent-cli-settings.repository"
-        },
-        {
-          "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/app-settings/fs-recent-projects.repository"
         },
         {
           "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
@@ -153,9 +158,9 @@
           "reason": "정적 import: @/infrastructure/fs/node-project-inspector.adapter"
         },
         {
-          "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+          "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/reference-tags/node-project-reference-tag-generator.adapter"
+          "reason": "정적 import: @/infrastructure/app-settings/fs-recent-projects.repository"
         },
         {
           "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
@@ -168,19 +173,14 @@
           "reason": "정적 import: @/infrastructure/sdd/fs-project-storage.repository"
         },
         {
+          "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/reference-tags/node-project-reference-tag-generator.adapter"
+        },
+        {
           "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
           "relationship": "imports",
           "reason": "정적 import: @/infrastructure/spec-chat/node-project-spec-chat.adapter"
-        },
-        {
-          "path": "src/shared/ipc/ipc-bridge.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/ipc-bridge"
-        },
-        {
-          "path": "src/shared/ipc/project-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/project-ipc"
         }
       ],
       "role": "메인 소스",
@@ -247,13 +247,23 @@
           "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
         },
         {
+          "path": "src/infrastructure/sdd/fs-project-analysis-backup.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-analysis-backup"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-analysis-persistence.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-analysis-persistence"
+        },
+        {
           "path": "src/infrastructure/fs/write-json-atomically.ts",
           "relationship": "imports",
           "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건."
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -296,14 +306,9 @@
           "reason": "정적 import: @/shared/contracts/app-error"
         },
         {
-          "path": "src/shared/contracts/result.ts",
+          "path": "src/renderer/renderer-sdd-api.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/shared/contracts/result"
-        },
-        {
-          "path": "src/shared/ipc/sdd-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/sdd-ipc"
+          "reason": "정적 import: @/renderer/renderer-sdd-api"
         },
         {
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
@@ -316,9 +321,14 @@
           "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         },
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-progress-tasks.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-progress-tasks"
         }
       ],
       "role": "렌더러 소스",
@@ -494,7 +504,61 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 1건."
     },
     {
       "category": "repository",
@@ -646,6 +710,55 @@
     {
       "category": "source",
       "layer": "infrastructure",
+      "path": "src/infrastructure/sdd/fs-project-analysis-persistence.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/fs/write-json-atomically.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/fs/write-json-atomically"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-documents"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
       "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
       "references": [
         {
@@ -695,47 +808,47 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/domain/project/project-reference-tag-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
         },
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager"
         },
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
         },
         {
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
         }
       ],
       "role": "렌더러 소스",
@@ -876,7 +989,7 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 4건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 3건."
     },
     {
       "category": "source",
@@ -1012,6 +1125,94 @@
     },
     {
       "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/renderer/app-view.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/app-view"
+        },
+        {
+          "path": "src/renderer/components/AppViewSwitcher.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/components/AppViewSwitcher"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/AgentCliConnectionCard"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/renderer/renderer-sdd-api.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/renderer-sdd-api"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
       "layer": "infrastructure",
       "path": "src/infrastructure/sdd/fs-project-session-documents.ts",
       "references": [
@@ -1052,46 +1253,7 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/renderer/app-view.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/app-view"
-        },
-        {
-          "path": "src/renderer/components/AppViewSwitcher.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/components/AppViewSwitcher"
-        },
-        {
-          "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/AgentCliConnectionCard"
-        },
-        {
-          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
-        },
-        {
-          "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -1099,19 +1261,14 @@
           "reason": "정적 import: @/domain/project/project-analysis-model"
         },
         {
-          "path": "src/domain/project/project-reference-tag-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants"
         },
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types"
         },
         {
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
@@ -1122,6 +1279,50 @@
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/index.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings"
         }
       ],
       "role": "렌더러 소스",
@@ -1159,7 +1360,7 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 13건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 15건."
     },
     {
       "category": "source",
@@ -1470,32 +1671,32 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
       "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        },
         {
           "path": "src/domain/project/project-spec-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
-          "path": "src/domain/project/project-session-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-session-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
         },
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size"
         }
       ],
       "role": "렌더러 소스",
@@ -1565,6 +1766,35 @@
       "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 8건."
     },
     {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 3건."
+    },
+    {
       "category": "repository",
       "layer": "infrastructure",
       "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
@@ -1625,7 +1855,7 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -1633,19 +1863,19 @@
           "reason": "정적 import: @/domain/project/project-analysis-model"
         },
         {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager"
+        },
+        {
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types"
         }
       ],
       "role": "렌더러 소스",
@@ -1973,6 +2203,35 @@
     {
       "category": "source",
       "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+      "references": [
+        {
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/utils"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/types"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
       "references": [
         {
@@ -2001,35 +2260,6 @@
     },
     {
       "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
-      "references": [
-        {
-          "path": "src/domain/project/project-spec-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-spec-model"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
       "layer": "infrastructure",
       "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
       "references": [
@@ -2050,7 +2280,7 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 5건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 7건."
     },
     {
       "category": "source",
@@ -2075,30 +2305,6 @@
       ],
       "role": "애플리케이션 소스",
       "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 3건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/App.tsx",
-      "references": [
-        {
-          "path": "src/renderer/features/agent-cli-settings/index.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/index.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap"
-        },
-        {
-          "path": "src/renderer/app-view.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/app-view"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 2건."
     },
     {
       "category": "source",
@@ -2487,6 +2693,30 @@
     {
       "category": "source",
       "layer": "infrastructure",
+      "path": "src/infrastructure/sdd/fs-project-analysis-backup.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-io"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
       "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
       "references": [
         {
@@ -2511,22 +2741,46 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+      "path": "src/renderer/App.tsx",
       "references": [
+        {
+          "path": "src/renderer/features/agent-cli-settings/index.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/index.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap"
+        },
+        {
+          "path": "src/renderer/app-view.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/app-view"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts",
+      "references": [
+        {
+          "path": "src/renderer/features/agent-cli-settings/types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/types"
+        },
+        {
+          "path": "src/renderer/renderer-sdd-api.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/renderer-sdd-api"
+        },
         {
           "path": "src/domain/app-settings/agent-cli-connection-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        },
-        {
-          "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/components/ConnectionStatusPill"
-        },
-        {
-          "path": "src/renderer/features/agent-cli-settings/utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/utils"
         }
       ],
       "role": "렌더러 소스",
@@ -2543,14 +2797,14 @@
           "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
         },
         {
-          "path": "src/shared/ipc/sdd-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/sdd-ipc"
-        },
-        {
           "path": "src/renderer/features/agent-cli-settings/types.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/agent-cli-settings/types"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/agent-cli-settings.api"
         }
       ],
       "role": "렌더러 소스",
@@ -2669,7 +2923,7 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 30건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 33건."
     },
     {
       "category": "source",
@@ -2707,7 +2961,7 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 4건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건."
     },
     {
       "category": "source",
@@ -2727,6 +2981,25 @@
       ],
       "role": "공용 소스",
       "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건."
+    },
+    {
+      "category": "entrypoint",
+      "layer": "entrypoint",
+      "path": "src/renderer/features/agent-cli-settings/index.ts",
+      "references": [
+        {
+          "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/AgentCliSettingsPage"
+        },
+        {
+          "path": "src/renderer/features/agent-cli-settings/utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/agent-cli-settings/utils"
+        }
+      ],
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
     },
     {
       "category": "source",
@@ -2900,23 +3173,23 @@
       "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
-      "category": "entrypoint",
-      "layer": "entrypoint",
-      "path": "src/renderer 2/main.tsx",
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-progress-tasks.ts",
       "references": [
         {
-          "path": "src/renderer/App.tsx",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/App"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
         },
         {
-          "path": "src/renderer/styles/app.css",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/styles/app.css"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils"
         }
       ],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
     },
     {
       "category": "entrypoint",
@@ -2949,7 +3222,7 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 58건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 60건."
     },
     {
       "category": "source",
@@ -2963,7 +3236,7 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 24건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 26건."
     },
     {
       "category": "source",
@@ -2977,12 +3250,12 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 19건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 20건."
     },
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -2991,12 +3264,26 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 5건."
+    },
+    {
+      "category": "source",
+      "layer": "infrastructure",
+      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
     },
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -3023,31 +3310,59 @@
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/types.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
         }
       ],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
     },
     {
-      "category": "entrypoint",
-      "layer": "entrypoint",
-      "path": "src/renderer/features/project-bootstrap/index.ts",
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/agent-cli-settings/utils.ts",
       "references": [
         {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
+          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage"
+          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
         }
       ],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-reference-tag-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/renderer-sdd-api.ts",
+      "references": [
+        {
+          "path": "src/shared/ipc/sdd-ipc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/ipc/sdd-ipc"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
     },
     {
       "category": "source",
@@ -3080,12 +3395,12 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
       "references": [
         {
-          "path": "src/domain/project/project-reference-tag-model.ts",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-reference-tag-model"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
         }
       ],
       "role": "렌더러 소스",
@@ -3108,12 +3423,12 @@
     {
       "category": "entrypoint",
       "layer": "entrypoint",
-      "path": "src/renderer/features/agent-cli-settings/index.ts",
+      "path": "src/renderer/features/project-bootstrap/index.ts",
       "references": [
         {
-          "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
           "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/agent-cli-settings/AgentCliSettingsPage"
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage"
         }
       ],
       "role": "진입점 후보",
@@ -3191,31 +3506,17 @@
     },
     {
       "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/types.ts",
+      "layer": "main",
+      "path": "src/main/ipc/register-project-ipc.ts",
       "references": [
         {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+          "path": "src/main/ipc/project-ipc-registration.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
+          "reason": "정적 import: @/main/ipc/project-ipc-registration"
         }
       ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/utils.ts",
-      "references": [
-        {
-          "path": "src/domain/app-settings/agent-cli-connection-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
     },
     {
       "category": "source",
@@ -3234,20 +3535,6 @@
     {
       "category": "source",
       "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
-      "references": [
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
       "references": [
         {
@@ -3258,20 +3545,6 @@
       ],
       "role": "렌더러 소스",
       "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
-    },
-    {
-      "category": "type",
-      "layer": "renderer 2/type",
-      "path": "src/renderer 2/global.d.ts",
-      "references": [
-        {
-          "path": "src/shared/ipc/project-ipc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/shared/ipc/project-ipc"
-        }
-      ],
-      "role": "renderer 2 타입",
-      "summary": "renderer 2 타입입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
     },
     {
       "category": "type",
@@ -3303,20 +3576,6 @@
     },
     {
       "category": "source",
-      "layer": "renderer 2/source",
-      "path": "src/renderer 2/App.tsx",
-      "references": [
-        {
-          "path": "src/renderer/features/project-bootstrap/index.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap"
-        }
-      ],
-      "role": "renderer 2 소스",
-      "summary": "renderer 2 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
-    },
-    {
-      "category": "source",
       "layer": "renderer",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
       "references": [
@@ -3335,7 +3594,7 @@
       "path": "src/domain/project/project-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 29건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 30건."
     },
     {
       "category": "source",
@@ -3343,7 +3602,7 @@
       "path": "src/domain/app-settings/agent-cli-connection-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 24건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 26건."
     },
     {
       "category": "source",
@@ -3351,7 +3610,7 @@
       "path": "src/domain/project/project-session-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 15건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 16건."
     },
     {
       "category": "source",
@@ -3359,7 +3618,7 @@
       "path": "src/domain/project/project-reference-tag-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 13건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 15건."
     },
     {
       "category": "source",
@@ -3367,7 +3626,7 @@
       "path": "src/infrastructure/fs/write-json-atomically.ts",
       "references": [],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 5건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 6건."
     },
     {
       "category": "source",
@@ -3402,14 +3661,6 @@
       "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건."
     },
     {
-      "category": "entrypoint",
-      "layer": "entrypoint",
-      "path": "src/renderer/styles/app.css",
-      "references": [],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
-    },
-    {
       "category": "source",
       "layer": "infrastructure",
       "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
@@ -3436,10 +3687,34 @@
     {
       "category": "source",
       "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
       "references": [],
       "role": "렌더러 소스",
       "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+    },
+    {
+      "category": "source",
+      "layer": "renderer",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+    },
+    {
+      "category": "entrypoint",
+      "layer": "entrypoint",
+      "path": "src/renderer/styles/app.css",
+      "references": [],
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
     },
     {
       "category": "source",
@@ -3504,14 +3779,6 @@
       "references": [],
       "role": "렌더러 소스",
       "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "entrypoint",
-      "layer": "entrypoint",
-      "path": "src/renderer 2/index.html",
-      "references": [],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
     },
     {
       "category": "entrypoint",

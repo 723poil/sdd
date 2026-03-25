@@ -9,6 +9,7 @@ import type {
 
 import { ConnectionStatusPill } from '@/renderer/features/agent-cli-settings/components/ConnectionStatusPill';
 import {
+  AGENT_CLI_REASONING_EFFORT_OPTIONS,
   describeAgentCliAuthMode,
   describeAgentCliCommandMode,
   describeAgentCliModel,
@@ -16,17 +17,11 @@ import {
   formatSavedAt,
   getAgentCliModelOptions,
 } from '@/renderer/features/agent-cli-settings/utils';
+import type { AgentCliConnectionDraft } from '@/renderer/features/agent-cli-settings/types';
 
 interface AgentCliConnectionCardProps {
   connection: AgentCliConnectionRecord;
-  draft: {
-    agentId: AgentCliId;
-    commandMode: AgentCliCommandMode;
-    executablePath: string;
-    authMode: AgentCliAuthMode;
-    model: string;
-    modelReasoningEffort: AgentCliModelReasoningEffort;
-  };
+  draft: AgentCliConnectionDraft;
   checkResult: AgentCliConnectionCheck | undefined;
   checkLabel: string;
   checkTone: 'positive' | 'warning' | 'neutral' | 'danger';
@@ -193,7 +188,7 @@ export function AgentCliConnectionCard(props: AgentCliConnectionCardProps) {
               }}
               value={props.draft.modelReasoningEffort}
             >
-              {(['low', 'medium', 'high', 'xhigh'] as const).map((modelReasoningEffort) => (
+              {AGENT_CLI_REASONING_EFFORT_OPTIONS.map((modelReasoningEffort) => (
                 <option key={modelReasoningEffort} value={modelReasoningEffort}>
                   {describeAgentCliReasoningEffort(modelReasoningEffort)}
                 </option>

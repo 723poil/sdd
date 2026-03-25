@@ -1,21 +1,13 @@
-import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import { basename, resolve } from 'node:path';
 
 import type { ProjectStoragePort } from '@/application/project/project.ports';
 import { ANALYSIS_FILE_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
-import {
-  PROJECT_ANALYSIS_DOCUMENT_IDS,
-  normalizeProjectAnalysisContext,
-  type ProjectAnalysisContext,
-  type ProjectAnalysisDraft,
-  type ProjectAnalysisDocumentLayoutMap,
-} from '@/domain/project/project-analysis-model';
+import { type ProjectAnalysisContext } from '@/domain/project/project-analysis-model';
 import {
   createEmptyProjectReferenceTagDocument,
   PROJECT_REFERENCE_TAGS_SCHEMA_VERSION,
   sanitizeProjectReferenceTagDocument,
-  type ProjectReferenceTagDocument,
 } from '@/domain/project/project-reference-tag-model';
 import {
   createNextProjectSpecMeta,
@@ -36,13 +28,12 @@ import {
   createNextProjectMetaAfterRename,
   normalizeProjectName,
 } from '@/domain/project/project-model';
-import { err, ok, type Result } from '@/shared/contracts/result';
+import { err, ok } from '@/shared/contracts/result';
 
 import {
   createInitialProjectStorageDocuments,
   readProjectAnalysisDocument,
   readProjectMetaDocument,
-  readProjectReferenceTagDocument,
 } from '@/infrastructure/sdd/fs-project-storage-documents';
 import {
   readSpecMetaDocument,
@@ -50,27 +41,27 @@ import {
   toProjectSpecIndexEntries,
 } from '@/infrastructure/sdd/fs-project-spec-documents';
 import {
-  getProjectAnalysisDocumentPath,
   getProjectStoragePaths,
   getSpecMetaPath,
   getSpecVersionPath,
 } from '@/infrastructure/sdd/fs-project-storage-paths';
+import { ensureJsonFile, ensureTextFile, pathExists } from '@/infrastructure/sdd/fs-project-storage-io';
 import {
-  ensureJsonFile,
-  ensureTextFile,
-  pathExists,
-  readJsonFile,
-} from '@/infrastructure/sdd/fs-project-storage-io';
+  buildProjectAnalysisWriteFailureDetails,
+  cleanupProjectAnalysisBackup,
+  createProjectAnalysisBackup,
+  restoreProjectAnalysisBackup,
+} from '@/infrastructure/sdd/fs-project-analysis-backup';
+import {
+  readProjectAnalysisDocumentLayouts,
+  readProjectReferenceTags,
+  writeProjectAnalysisDocumentLayouts,
+  writeProjectAnalysisDocuments,
+} from '@/infrastructure/sdd/fs-project-analysis-persistence';
 import {
   writeJsonAtomically,
   writeTextAtomically,
 } from '@/infrastructure/fs/write-json-atomically';
-
-interface ProjectAnalysisBackup {
-  backupAnalysisDirectoryPath: string | null;
-  backupRootPath: string | null;
-  hadExistingAnalysisDirectory: boolean;
-}
 
 export function createFsProjectStorageRepository(): ProjectStoragePort {
   return {
@@ -517,33 +508,15 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         );
       }
 
-      const contextResult = await readJsonFile(
+      const nextDocumentLayoutsResult = await writeProjectAnalysisDocumentLayouts({
         analysisContextPath,
-        'analysis/context.json 을 읽거나 파싱할 수 없습니다.',
-      );
-      if (!contextResult.ok) {
-        return err(contextResult.error);
-      }
-
-      const normalizedContext = normalizeProjectAnalysisContext(contextResult.value);
-      if (!normalizedContext) {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            'analysis/context.json 이 현재 schemaVersion 계약을 만족하지 않습니다.',
-            analysisContextPath,
-          ),
-        );
-      }
-
-      const nextDocumentLayouts = cloneProjectAnalysisDocumentLayouts(input.documentLayouts);
-
-      await writeJsonAtomically(analysisContextPath, {
-        ...normalizedContext,
-        documentLayouts: nextDocumentLayouts,
+        documentLayouts: input.documentLayouts,
       });
+      if (!nextDocumentLayoutsResult.ok) {
+        return nextDocumentLayoutsResult;
+      }
 
-      return ok(nextDocumentLayouts);
+      return ok(nextDocumentLayoutsResult.value);
     },
 
     async saveProjectReferenceTags(input) {
@@ -611,198 +584,10 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
   };
 }
 
-async function createProjectAnalysisBackup(input: {
-  analysisDirectoryPath: string;
-}): Promise<Result<ProjectAnalysisBackup>> {
-  const hadExistingAnalysisDirectory = await pathExists(input.analysisDirectoryPath);
-  if (!hadExistingAnalysisDirectory) {
-    return ok({
-      backupAnalysisDirectoryPath: null,
-      backupRootPath: null,
-      hadExistingAnalysisDirectory: false,
-    });
-  }
-
-  const backupRootPath = await mkdtemp(join(tmpdir(), 'sdd-analysis-backup-'));
-  const backupAnalysisDirectoryPath = join(backupRootPath, 'analysis');
-
-  try {
-    await cp(input.analysisDirectoryPath, backupAnalysisDirectoryPath, {
-      force: true,
-      recursive: true,
-    });
-    await rm(input.analysisDirectoryPath, { force: true, recursive: true });
-
-    return ok({
-      backupAnalysisDirectoryPath,
-      backupRootPath,
-      hadExistingAnalysisDirectory: true,
-    });
-  } catch (error) {
-    await rm(backupRootPath, { force: true, recursive: true });
-
-    return err(
-      createProjectError(
-        'INVALID_PROJECT_STORAGE',
-        '기존 분석 파일을 백업하지 못했습니다.',
-        describeUnknownError(error),
-      ),
-    );
-  }
-}
-
-async function restoreProjectAnalysisBackup(input: {
-  analysisBackup: ProjectAnalysisBackup;
-  analysisDirectoryPath: string;
-}): Promise<Result<void>> {
-  try {
-    await rm(input.analysisDirectoryPath, { force: true, recursive: true });
-
-    if (
-      input.analysisBackup.hadExistingAnalysisDirectory &&
-      input.analysisBackup.backupAnalysisDirectoryPath
-    ) {
-      await cp(input.analysisBackup.backupAnalysisDirectoryPath, input.analysisDirectoryPath, {
-        force: true,
-        recursive: true,
-      });
-    }
-
-    return ok(undefined);
-  } catch (error) {
-    return err(
-      createProjectError(
-        'INVALID_PROJECT_STORAGE',
-        '기존 분석 백업을 복구하지 못했습니다.',
-        describeUnknownError(error),
-      ),
-    );
-  }
-}
-
-async function cleanupProjectAnalysisBackup(backup: ProjectAnalysisBackup): Promise<void> {
-  if (!backup.backupRootPath) {
-    return;
-  }
-
-  try {
-    await rm(backup.backupRootPath, { force: true, recursive: true });
-  } catch {
-    return;
-  }
-}
-
-function buildProjectAnalysisWriteFailureDetails(input: {
-  backupPath: string | null;
-  error: unknown;
-  restoreError: string;
-}): string {
-  const details = [
-    `write=${describeUnknownError(input.error)}`,
-    `restore=${input.restoreError}`,
-    input.backupPath ? `backup=${input.backupPath}` : null,
-  ].filter((value): value is string => value !== null);
-
-  return details.join('\n');
-}
-
 function describeUnknownError(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
 
   return String(error);
-}
-
-async function readProjectAnalysisDocumentLayouts(input: {
-  analysisContextPath: string;
-}): Promise<ProjectAnalysisDocumentLayoutMap> {
-  if (!(await pathExists(input.analysisContextPath))) {
-    return {};
-  }
-
-  const contextResult = await readJsonFile(
-    input.analysisContextPath,
-    'analysis/context.json 을 읽거나 파싱할 수 없습니다.',
-  );
-  if (!contextResult.ok) {
-    return {};
-  }
-
-  const normalizedContext = normalizeProjectAnalysisContext(contextResult.value);
-  if (!normalizedContext) {
-    return {};
-  }
-
-  return cloneProjectAnalysisDocumentLayouts(normalizedContext.documentLayouts);
-}
-
-async function readProjectReferenceTags(input: {
-  analysisManualReferenceTagsPath: string;
-  fallbackPaths: string[];
-}): Promise<ProjectReferenceTagDocument> {
-  const referenceTagsResult = await readProjectReferenceTagDocument(input);
-  if (!referenceTagsResult.ok) {
-    return sanitizeProjectReferenceTagDocument({
-      document: {
-        schemaVersion: PROJECT_REFERENCE_TAGS_SCHEMA_VERSION,
-        updatedAt: new Date(0).toISOString(),
-        revision: 0,
-        tags: [],
-        assignments: [],
-      },
-      validFilePaths: input.fallbackPaths,
-    });
-  }
-
-  return sanitizeProjectReferenceTagDocument({
-    document: referenceTagsResult.value,
-    validFilePaths: input.fallbackPaths,
-  });
-}
-
-function cloneProjectAnalysisDocumentLayouts(
-  value: ProjectAnalysisDocumentLayoutMap,
-): ProjectAnalysisDocumentLayoutMap {
-  const next: ProjectAnalysisDocumentLayoutMap = {};
-
-  for (const documentId of PROJECT_ANALYSIS_DOCUMENT_IDS) {
-    const layout = value[documentId];
-    if (!layout) {
-      continue;
-    }
-
-    next[documentId] = {
-      x: layout.x,
-      y: layout.y,
-    };
-  }
-
-  return next;
-}
-
-async function writeProjectAnalysisDocuments(input: {
-  analysis: ProjectAnalysisDraft;
-  analysisDirectoryPath: string;
-}): Promise<void> {
-  const documentMap = new Map(input.analysis.documents.map((document) => [document.id, document]));
-
-  for (const documentId of PROJECT_ANALYSIS_DOCUMENT_IDS) {
-    if (documentId === 'overview') {
-      continue;
-    }
-
-    const document = documentMap.get(documentId);
-    if (!document) {
-      continue;
-    }
-
-    await writeTextAtomically(
-      getProjectAnalysisDocumentPath({
-        analysisDirectoryPath: input.analysisDirectoryPath,
-        documentId,
-      }),
-      document.markdown,
-    );
-  }
 }

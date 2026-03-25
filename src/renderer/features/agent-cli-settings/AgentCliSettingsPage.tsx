@@ -10,6 +10,10 @@ import { AppViewSwitcher } from '@/renderer/components/AppViewSwitcher';
 import { AgentCliConnectionCard } from '@/renderer/features/agent-cli-settings/components/AgentCliConnectionCard';
 import { ConnectionStatusPill } from '@/renderer/features/agent-cli-settings/components/ConnectionStatusPill';
 import { useAgentCliSettingsWorkflow } from '@/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow';
+import {
+  getConnectionCheckLabel,
+  getConnectionCheckTone,
+} from '@/renderer/features/agent-cli-settings/utils';
 
 interface AgentCliSettingsPageProps {
   activeAppView: AppView;
@@ -92,16 +96,8 @@ export function AgentCliSettingsPage(props: AgentCliSettingsPageProps) {
 
               return (
                 <AgentCliConnectionCard
-                  checkLabel={checkResult ? checkResult.message : '아직 확인하지 않았습니다.'}
-                  checkTone={
-                    checkResult
-                      ? checkResult.status === 'ready'
-                        ? 'positive'
-                        : checkResult.status === 'missing'
-                          ? 'warning'
-                          : 'danger'
-                      : 'neutral'
-                  }
+                  checkLabel={getConnectionCheckLabel(checkResult)}
+                  checkTone={getConnectionCheckTone(checkResult)}
                   checkResult={checkResult}
                   connection={connection}
                   draft={draft}

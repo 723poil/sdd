@@ -16,9 +16,11 @@ export interface AgentCliConnectionDraft {
   modelReasoningEffort: AgentCliModelReasoningEffort;
 }
 
+export type AgentCliConnectionDraftMap = Partial<Record<AgentCliId, AgentCliConnectionDraft>>;
+
 export interface AgentCliSettingsViewState {
   connections: AgentCliConnectionRecord[];
-  draftsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionDraft>>;
+  draftsByAgentId: AgentCliConnectionDraftMap;
   checkResultsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionCheck>>;
   loadingMessage: string;
   errorMessage: string | null;

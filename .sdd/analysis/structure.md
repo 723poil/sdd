@@ -1,43 +1,41 @@
-저장소는 단일 Electron 앱에 가깝지만, 실행 코드만 있는 형태는 아니다. `src/` 아래에 앱 본체가 있고, `docs/codex-spec-workflow/`와 `.codex/skills/`가 설계 계약을, `scripts/`가 개발·패키징 파이프라인을, `.sdd/`가 생성 산출물을 맡는다.
+# 구조와 주요 모듈
 
-## 루트 분할
-- `src/`: 실제 앱 코드. main/preload/renderer와 application/domain/infrastructure/shared를 함께 둔다.
-- `docs/codex-spec-workflow/`: 제품 목적, 아키텍처, 저장 포맷, Codex CLI 연결 전략을 나눈 설계 문서 묶음.
-- `.codex/skills/`: 저장소 전용 Codex skill. 구현 가드레일, MVP 범위, 저장 포맷, UI 문구, XML prompt 규약을 분리한다.
-- `scripts/`: `scripts/run-dev.ts`, `scripts/prepare-dev-mac-app.ts`, `scripts/generate-icon-assets.ts` 중심의 개발/배포 보조 스크립트.
-- `.sdd/`: 이 저장소 자체를 분석한 산출물. 앱이 다루는 저장 형식을 dogfood 형태로 보여준다.
+sdd의 구조는 경로 중심으로 책임이 나뉘어 있습니다. 이 문서는 디렉터리 단위의 분할 방식과 상위에서 먼저 읽어야 할 파일을 함께 보여줍니다.
 
-## `src/` 실행체
+## 구조 다이어그램
+
 ```mermaid
-flowchart TD
-  src[src]
-  src --> main[main]
-  src --> preload[preload]
-  src --> renderer[renderer]
-  src --> application[application]
-  src --> domain[domain]
-  src --> infrastructure[infrastructure]
-  src --> shared[shared]
-
-  renderer --> workbench[features/project-bootstrap]
-  renderer --> settings[features/agent-cli-settings]
-
-  infrastructure --> analysis[analysis]
-  infrastructure --> storage[sdd]
-  infrastructure --> chat[spec-chat]
-  infrastructure --> tags[reference-tags]
-  infrastructure --> appSettings[app-settings]
-  infrastructure --> cli[agent-cli]
+flowchart TB
+  project["sdd"]
+  project --> root0["src"]
+  root0 --> child1["src/application"]
+  root0 --> child2["src/domain"]
+  root0 --> child3["src/infrastructure"]
+  root0 --> child4["src/main"]
+  root0 --> child5["src/main 2"]
+  root0 --> child6["src/preload"]
+  root0 --> child7["src/preload 2"]
 ```
-- `src/main`: `src/main/main.ts`가 앱 부트스트랩, `src/main/ipc/register-*.ts`가 composition root다.
-- `src/preload`: `src/preload/index.ts` 하나가 `window.sdd` bridge를 노출한다.
-- `src/renderer`: 루트 shell은 얇고, 실제 복잡도는 `project-bootstrap` feature의 workflow와 map/document/chat UI에 집중된다.
-- `src/application`: use case와 port 계약만 둔다.
-- `src/domain`: project/spec/session/analysis/reference-tag/app-settings schema를 묶는다.
-- `src/infrastructure`: `.sdd` 저장소, 분석기, Codex 실행, 글로벌 설정 저장을 concrete implementation으로 제공한다.
-- `src/shared`: Result/AppError와 IPC 채널/renderer helper를 둔다.
 
-## 구조상 메모
-- renderer 복잡도는 `src/renderer/features/project-bootstrap/project-bootstrap-page/` 아래에 집중돼 있다. page 조립, workflow hook, view-model, map/document component가 세분화돼 있다.
-- `src/infrastructure/sdd/`는 단순 파일 I/O helper가 아니라, 분석 문서, 명세, 세션, versioning, revision conflict, backup 복구까지 맡는 저장소 계층이다.
-- `src/main 2`, `src/preload 2`, `src/renderer 2`는 현재 빌드에서 제외된다. 특히 `src/renderer 2`는 과거 단순 버전처럼 보여 현재 구조와 별도 취급하는 편이 맞다.
+## 핵심 디렉터리
+
+- `src`: 주요 파일 148개. 소스 136개, 진입점 7개, 레포지토리 4개 중심 경로입니다. (src/source)
+- `src/application`: 주요 파일 31개. 소스 31개 중심 경로입니다. (application)
+- `src/domain`: 주요 파일 7개. 소스 7개 중심 경로입니다. (domain/source)
+- `src/infrastructure`: 주요 파일 41개. 소스 37개, 레포지토리 4개 중심 경로입니다. (infrastructure)
+- `src/main`: 주요 파일 6개. 소스 5개, 진입점 1개 중심 경로입니다. (main)
+- `src/main 2`: 정적 분석에서 주요 디렉터리로 감지했습니다. (main 2/source)
+
+## 대표 파일
+
+- `src/main/ipc/project-ipc-registration.ts`: 메인 소스. 메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 35건, 들어오는 참조 1건.
+- `src/infrastructure/sdd/fs-project-storage.repository.ts`: 인프라 레포지토리. 인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 1건.
+- `src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts`: 렌더러 소스. 렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건.
+- `src/infrastructure/analysis/node-project-analyzer.adapter.ts`: 인프라 소스. 인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건.
+- `src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx`: 렌더러 소스. 렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건.
+- `src/infrastructure/sdd/fs-project-storage-documents.ts`: 인프라 소스. 인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 2건.
+
+## 구조 해석 포인트
+
+- 주요 경로는 application, config, domain/app-settings/source, domain/project/source, entrypoint, infrastructure, main, renderer, scripts/source, shared 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계를 함께 저장합니다.
+- 우선순위 경로: `src`, `src/application`, `src/domain`, `src/infrastructure`
