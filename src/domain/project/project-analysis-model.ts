@@ -3,6 +3,7 @@ import {
   ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
   LEGACY_ANALYSIS_CONTEXT_SCHEMA_VERSION,
 } from '@/domain/project/project-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 
 export const PROJECT_ANALYSIS_DOCUMENT_IDS = [
   'overview',
@@ -126,6 +127,7 @@ export interface ProjectAnalysis {
   documents: ProjectAnalysisDocument[];
   fileIndex: ProjectAnalysisFileIndexEntry[];
   summaryMarkdown: string;
+  referenceTags?: ProjectReferenceTagDocument;
 }
 
 export interface ProjectAnalysisDraft extends ProjectAnalysis {
@@ -360,7 +362,9 @@ function isProjectAnalysisDocumentSummary(value: unknown): value is ProjectAnaly
   );
 }
 
-function isProjectAnalysisDocumentLayoutMap(value: unknown): value is ProjectAnalysisDocumentLayoutMap {
+function isProjectAnalysisDocumentLayoutMap(
+  value: unknown,
+): value is ProjectAnalysisDocumentLayoutMap {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -458,7 +462,8 @@ function isProjectAnalysisDocumentLinkArray(
   value: unknown,
 ): value is ProjectAnalysisDocumentLink[] {
   return (
-    Array.isArray(value) && value.every((documentLink) => isProjectAnalysisDocumentLink(documentLink))
+    Array.isArray(value) &&
+    value.every((documentLink) => isProjectAnalysisDocumentLink(documentLink))
   );
 }
 
@@ -483,7 +488,8 @@ function isProjectAnalysisFileReferenceArray(
   value: unknown,
 ): value is ProjectAnalysisFileReference[] {
   return (
-    Array.isArray(value) && value.every((fileReference) => isProjectAnalysisFileReference(fileReference))
+    Array.isArray(value) &&
+    value.every((fileReference) => isProjectAnalysisFileReference(fileReference))
   );
 }
 

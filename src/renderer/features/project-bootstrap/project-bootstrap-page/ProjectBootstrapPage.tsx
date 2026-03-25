@@ -1,5 +1,6 @@
 import type { ProjectAnalysisDocumentId } from '@/domain/project/project-analysis-model';
 import type { AppView } from '@/renderer/app-view';
+import type { WorkbenchProgressTask } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
 import { BottomStatusBar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar';
 import { InfoSidebar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar';
@@ -52,6 +53,19 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleCancelAnalysis = () => {
     workbench.onCancelAnalysis();
   };
+  const handleCancelReferenceTagGeneration = () => {
+    workbench.onCancelReferenceTagGeneration();
+  };
+  const handleCancelBottomStatusTask = (task: WorkbenchProgressTask) => {
+    if (task.kind === 'analysis') {
+      workbench.onCancelAnalysis(task.rootPath ?? undefined);
+      return;
+    }
+
+    if (task.kind === 'reference-tags-generate') {
+      workbench.onCancelReferenceTagGeneration(task.rootPath ?? undefined);
+    }
+  };
   const handleSendMessage = () => {
     workbench.onSendMessage();
   };
@@ -65,6 +79,17 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
     documentLayouts: Parameters<typeof workbench.onSaveAnalysisDocumentLayouts>[0],
   ) => {
     workbench.onSaveAnalysisDocumentLayouts(documentLayouts);
+  };
+  const handleSaveReferenceTags = (
+    referenceTags: Parameters<typeof workbench.onSaveReferenceTags>[0],
+  ) => {
+    return workbench.onSaveReferenceTags(referenceTags);
+  };
+  const handleSelectBottomStatusTask = (task: WorkbenchProgressTask) => {
+    workbench.onSelectProgressTask(task.id);
+  };
+  const handleGenerateReferenceTags = () => {
+    return workbench.onGenerateReferenceTags();
   };
   const handleSelectSpec = (specId: string) => {
     workbench.onSelectSpec(specId);
@@ -115,8 +140,18 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             activeWorkspacePage={workbench.activeWorkspacePage}
             analysis={workbench.analysis}
             analysisSessionKey={workbench.selectedPath ?? 'no-project'}
+            canManageReferenceTags={
+              workbench.inspection?.initializationState === 'ready' &&
+              workbench.inspection.isWritable
+            }
             errorMessage={workbench.errorMessage}
+            isCancellingReferenceTags={workbench.isCancellingReferenceTags}
+            isGeneratingReferenceTags={workbench.isGeneratingReferenceTags}
+            isSavingReferenceTags={workbench.isSavingReferenceTags}
+            onCancelReferenceTagGeneration={handleCancelReferenceTagGeneration}
+            onGenerateReferenceTags={handleGenerateReferenceTags}
             onSaveAnalysisDocumentLayouts={handleSaveAnalysisDocumentLayouts}
+            onSaveReferenceTags={handleSaveReferenceTags}
             onSelectAnalysisDocument={handleSelectAnalysisDocument}
             onSelectSpec={handleSelectSpec}
             onSelectWorkspacePage={handleSelectWorkspacePage}
@@ -174,14 +209,15 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
 
         <BottomStatusBar
           activeAppView={props.activeAppView}
+          activeProgressTask={workbench.activeProgressTask}
           activeWorkspacePage={workbench.activeWorkspacePage}
-          analysisRunStatus={workbench.analysisRunStatus}
-          analysisStatus={workbench.analysisStatus}
           errorMessage={workbench.errorMessage}
           inspection={workbench.inspection}
           message={workbench.message}
-          onCancelAnalysis={handleCancelAnalysis}
+          onCancelTask={handleCancelBottomStatusTask}
           onSelectAppView={props.onSelectAppView}
+          onSelectTask={handleSelectBottomStatusTask}
+          progressTasks={workbench.progressTasks}
           storageStatus={workbench.storageStatus}
         />
       </div>

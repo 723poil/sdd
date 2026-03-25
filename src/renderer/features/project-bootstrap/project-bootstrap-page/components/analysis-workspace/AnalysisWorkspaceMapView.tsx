@@ -4,6 +4,7 @@ import type { ProjectAnalysisDocumentId } from '@/domain/project/project-analysi
 import type {
   AnalysisDocumentBoardNode,
   AnalysisRenderedLink,
+  AnalysisStageSize,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
 
 interface AnalysisWorkspaceMapViewProps {
@@ -22,6 +23,7 @@ interface AnalysisWorkspaceMapViewProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   selectedDocumentId: ProjectAnalysisDocumentId | null;
+  stageSize: AnalysisStageSize;
   stageGridStyle: Record<string, string>;
   stageRef: RefObject<HTMLDivElement | null>;
   viewportScale: number;
@@ -42,6 +44,7 @@ export function AnalysisWorkspaceMapView(props: AnalysisWorkspaceMapViewProps) {
     onZoomIn,
     onZoomOut,
     selectedDocumentId,
+    stageSize,
     stageGridStyle,
     stageRef,
     viewportScale,
@@ -120,7 +123,7 @@ export function AnalysisWorkspaceMapView(props: AnalysisWorkspaceMapViewProps) {
         <svg
           aria-hidden="true"
           className="analysis-map__links"
-          viewBox="0 0 100 100"
+          viewBox={`0 0 ${Math.max(stageSize.width, 1)} ${Math.max(stageSize.height, 1)}`}
           preserveAspectRatio="none"
         >
           <defs>

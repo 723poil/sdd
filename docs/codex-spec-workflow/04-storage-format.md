@@ -14,7 +14,9 @@
 - 핵심 작업 데이터는 프로젝트와 함께 이동 가능해야 함
 - 프로젝트 분석은 앱 내부의 로컬 정적 분석 결과를 기본으로 저장하고, 필요하면 CLI 에이전트 결과로 문서 서술을 보강하는 방식으로 유지
 - 분석 결과에는 문서 맵 연결선과 파일별 참조 관계가 함께 들어가야 한다
+- 수동 reference-tag/assignment는 분석기 출력과 분리된 별도 분석 파일로 저장한다
 - 사람이 읽는 분석 문서는 Markdown 을 기본으로 하고, 필요하면 Mermaid fenced block을 포함할 수 있다
+- 사람이 읽는 분석 문서는 경로 덤프보다 상단 요약, 역할별 그룹화, Mermaid 시각화를 우선한다
 
 추가 원칙:
 
@@ -43,6 +45,7 @@
     connectivity.md
     context.json
     file-index.json
+    manual-reference-tags.json
   sessions/
     index.json
     session-001/
@@ -131,6 +134,7 @@
 
 권장 내용:
 
+- 상단 1~2문장 요약
 - 프로젝트 개요
 - 스택
 - 분석 범위
@@ -147,11 +151,13 @@
 
 권장 내용:
 
+- 상단 1~2문장 요약
 - 루트 디렉터리
 - 주요 하위 디렉터리
 - 기능 단위 모듈
 - 상위/하위 계층 관계
 - 필요하면 Mermaid graph / flowchart
+- 긴 경로 나열보다 책임 단위 묶음과 대표 경로 위주로 설명
 
 ### `.sdd/analysis/layers.md`
 
@@ -161,6 +167,7 @@
 
 권장 내용:
 
+- 상단 1~2문장 요약
 - `main`
 - `preload`
 - `renderer`
@@ -169,6 +176,7 @@
 - `infrastructure`
 - 레이어 간 허용/금지 연결
 - 필요하면 Mermaid graph
+- 레이어별 대표 경로나 책임 묶음을 함께 적어 사람이 바로 읽을 수 있게 구성
 
 ### `.sdd/analysis/connectivity.md`
 
@@ -178,11 +186,13 @@
 
 권장 내용:
 
+- 상단 1~2문장 요약
 - 엔트리포인트에서 시작되는 연결 경로
 - 핵심 모듈 간 참조 관계
 - 설정 파일과 런타임 경로
 - 자주 이어지는 흐름
 - 필요하면 Mermaid sequence / flowchart
+- 파일 경로를 전부 나열하지 말고 핵심 흐름과 대표 예시만 압축해서 설명
 
 ### `.sdd/analysis/file-index.json`
 
@@ -204,6 +214,36 @@
 - `references`는 해당 파일이 참조하는 다른 인덱스 파일들의 목록이다
 - 각 참조는 `path`, `relationship`, `reason`을 가진다
 - 이 정보는 중앙 분석 화면에서 파일 간 연결 관계를 보여줄 때 사용한다
+- `file-index.json`은 analyzer 출력의 재생성 대상이고, 수동 reference-tag/assignment는 이 파일과 분리해 유지한다
+
+### `.sdd/analysis/manual-reference-tags.json`
+
+역할:
+
+- 사람이 수동으로 지정한 분석 파일별 reference-tag/assignment를 저장하는 보조 계약
+
+권장 내용:
+
+- `schemaVersion`
+- `revision`
+- `updatedAt`
+- `tags`
+  - `id`
+  - `label`
+  - `description`
+  - `color`
+  - `createdAt`
+  - `updatedAt`
+- `assignments`
+  - `path`
+  - `tagIds`
+
+주의:
+
+- 이 파일은 analyzer 출력이 아니다
+- `file-index.json` 재생성으로 덮어쓰지 않는다
+- `file-index.json`과 함께 읽어서 중앙 분석 화면에 반영한다
+- 수동 태그는 renderer의 로컬 상태에만 두지 않고, 저장 가능한 분석 계약으로 유지한다
 
 ### `.sdd/specs/index.json`
 

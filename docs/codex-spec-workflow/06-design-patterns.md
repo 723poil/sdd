@@ -63,6 +63,8 @@
 - 도메인/유스케이스는 항상 port 인터페이스만 안다
 - 문서 맵처럼 프로젝트에 귀속되는 UI 배치 상태는 renderer 임시 state로 끝내지 말고 `.sdd/analysis/context.json`을 통해 저장한다
 - 문서 맵 연결선과 파일별 참조 관계도 분석 산출물로 함께 저장하고, renderer가 임의로 생성하지 않는다
+- 수동 reference-tag/assignment는 analyzer 출력과 분리된 별도 분석 파일로 보존하고, `file-index.json` 재생성으로 덮어쓰지 않는다
+- renderer는 수동 태그를 local-only state로 두지 말고 use case/repository 경계를 통해 저장한다
 
 ### 2) Feature-based Module Structure
 
@@ -234,6 +236,10 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 - `file-index.json`
 - `context.json`
 
+추가 보조 파일:
+
+- `manual-reference-tags.json`
+
 추가 권장 구조화 데이터:
 
 - `context.documentLinks`
@@ -244,6 +250,7 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 
 - UI는 이 Markdown 문서를 직접 읽는 docs-style 페이지를 우선한다
 - Mermaid 코드 블록은 분석 문서 안에 함께 저장하고 렌더링 가능한 블록으로 취급한다
+- `manual-reference-tags.json`은 analyzer 재생성 결과가 아니라 사용자 편집 오버레이이므로, `file-index.json`과 별도 유지한다
 
 ### 7) Strategy Pattern
 
@@ -523,6 +530,30 @@ renderer 상태는 한 덩어리 전역 상태로 두지 않는 편이 좋다.
 
 - store에는 화면 상태만 두고
 - 데이터 정합성 기준은 use case 결과와 `.sdd` 파일에 둔다
+
+### 13-2) Progressive Disclosure Pattern
+
+밀도가 높은 workspace UI는 설명을 모두 상시 노출하기보다, 필요한 때만 열리는 도움말로 나누는 편이 좋다.
+
+적용 대상:
+
+- 분석 인스펙터
+- 참조/태그 카드
+- 플로팅 패널
+- 빈 상태와 도움말 문구
+
+왜 쓰는가:
+
+- 맵, 문서, 채팅 같은 핵심 작업 면적을 덜 가린다
+- 같은 설명 문구가 카드마다 반복되는 문제를 줄인다
+- 사용자는 제목, 상태, 액션만으로 빠르게 스캔하고, 필요할 때만 설명을 연다
+
+권장 규칙:
+
+- 기본 노출은 제목, 상태, 핵심 액션, 선택 맥락, 필요한 수치 위주로 둔다
+- 선택형 설명이나 배경 설명은 툴팁, 도움말 버튼, 접이식 보조 패널로 보낸다
+- 같은 설명은 여러 카드에 반복하지 말고 하나의 도움말 진입점으로 모은다
+- inline 문구는 오류 복구, 빈 상태 다음 행동, 파괴적 액션 경고처럼 즉시 필요한 정보에만 쓴다
 
 ## 6. 추천 폴더 구조
 

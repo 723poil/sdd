@@ -11,19 +11,19 @@ Use this skill when the user asks to prepare a commit, review whether changes ar
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/AGENTS.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/06-design-patterns.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- `/Users/723poil/git/side/sdd/AGENTS.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/06-design-patterns.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
 
 Read these when the touched files require them:
 
 - storage or `.sdd` changes:
-  - `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/04-storage-format.md`
+  - `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/04-storage-format.md`
 - architecture or layer boundary changes:
-  - `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/02-architecture.md`
+  - `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/02-architecture.md`
 - Codex integration changes:
-  - `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
-  - `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
+  - `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
+  - `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
 
 ## Commit preparation workflow
 

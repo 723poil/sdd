@@ -126,12 +126,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  width: 100%;
   min-width: 0;
   border: none;
   background: transparent;
   color: inherit;
   padding: 7px 10px;
+  cursor: pointer;
   text-align: left;
   outline: none;
 }

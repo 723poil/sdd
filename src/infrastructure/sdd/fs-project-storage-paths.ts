@@ -6,6 +6,7 @@ export interface ProjectStoragePaths {
   analysisContextPath: string;
   analysisDirectoryPath: string;
   analysisFileIndexPath: string;
+  analysisManualReferenceTagsPath: string;
   analysisSummaryPath: string;
   projectJsonPath: string;
   runsDirectoryPath: string;
@@ -26,6 +27,7 @@ export function getProjectStoragePaths(rootPath: string): ProjectStoragePaths {
     sddDirectoryPath,
     analysisDirectoryPath,
     analysisFileIndexPath: join(analysisDirectoryPath, 'file-index.json'),
+    analysisManualReferenceTagsPath: join(analysisDirectoryPath, 'manual-reference-tags.json'),
     sessionsDirectoryPath: join(sddDirectoryPath, 'sessions'),
     specsDirectoryPath,
     runsDirectoryPath,

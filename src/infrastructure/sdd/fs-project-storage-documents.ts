@@ -8,6 +8,11 @@ import {
   type ProjectAnalysisDocument,
   type ProjectAnalysisFileIndexDocument,
 } from '@/domain/project/project-analysis-model';
+import {
+  createEmptyProjectReferenceTagDocument,
+  normalizeProjectReferenceTagDocument,
+  type ProjectReferenceTagDocument,
+} from '@/domain/project/project-reference-tag-model';
 import type { ProjectSpecIndex } from '@/domain/project/project-spec-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import {
@@ -32,6 +37,7 @@ import { pathExists, readJsonFile, readTextFile } from '@/infrastructure/sdd/fs-
 export interface InitialProjectStorageDocuments {
   analysisContext: ProjectAnalysis['context'];
   analysisFileIndex: ProjectAnalysisFileIndexDocument;
+  analysisManualReferenceTags: ProjectReferenceTagDocument;
   analysisSummaryMarkdown: string;
   sessionsIndex: ProjectSessionIndex;
   specsIndex: ProjectSpecIndex;
@@ -78,6 +84,7 @@ export async function readProjectAnalysisDocument(input: {
     analysisContextPath,
     analysisDirectoryPath,
     analysisFileIndexPath,
+    analysisManualReferenceTagsPath,
     analysisSummaryPath,
     sddDirectoryPath,
   } = getProjectStoragePaths(input.rootPath);
@@ -125,6 +132,14 @@ export async function readProjectAnalysisDocument(input: {
     return err(fileIndexResult.error);
   }
 
+  const referenceTagsResult = await readProjectReferenceTagDocument({
+    analysisManualReferenceTagsPath,
+    fallbackPaths: fileIndexResult.value.entries.map((entry) => entry.path),
+  });
+  if (!referenceTagsResult.ok) {
+    return err(referenceTagsResult.error);
+  }
+
   const documentsResult = await readProjectAnalysisDocuments({
     analysisDirectoryPath,
     context: normalizedContext,
@@ -138,6 +153,7 @@ export async function readProjectAnalysisDocument(input: {
     context: normalizedContext,
     documents: documentsResult.value,
     fileIndex: fileIndexResult.value.entries,
+    referenceTags: referenceTagsResult.value,
     summaryMarkdown: summaryResult.value,
   });
 }
@@ -172,6 +188,10 @@ export function createInitialProjectStorageDocuments(input: {
       generatedAt: input.now,
       entries: [],
     },
+    analysisManualReferenceTags: createEmptyProjectReferenceTagDocument({
+      now: input.now,
+      revision: 1,
+    }),
     analysisSummaryMarkdown: createInitialAnalysisSummaryMarkdown(input.projectName),
     sessionsIndex: {
       schemaVersion: PROJECT_SESSION_INDEX_SCHEMA_VERSION,
@@ -232,6 +252,46 @@ async function readProjectAnalysisFileIndexDocument(input: {
   });
 }
 
+export async function readProjectReferenceTagDocument(input: {
+  analysisManualReferenceTagsPath: string;
+  fallbackPaths: string[];
+}): Promise<Result<ProjectReferenceTagDocument>> {
+  if (!(await pathExists(input.analysisManualReferenceTagsPath))) {
+    return ok(
+      createEmptyProjectReferenceTagDocument({
+        revision: 0,
+      }),
+    );
+  }
+
+  const referenceTagsResult = await readJsonFile(
+    input.analysisManualReferenceTagsPath,
+    'analysis/manual-reference-tags.json 을 읽거나 파싱할 수 없습니다.',
+  );
+  if (!referenceTagsResult.ok) {
+    return err(referenceTagsResult.error);
+  }
+
+  const normalizedReferenceTags = normalizeProjectReferenceTagDocument(referenceTagsResult.value);
+  if (!normalizedReferenceTags) {
+    return err(
+      createProjectError(
+        'INVALID_PROJECT_STORAGE',
+        'analysis/manual-reference-tags.json 이 현재 schemaVersion 계약을 만족하지 않습니다.',
+        input.analysisManualReferenceTagsPath,
+      ),
+    );
+  }
+
+  const visiblePaths = new Set(input.fallbackPaths);
+  return ok({
+    ...normalizedReferenceTags,
+    assignments: normalizedReferenceTags.assignments.filter((assignment) =>
+      visiblePaths.has(assignment.path),
+    ),
+  });
+}
+
 async function readProjectAnalysisDocuments(input: {
   analysisDirectoryPath: string;
   context: ProjectAnalysis['context'];
@@ -278,7 +338,7 @@ async function readProjectAnalysisDocuments(input: {
         id: documentId,
         summary:
           documentSummaryMap.get(documentId)?.summary ?? '프로젝트 분석 문서를 불러왔습니다.',
-        markdown: documentResult.value,
+        markdown: stripLegacyKeyFileReferenceSection(documentResult.value),
       }),
     );
   }
@@ -299,6 +359,15 @@ function resolveOverviewSummary(input: {
   }
 
   return '프로젝트 전체 개요를 확인합니다.';
+}
+
+function stripLegacyKeyFileReferenceSection(markdown: string): string {
+  const sanitized = markdown.replace(
+    /(?:^|\n)## 핵심 파일 참조\s*\n[\s\S]*?(?=(?:\n## |\n# )|$)/u,
+    '\n',
+  );
+
+  return sanitized.replace(/\n{3,}/gu, '\n\n').trimEnd();
 }
 
 function createInitialAnalysisSummaryMarkdown(projectName: string): string {

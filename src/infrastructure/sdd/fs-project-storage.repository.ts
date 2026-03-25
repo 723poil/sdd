@@ -12,6 +12,12 @@ import {
   type ProjectAnalysisDocumentLayoutMap,
 } from '@/domain/project/project-analysis-model';
 import {
+  createEmptyProjectReferenceTagDocument,
+  PROJECT_REFERENCE_TAGS_SCHEMA_VERSION,
+  sanitizeProjectReferenceTagDocument,
+  type ProjectReferenceTagDocument,
+} from '@/domain/project/project-reference-tag-model';
+import {
   createDefaultProjectSpecSlug,
   createDefaultProjectSpecTitle,
   createInitialProjectSpecMarkdown,
@@ -29,6 +35,7 @@ import {
   createInitialProjectStorageDocuments,
   readProjectAnalysisDocument,
   readProjectMetaDocument,
+  readProjectReferenceTagDocument,
 } from '@/infrastructure/sdd/fs-project-storage-documents';
 import {
   readProjectSpecDocuments,
@@ -170,6 +177,7 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         analysisContextPath,
         analysisDirectoryPath,
         analysisFileIndexPath,
+        analysisManualReferenceTagsPath,
         analysisSummaryPath,
         projectJsonPath,
         runsDirectoryPath,
@@ -211,6 +219,10 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
 
       await ensureJsonFile(analysisContextPath, initialDocuments.analysisContext);
       await ensureJsonFile(analysisFileIndexPath, initialDocuments.analysisFileIndex);
+      await ensureJsonFile(
+        analysisManualReferenceTagsPath,
+        initialDocuments.analysisManualReferenceTags,
+      );
       await ensureTextFile(analysisSummaryPath, initialDocuments.analysisSummaryMarkdown);
       await ensureJsonFile(specsIndexPath, initialDocuments.specsIndex);
       await ensureJsonFile(sessionsIndexPath, initialDocuments.sessionsIndex);
@@ -228,6 +240,7 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         analysisContextPath,
         analysisDirectoryPath,
         analysisFileIndexPath,
+        analysisManualReferenceTagsPath,
         analysisSummaryPath,
         projectJsonPath,
         specsIndexPath,
@@ -263,6 +276,10 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         const now = new Date().toISOString();
         const preservedDocumentLayouts = await readProjectAnalysisDocumentLayouts({
           analysisContextPath,
+        });
+        const preservedReferenceTags = await readProjectReferenceTags({
+          analysisManualReferenceTagsPath,
+          fallbackPaths: input.analysis.fileIndex.map((entry) => entry.path),
         });
         const nextAnalysisContext: ProjectAnalysisContext = {
           ...input.analysis.context,
@@ -300,6 +317,7 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
             context: nextAnalysisContext,
             documents: input.analysis.documents,
             fileIndex: input.analysis.fileIndex,
+            referenceTags: preservedReferenceTags,
             summaryMarkdown: input.analysis.summaryMarkdown,
           },
           projectMeta: nextProjectMeta,
@@ -318,7 +336,8 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
               buildProjectAnalysisWriteFailureDetails({
                 backupPath: analysisBackup.backupRootPath,
                 error,
-                restoreError: restoreBackupResult.error.details ?? restoreBackupResult.error.message,
+                restoreError:
+                  restoreBackupResult.error.details ?? restoreBackupResult.error.message,
               }),
             ),
           );
@@ -394,6 +413,69 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       });
 
       return ok(nextDocumentLayouts);
+    },
+
+    async saveProjectReferenceTags(input) {
+      const rootPath = resolve(input.rootPath);
+      const { analysisManualReferenceTagsPath, projectJsonPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return err(
+          createProjectError(
+            'PROJECT_NOT_INITIALIZED',
+            'project.json 이 없어 참조 태그를 저장할 수 없습니다.',
+            projectJsonPath,
+          ),
+        );
+      }
+
+      await ensureJsonFile(
+        analysisManualReferenceTagsPath,
+        createEmptyProjectReferenceTagDocument({
+          revision: 0,
+        }),
+      );
+
+      const currentAnalysisResult = await this.readProjectAnalysis({ rootPath });
+      if (!currentAnalysisResult.ok) {
+        return err(currentAnalysisResult.error);
+      }
+
+      const validFilePaths =
+        currentAnalysisResult.value?.fileIndex.map((entry) => entry.path) ?? [];
+      const existingReferenceTags = await readProjectReferenceTags({
+        analysisManualReferenceTagsPath,
+        fallbackPaths: validFilePaths,
+      });
+
+      if (input.referenceTags.revision !== existingReferenceTags.revision) {
+        return err(
+          createProjectError(
+            'PROJECT_WRITE_CONFLICT',
+            '참조 태그가 다른 변경과 충돌했습니다. 다시 불러온 뒤 저장해 주세요.',
+          ),
+        );
+      }
+
+      const now = new Date().toISOString();
+      const nextReferenceTags = sanitizeProjectReferenceTagDocument({
+        document: {
+          ...input.referenceTags,
+          schemaVersion: PROJECT_REFERENCE_TAGS_SCHEMA_VERSION,
+          revision: existingReferenceTags.revision + 1,
+          updatedAt: now,
+        },
+        validFilePaths,
+      });
+
+      await writeJsonAtomically(analysisManualReferenceTagsPath, nextReferenceTags);
+
+      return ok(nextReferenceTags);
     },
   };
 }
@@ -522,6 +604,30 @@ async function readProjectAnalysisDocumentLayouts(input: {
   }
 
   return cloneProjectAnalysisDocumentLayouts(normalizedContext.documentLayouts);
+}
+
+async function readProjectReferenceTags(input: {
+  analysisManualReferenceTagsPath: string;
+  fallbackPaths: string[];
+}): Promise<ProjectReferenceTagDocument> {
+  const referenceTagsResult = await readProjectReferenceTagDocument(input);
+  if (!referenceTagsResult.ok) {
+    return sanitizeProjectReferenceTagDocument({
+      document: {
+        schemaVersion: PROJECT_REFERENCE_TAGS_SCHEMA_VERSION,
+        updatedAt: new Date(0).toISOString(),
+        revision: 0,
+        tags: [],
+        assignments: [],
+      },
+      validFilePaths: input.fallbackPaths,
+    });
+  }
+
+  return sanitizeProjectReferenceTagDocument({
+    document: referenceTagsResult.value,
+    validFilePaths: input.fallbackPaths,
+  });
 }
 
 function cloneProjectAnalysisDocumentLayouts(

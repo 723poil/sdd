@@ -4,6 +4,22 @@ import type {
   ProjectAnalysisFileIndexEntry,
   ProjectAnalysisFileReference,
 } from '@/domain/project/project-analysis-model';
+import {
+  createEmptyProjectReferenceTagDocument,
+  createProjectReferenceTag,
+  type ProjectReferenceTagDocument,
+} from '@/domain/project/project-reference-tag-model';
+import {
+  ReferenceTagManager,
+  type ReferenceTagCreateResult,
+  type ReferenceTagGenerationResult,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager';
+import {
+  buildReferenceTagIdsByPath,
+  buildReferenceTagSummaries,
+  removeReferenceTagFromDocument,
+  toggleReferenceTagAssignment,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils';
 import type { StructuredProjectAnalysis } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 import {
   REFERENCE_GRAPH_TOP_OVERFLOW,
@@ -17,7 +33,14 @@ import {
 
 interface AnalysisReferenceMapProps {
   analysis: StructuredProjectAnalysis;
+  canManageTags: boolean;
   isActive: boolean;
+  isCancellingTags: boolean;
+  isGeneratingTags: boolean;
+  isSavingTags: boolean;
+  onCancelReferenceTagGeneration: () => void;
+  onGenerateReferenceTags: () => Promise<ReferenceTagGenerationResult>;
+  onSaveReferenceTags: (referenceTags: ProjectReferenceTagDocument) => Promise<boolean>;
 }
 
 interface AnalysisViewport {
@@ -44,6 +67,7 @@ interface AnalysisReferenceNode {
   path: string;
   role: string;
   summary: string;
+  tagLabels: string[];
   width: number;
   x: number;
   y: number;
@@ -137,6 +161,7 @@ type AnalysisRect = {
 };
 
 interface AnalysisReferenceBuildOptions {
+  activeTagIds: Set<string>;
   expandedGroupKeys: Set<string>;
   stageWidth: number;
 }
@@ -192,29 +217,64 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const interactionRef = useRef<AnalysisInteractionState | null>(null);
   const hasAdjustedViewportRef = useRef(false);
-  const [activeAreaName, setActiveAreaName] = useState<string | null>(null);
+  const [activeAreaNames, setActiveAreaNames] = useState<string[]>([]);
+  const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
   const [isPanning, setIsPanning] = useState(false);
   const [isInspectorCollapsed, setIsInspectorCollapsed] = useState(false);
   const [expandedGroupKeys, setExpandedGroupKeys] = useState<string[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [stageSize, setStageSize] = useState<AnalysisStageSize>(EMPTY_STAGE_SIZE);
   const [viewport, setViewport] = useState<AnalysisViewport>(INITIAL_VIEWPORT);
-  const expandedGroupKeySet = useMemo(
-    () => new Set(expandedGroupKeys),
-    [expandedGroupKeys],
+  const activeAreaNameSet = useMemo(() => new Set(activeAreaNames), [activeAreaNames]);
+  const activeTagIdSet = useMemo(() => new Set(activeTagIds), [activeTagIds]);
+  const referenceTags = useMemo(
+    () => props.analysis.referenceTags ?? createEmptyProjectReferenceTagDocument(),
+    [props.analysis.referenceTags],
   );
+  const areaScopedPaths = useMemo(() => {
+    if (activeAreaNames.length === 0) {
+      return null;
+    }
+
+    return new Set(
+      props.analysis.fileIndex
+        .filter((entry) =>
+          activeAreaNameSet.has(resolveClusterAreaName(resolveNodeClusterName(entry.layer))),
+        )
+        .map((entry) => entry.path),
+    );
+  }, [activeAreaNameSet, activeAreaNames.length, props.analysis.fileIndex]);
+  const tagSummaries = useMemo(
+    () =>
+      buildReferenceTagSummaries({
+        allowedPaths: areaScopedPaths,
+        referenceTags,
+        selectedPath,
+      }),
+    [areaScopedPaths, referenceTags, selectedPath],
+  );
+  const taggedFileCount = useMemo(
+    () => new Set(referenceTags.assignments.map((assignment) => assignment.path)).size,
+    [referenceTags.assignments],
+  );
+  const graphResetKey = useMemo(
+    () => createReferenceGraphResetKey(props.analysis),
+    [props.analysis],
+  );
+  const expandedGroupKeySet = useMemo(() => new Set(expandedGroupKeys), [expandedGroupKeys]);
 
   const graph = useMemo(
     () =>
       buildReferenceGraph(props.analysis, {
+        activeTagIds: activeTagIdSet,
         expandedGroupKeys: expandedGroupKeySet,
         stageWidth: stageSize.width,
       }),
-    [expandedGroupKeySet, props.analysis, stageSize.width],
+    [activeTagIdSet, expandedGroupKeySet, props.analysis, stageSize.width],
   );
   const visibleGraph = useMemo(
-    () => filterReferenceGraphByArea(graph, activeAreaName),
-    [activeAreaName, graph],
+    () => filterReferenceGraphByAreas(graph, activeAreaNameSet),
+    [activeAreaNameSet, graph],
   );
   const areaSummaries = useMemo(
     () => graph.areas.map((area) => ({ count: area.count, label: area.label, name: area.name })),
@@ -261,22 +321,34 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   );
 
   useEffect(() => {
-    setActiveAreaName(null);
+    setActiveAreaNames([]);
     setSelectedPath(null);
     hasAdjustedViewportRef.current = false;
     setViewport(INITIAL_VIEWPORT);
-  }, [props.analysis]);
+  }, [graphResetKey]);
 
   useEffect(() => {
-    if (activeAreaName && !graph.areas.some((area) => area.name === activeAreaName)) {
-      setActiveAreaName(null);
-    }
-  }, [activeAreaName, graph.areas]);
+    const availableTagIds = new Set(tagSummaries.map((summary) => summary.tag.id));
+
+    setActiveTagIds((current) => {
+      const next = current.filter((tagId) => availableTagIds.has(tagId));
+      return next.length === current.length ? current : next;
+    });
+  }, [tagSummaries]);
+
+  useEffect(() => {
+    const availableAreaNames = new Set(graph.areas.map((area) => area.name));
+
+    setActiveAreaNames((current) => {
+      const next = current.filter((areaName) => availableAreaNames.has(areaName));
+      return next.length === current.length ? current : next;
+    });
+  }, [graph.areas]);
 
   useEffect(() => {
     hasAdjustedViewportRef.current = false;
     setViewport(INITIAL_VIEWPORT);
-  }, [activeAreaName]);
+  }, [activeAreaNames]);
 
   useEffect(() => {
     if (selectedPath && !visibleGraph.nodes.some((node) => node.path === selectedPath)) {
@@ -413,6 +485,62 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     setViewport(createViewportToFitGraph(visibleGraph, stageSize));
   };
 
+  const saveReferenceTags = async (nextReferenceTags: ProjectReferenceTagDocument) => {
+    const didSave = await props.onSaveReferenceTags(nextReferenceTags);
+    return didSave;
+  };
+  const handleCreateTag = async (input: {
+    description: string;
+    label: string;
+  }): Promise<ReferenceTagCreateResult> => {
+
+    const normalizedLabel = input.label.trim();
+    const existingLabels = new Set(
+      tagSummaries.map((summary) => summary.tag.label.trim().toLowerCase()),
+    );
+    if (existingLabels.has(normalizedLabel.toLowerCase())) {
+      return 'duplicate';
+    }
+
+    const nextReferenceTags: ProjectReferenceTagDocument = {
+      ...referenceTags,
+      tags: [
+        ...referenceTags.tags,
+        createProjectReferenceTag({
+          description: input.description,
+          existingIds: referenceTags.tags.map((tag) => tag.id),
+          label: normalizedLabel,
+          now: new Date().toISOString(),
+        }),
+      ],
+    };
+
+    const didSave = await saveReferenceTags(nextReferenceTags);
+    return didSave ? 'created' : 'failed';
+  };
+
+  const handleDeleteTag = async (tagId: string): Promise<void> => {
+
+    const didSave = await saveReferenceTags(removeReferenceTagFromDocument(referenceTags, tagId));
+    if (didSave) {
+      setActiveTagIds((current) => current.filter((currentTagId) => currentTagId !== tagId));
+    }
+  };
+
+  const handleToggleTagAssignment = async (tagId: string): Promise<void> => {
+    if (!selectedPath) {
+      return;
+    }
+
+    await saveReferenceTags(
+      toggleReferenceTagAssignment({
+        document: referenceTags,
+        path: selectedPath,
+        tagId,
+      }),
+    );
+  };
+
   const applyScaleFromButton = (scaleDelta: number) => {
     const stageElement = stageRef.current;
     if (!stageElement) {
@@ -440,6 +568,8 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
       };
     });
   };
+
+  const hasActiveFilters = activeAreaNames.length > 0 || activeTagIds.length > 0;
 
   return (
     <section className="analysis-map analysis-reference-map">
@@ -565,218 +695,232 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
           {visibleGraph.nodes.length === 0 ? (
             <div className="analysis-map__empty">
               <div className="analysis-empty-panel__card">
-                <span className="analysis-empty-panel__eyebrow">참조 준비</span>
-                <h3 className="analysis-empty-panel__title">파일 참조 맵이 아직 없습니다.</h3>
+                <span className="analysis-empty-panel__eyebrow">
+                  {hasActiveFilters ? '필터 결과' : '참조 준비'}
+                </span>
+                <h3 className="analysis-empty-panel__title">
+                  {hasActiveFilters
+                    ? '선택한 영역과 태그에 맞는 파일이 없습니다.'
+                    : '파일 참조 맵이 아직 없습니다.'}
+                </h3>
                 <p className="analysis-empty-panel__description">
-                  현재 분석 결과에는 별도로 시각화할 파일 참조선이 없습니다.
+                  {hasActiveFilters
+                    ? '영역 또는 태그 선택을 조정해 다른 파일 관계를 확인해 주세요.'
+                    : '현재 분석 결과에는 별도로 시각화할 파일 참조선이 없습니다.'}
                 </p>
               </div>
             </div>
           ) : (
             <>
-            <svg
-              aria-hidden="true"
-              className="analysis-map__links"
-              viewBox={`0 0 ${stageSize.width} ${stageSize.height}`}
-            >
-              <defs>
-                <marker
-                  id="analysis-reference-map-arrowhead"
-                  markerHeight="8"
-                  markerUnits="strokeWidth"
-                  markerWidth="8"
-                  orient="auto"
-                  refX="6"
-                  refY="3"
-                >
-                  <path className="analysis-map__arrowhead" d="M0,0 L0,6 L6,3 z" />
-                </marker>
-              </defs>
-              {linkPaths.map((link) => (
-                <path
-                  className={`analysis-map__link ${
-                    link.variant === 'summary'
-                      ? 'analysis-reference-map__link--summary'
-                      : link.isActive
-                        ? 'analysis-reference-map__link--active'
-                        : 'analysis-reference-map__link--muted'
-                  }`}
-                  d={link.path}
-                  key={link.key}
-                  markerEnd="url(#analysis-reference-map-arrowhead)"
-                />
-              ))}
-            </svg>
-
-            {linkPaths.map((link) => (
-              <div
-                className={`analysis-map__link-label analysis-reference-map__link-label ${
-                  link.variant === 'summary' ? 'analysis-reference-map__link-label--summary' : ''
-                }`}
-                key={`${link.key}-label`}
-                style={{
-                  left: `${link.midX}px`,
-                  top: `${link.midY}px`,
-                }}
-                title={link.reason}
+              <svg
+                aria-hidden="true"
+                className="analysis-map__links"
+                viewBox={`0 0 ${stageSize.width} ${stageSize.height}`}
               >
-                {link.label}
-              </div>
-            ))}
-
-            <div className="analysis-map__world-anchor">
-              <div className="analysis-map__world" style={worldStyle}>
-                {visibleGraph.areas.map((area) => (
-                  <div
-                    className={`analysis-reference-map__area ${
-                      selectedNode?.area === area.name || activeAreaName === area.name
-                        ? 'analysis-reference-map__area--active'
-                        : ''
-                    }`}
-                    key={area.key}
-                    style={{
-                      left: `${area.x}px`,
-                      top: `${area.y}px`,
-                      width: `${area.width}px`,
-                      height: `${area.height}px`,
-                    }}
+                <defs>
+                  <marker
+                    id="analysis-reference-map-arrowhead"
+                    markerHeight="8"
+                    markerUnits="strokeWidth"
+                    markerWidth="8"
+                    orient="auto"
+                    refX="6"
+                    refY="3"
                   >
-                    <div className="analysis-reference-map__area-header">
-                      <strong>{area.label}</strong>
-                      <span>
-                        클러스터 {area.clusterCount}개 · 파일 {area.count}개
-                      </span>
-                    </div>
-                  </div>
+                    <path className="analysis-map__arrowhead" d="M0,0 L0,6 L6,3 z" />
+                  </marker>
+                </defs>
+                {linkPaths.map((link) => (
+                  <path
+                    className={`analysis-map__link ${
+                      link.variant === 'summary'
+                        ? 'analysis-reference-map__link--summary'
+                        : link.isActive
+                          ? 'analysis-reference-map__link--active'
+                          : 'analysis-reference-map__link--muted'
+                    }`}
+                    d={link.path}
+                    key={link.key}
+                    markerEnd="url(#analysis-reference-map-arrowhead)"
+                  />
                 ))}
+              </svg>
 
-                {visibleGraph.clusters.map((cluster) => (
-                  <div
-                    className={`analysis-reference-map__cluster ${
-                      selectedNode?.cluster === cluster.name
-                        ? 'analysis-reference-map__cluster--active'
-                        : ''
-                    }`}
-                    key={cluster.key}
-                    style={{
-                      left: `${cluster.x}px`,
-                      top: `${cluster.y}px`,
-                      width: `${cluster.width}px`,
-                      height: `${cluster.height}px`,
-                    }}
-                  >
-                    <div className="analysis-reference-map__cluster-header">
-                      <strong>{cluster.label}</strong>
-                      <span>
-                        역할 {cluster.groupCount}개 · 파일 {cluster.count}개
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              {linkPaths.map((link) => (
+                <div
+                  className={`analysis-map__link-label analysis-reference-map__link-label ${
+                    link.variant === 'summary' ? 'analysis-reference-map__link-label--summary' : ''
+                  }`}
+                  key={`${link.key}-label`}
+                  style={{
+                    left: `${link.midX}px`,
+                    top: `${link.midY}px`,
+                  }}
+                  title={link.reason}
+                >
+                  {link.label}
+                </div>
+              ))}
 
-                {visibleGraph.roleGroups.map((group) => (
-                  <div
-                    className={`analysis-reference-map__role-group ${
-                      selectedNode &&
-                      selectedNode.cluster === group.clusterKey &&
-                      selectedNode.groupCategory === group.category
-                        ? 'analysis-reference-map__role-group--active'
-                        : ''
-                    } ${
-                      !selectedPath && group.hiddenCount > 0
-                        ? 'analysis-reference-map__role-group--expandable'
-                        : ''
-                    }`}
-                    key={group.key}
-                    onClick={() => {
-                      if (selectedPath || group.hiddenCount === 0) {
-                        return;
-                      }
-
-                      setExpandedGroupKeys((current) => {
-                        if (current.includes(group.key)) {
-                          return current.filter((key) => key !== group.key);
-                        }
-
-                        return [...current, group.key];
-                      });
-                    }}
-                    onPointerDown={(event) => {
-                      if (selectedPath || group.hiddenCount === 0) {
-                        return;
-                      }
-
-                      event.stopPropagation();
-                    }}
-                    style={{
-                      left: `${group.x}px`,
-                      top: `${group.y}px`,
-                      width: `${group.width}px`,
-                      height: `${group.height}px`,
-                    }}
-                  >
-                    <div className="analysis-reference-map__role-group-header">
-                      <strong>{group.label}</strong>
-                      <span>{group.count}개</span>
-                    </div>
-                    {!selectedPath && group.hiddenCount > 0 ? (
-                      <div className="analysis-reference-map__role-group-footer">
-                        <span className="analysis-reference-map__role-group-more">
-                          {group.isExpanded ? '접기' : `+${group.hiddenCount}개 더 보기`}
+              <div className="analysis-map__world-anchor">
+                <div className="analysis-map__world" style={worldStyle}>
+                  {visibleGraph.areas.map((area) => (
+                    <div
+                      className={`analysis-reference-map__area ${
+                        selectedNode?.area === area.name ||
+                        activeAreaNameSet.has(area.name)
+                          ? 'analysis-reference-map__area--active'
+                          : ''
+                      }`}
+                      key={area.key}
+                      style={{
+                        left: `${area.x}px`,
+                        top: `${area.y}px`,
+                        width: `${area.width}px`,
+                        height: `${area.height}px`,
+                      }}
+                    >
+                      <div className="analysis-reference-map__area-header">
+                        <strong>{area.label}</strong>
+                        <span>
+                          클러스터 {area.clusterCount}개 · 파일 {area.count}개
                         </span>
                       </div>
-                    ) : null}
-                  </div>
-                ))}
+                    </div>
+                  ))}
 
-                {visibleGraph.nodes.map((node) => (
-                  <button
-                    className={`analysis-reference-map__node ${
-                      selectedPath === node.path ? 'analysis-reference-map__node--selected' : ''
-                    } ${
-                      selectedPath && node.path !== selectedPath && relatedPaths.has(node.path)
-                        ? 'analysis-reference-map__node--related'
-                        : ''
-                    } ${
-                      selectedPath && node.path !== selectedPath && !relatedPaths.has(node.path)
-                        ? 'analysis-reference-map__node--muted'
-                        : ''
-                    }`}
-                    key={node.path}
-                    onClick={() => {
-                      setSelectedPath(node.path);
-                    }}
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }}
-                    style={{
-                      left: `${node.x}px`,
-                      top: `${node.y}px`,
-                      width: `${node.width}px`,
-                      height: `${node.height}px`,
-                    }}
-                    type="button"
-                  >
-                    <span className="analysis-reference-map__node-file">{node.fileName}</span>
-                    <strong className="analysis-reference-map__node-path">{node.path}</strong>
-                    <span className="analysis-reference-map__node-summary">{node.summary}</span>
-                    <span className="analysis-reference-map__node-meta">
-                      <span className="analysis-reference-map__node-chip">{node.role}</span>
-                      <span className="analysis-reference-map__node-chip">
-                        {resolveRoleGroupDisplayName(node.groupCategory)}
+                  {visibleGraph.clusters.map((cluster) => (
+                    <div
+                      className={`analysis-reference-map__cluster ${
+                        selectedNode?.cluster === cluster.name
+                          ? 'analysis-reference-map__cluster--active'
+                          : ''
+                      }`}
+                      key={cluster.key}
+                      style={{
+                        left: `${cluster.x}px`,
+                        top: `${cluster.y}px`,
+                        width: `${cluster.width}px`,
+                        height: `${cluster.height}px`,
+                      }}
+                    >
+                      <div className="analysis-reference-map__cluster-header">
+                        <strong>{cluster.label}</strong>
+                        <span>
+                          역할 {cluster.groupCount}개 · 파일 {cluster.count}개
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {visibleGraph.roleGroups.map((group) => (
+                    <div
+                      className={`analysis-reference-map__role-group ${
+                        selectedNode &&
+                        selectedNode.cluster === group.clusterKey &&
+                        selectedNode.groupCategory === group.category
+                          ? 'analysis-reference-map__role-group--active'
+                          : ''
+                      } ${
+                        !selectedPath && group.hiddenCount > 0
+                          ? 'analysis-reference-map__role-group--expandable'
+                          : ''
+                      }`}
+                      key={group.key}
+                      onClick={() => {
+                        if (selectedPath || group.hiddenCount === 0) {
+                          return;
+                        }
+
+                        setExpandedGroupKeys((current) => {
+                          if (current.includes(group.key)) {
+                            return current.filter((key) => key !== group.key);
+                          }
+
+                          return [...current, group.key];
+                        });
+                      }}
+                      onPointerDown={(event) => {
+                        if (selectedPath || group.hiddenCount === 0) {
+                          return;
+                        }
+
+                        event.stopPropagation();
+                      }}
+                      style={{
+                        left: `${group.x}px`,
+                        top: `${group.y}px`,
+                        width: `${group.width}px`,
+                        height: `${group.height}px`,
+                      }}
+                    >
+                      <div className="analysis-reference-map__role-group-header">
+                        <strong>{group.label}</strong>
+                        <span>{group.count}개</span>
+                      </div>
+                      {!selectedPath && group.hiddenCount > 0 ? (
+                        <div className="analysis-reference-map__role-group-footer">
+                          <span className="analysis-reference-map__role-group-more">
+                            {group.isExpanded ? '접기' : `+${group.hiddenCount}개 더 보기`}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+
+                  {visibleGraph.nodes.map((node) => (
+                    <button
+                      className={`analysis-reference-map__node ${
+                        selectedPath === node.path ? 'analysis-reference-map__node--selected' : ''
+                      } ${
+                        selectedPath && node.path !== selectedPath && relatedPaths.has(node.path)
+                          ? 'analysis-reference-map__node--related'
+                          : ''
+                      } ${
+                        selectedPath && node.path !== selectedPath && !relatedPaths.has(node.path)
+                          ? 'analysis-reference-map__node--muted'
+                          : ''
+                      }`}
+                      key={node.path}
+                      onClick={() => {
+                        setSelectedPath(node.path);
+                      }}
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                      style={{
+                        left: `${node.x}px`,
+                        top: `${node.y}px`,
+                        width: `${node.width}px`,
+                        height: `${node.height}px`,
+                      }}
+                      type="button"
+                    >
+                      <span className="analysis-reference-map__node-file">{node.fileName}</span>
+                      <strong className="analysis-reference-map__node-path">{node.path}</strong>
+                      <span className="analysis-reference-map__node-summary">{node.summary}</span>
+                      <span className="analysis-reference-map__node-meta">
+                        <span className="analysis-reference-map__node-chip">{node.role}</span>
+                        <span className="analysis-reference-map__node-chip">
+                          {resolveRoleGroupDisplayName(node.groupCategory)}
+                        </span>
+                        {node.tagLabels.length > 0 ? (
+                          <span className="analysis-reference-map__node-chip">
+                            태그 {node.tagLabels.length}
+                          </span>
+                        ) : null}
+                        <span className="analysis-reference-map__node-chip">
+                          나감 {node.outgoingCount}
+                        </span>
+                        <span className="analysis-reference-map__node-chip">
+                          들어옴 {node.incomingCount}
+                        </span>
                       </span>
-                      <span className="analysis-reference-map__node-chip">
-                        나감 {node.outgoingCount}
-                      </span>
-                      <span className="analysis-reference-map__node-chip">
-                        들어옴 {node.incomingCount}
-                      </span>
-                    </span>
-                  </button>
-                ))}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
             </>
           )}
         </div>
@@ -812,37 +956,72 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                 <div className="analysis-reference-map__copy">
                   <span className="analysis-reference-map__eyebrow">파일 참조</span>
                   <h4>참조 맵</h4>
-                  <p>
-                    영역, 클러스터, 역할 박스로 나눠 핵심 파일 연결을 구조 단위로 살펴볼 수
-                    있습니다.
-                  </p>
                 </div>
                 <div className="analysis-reference-map__stats">
-                  <span className="analysis-reference-map__stat">파일 {visibleGraph.nodes.length}개</span>
-                  <span className="analysis-reference-map__stat">참조선 {visibleGraph.edges.length}개</span>
+                  <span className="analysis-reference-map__stat">
+                    <span className="analysis-reference-map__summary-label">파일</span>
+                    <strong className="analysis-reference-map__summary-value">
+                      {visibleGraph.nodes.length}개
+                    </strong>
+                  </span>
+                  <span className="analysis-reference-map__stat">
+                    <span className="analysis-reference-map__summary-label">참조선</span>
+                    <strong className="analysis-reference-map__summary-value">
+                      {visibleGraph.edges.length}개
+                    </strong>
+                  </span>
                 </div>
               </div>
 
-              <div className="analysis-reference-map__layers">
-                {areaSummaries.map((area) => (
+              <div className="analysis-reference-map__filter-panel">
+                <div className="analysis-reference-map__filter-header">
+                  <span className="analysis-reference-map__eyebrow">영역 선택</span>
+                </div>
+                <div className="analysis-reference-map__layers">
                   <button
+                    aria-pressed={activeAreaNames.length === 0}
                     className={`analysis-reference-map__layer-chip ${
-                      activeAreaName === area.name ||
-                      (!activeAreaName && selectedNode?.area === area.name)
-                        ? 'analysis-reference-map__layer-chip--active'
-                        : ''
+                      activeAreaNames.length === 0 ? 'analysis-reference-map__layer-chip--active' : ''
                     }`}
-                    key={area.name}
                     onClick={() => {
-                      setSelectedPath(null);
-                      setActiveAreaName((current) => (current === area.name ? null : area.name));
+                      setActiveAreaNames([]);
                     }}
                     type="button"
                   >
-                    {area.label}
-                    <strong>{area.count}</strong>
+                    <span className="analysis-reference-map__summary-label">전체</span>
+                    <strong className="analysis-reference-map__summary-value">
+                      {graph.nodes.length}개
+                    </strong>
                   </button>
-                ))}
+                  {areaSummaries.map((area) => {
+                    const isActive =
+                      activeAreaNameSet.has(area.name) ||
+                      (activeAreaNames.length === 0 && selectedNode?.area === area.name);
+
+                    return (
+                      <button
+                        aria-pressed={isActive}
+                        className={`analysis-reference-map__layer-chip ${
+                          isActive ? 'analysis-reference-map__layer-chip--active' : ''
+                        }`}
+                        key={area.name}
+                        onClick={() => {
+                          setActiveAreaNames((current) =>
+                            current.includes(area.name)
+                              ? current.filter((currentAreaName) => currentAreaName !== area.name)
+                              : [...current, area.name],
+                          );
+                        }}
+                        type="button"
+                      >
+                        <span className="analysis-reference-map__summary-label">{area.label}</span>
+                        <strong className="analysis-reference-map__summary-value">
+                          {area.count}개
+                        </strong>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {selectedNode ? (
@@ -882,7 +1061,9 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                       </div>
                     </div>
 
-                    <p className="analysis-reference-map__selected-summary">{selectedNode.summary}</p>
+                    <p className="analysis-reference-map__selected-summary">
+                      {selectedNode.summary}
+                    </p>
 
                     <div className="analysis-reference-map__meta">
                       <span className="analysis-reference-map__meta-chip">
@@ -891,6 +1072,11 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                       <span className="analysis-reference-map__meta-chip">
                         들어옴 {selectedNode.incomingCount}개
                       </span>
+                      {selectedNode.tagLabels.map((tagLabel) => (
+                        <span className="analysis-reference-map__meta-chip" key={tagLabel}>
+                          태그 {tagLabel}
+                        </span>
+                      ))}
                     </div>
                   </section>
 
@@ -966,14 +1152,34 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                     </section>
                   </div>
                 </div>
-              ) : (
-                <div className="analysis-reference-map__selected">
-                  <p className="analysis-reference-map__empty-copy">
-                    파일 카드를 선택하면 해당 파일 중심의 참조선만 맵에 표시됩니다. 역할
-                    박스를 누르면 더 많은 파일을 펼쳐볼 수 있습니다.
-                  </p>
-                </div>
-              )}
+              ) : null}
+
+              <ReferenceTagManager
+                activeTagIds={activeTagIds}
+                canManageTags={props.canManageTags}
+                isCancellingReferenceTags={props.isCancellingTags}
+                isGeneratingReferenceTags={props.isGeneratingTags}
+                isSaving={props.isSavingTags}
+                onCancelReferenceTagGeneration={props.onCancelReferenceTagGeneration}
+                onGenerateReferenceTags={props.onGenerateReferenceTags}
+                onCreateTag={handleCreateTag}
+                onDeleteTag={handleDeleteTag}
+                onClearTags={() => {
+                  setActiveTagIds([]);
+                }}
+                onToggleTagFilter={(tagId) => {
+                  setActiveTagIds((current) =>
+                    current.includes(tagId)
+                      ? current.filter((currentTagId) => currentTagId !== tagId)
+                      : [...current, tagId],
+                  );
+                }}
+                onToggleTagAssignment={handleToggleTagAssignment}
+                selectedPath={selectedPath}
+                selectedPathLabel={selectedNode?.path ?? null}
+                taggedFileCount={taggedFileCount}
+                tagSummaries={tagSummaries}
+              />
             </div>
           ) : null}
         </div>
@@ -988,13 +1194,32 @@ function buildReferenceGraph(
 ): AnalysisReferenceGraph {
   const entryByPath = new Map(analysis.fileIndex.map((entry) => [entry.path, entry] as const));
   const indexedPaths = new Set(entryByPath.keys());
+  const tagIdsByPath = buildReferenceTagIdsByPath(analysis.referenceTags);
+  const tagLabelById = new Map(
+    (analysis.referenceTags?.tags ?? []).map((tag) => [tag.id, tag.label] as const),
+  );
   const incomingCounts = new Map<string, number>();
   const outgoingCounts = new Map<string, number>();
   const groupCategoryByPath = new Map<string, string>();
-  const edges = deduplicateFileReferences(analysis.context.fileReferences).filter(
-    (edge) => indexedPaths.has(edge.from) && indexedPaths.has(edge.to),
+  const referencedPaths = new Set(
+    analysis.fileIndex
+      .map((entry) => entry.path)
+      .filter(
+        (path) =>
+          options.activeTagIds.size === 0 ||
+          (tagIdsByPath
+            .get(path)
+            ?.some((tagId) => options.activeTagIds.has(tagId)) ??
+            false),
+      ),
   );
-  const referencedPaths = new Set(analysis.fileIndex.map((entry) => entry.path));
+  const edges = deduplicateFileReferences(analysis.context.fileReferences).filter(
+    (edge) =>
+      indexedPaths.has(edge.from) &&
+      indexedPaths.has(edge.to) &&
+      referencedPaths.has(edge.from) &&
+      referencedPaths.has(edge.to),
+  );
 
   for (const edge of edges) {
     outgoingCounts.set(edge.from, (outgoingCounts.get(edge.from) ?? 0) + 1);
@@ -1063,7 +1288,9 @@ function buildReferenceGraph(
       currentAreaRowHeight = 0;
     }
 
-    const areaClusters = clusterNames.filter((clusterName) => resolveClusterAreaName(clusterName) === areaName);
+    const areaClusters = clusterNames.filter(
+      (clusterName) => resolveClusterAreaName(clusterName) === areaName,
+    );
     const clusterColumnCount = resolveClusterColumnCount({
       areaWidth,
       clusterCount: areaClusters.length,
@@ -1088,7 +1315,9 @@ function buildReferenceGraph(
           ? ROLE_GROUP_COLUMNS
           : 1;
       const groupWidth = Math.floor(
-        (clusterWidth - CLUSTER_PADDING_X * 2 - ROLE_GROUP_GAP * Math.max(0, groupColumnCount - 1)) /
+        (clusterWidth -
+          CLUSTER_PADDING_X * 2 -
+          ROLE_GROUP_GAP * Math.max(0, groupColumnCount - 1)) /
           groupColumnCount,
       );
       const groupRowHeights: number[] = [];
@@ -1104,10 +1333,7 @@ function buildReferenceGraph(
 
       return {
         clusterHeight:
-          CLUSTER_HEADER_HEIGHT +
-          CLUSTER_PADDING_TOP +
-          clusterBodyHeight +
-          CLUSTER_PADDING_BOTTOM,
+          CLUSTER_HEADER_HEIGHT + CLUSTER_PADDING_TOP + clusterBodyHeight + CLUSTER_PADDING_BOTTOM,
         clusterName,
         groupColumnCount,
         groupEntries,
@@ -1123,11 +1349,7 @@ function buildReferenceGraph(
       const columnOffset = clusterColumnHeights[columnIndex] ?? 0;
       const clusterName = clusterLayout.clusterName;
       const clusterX = areaX + AREA_PADDING_X + columnIndex * (clusterWidth + CLUSTER_COLUMN_GAP);
-      const clusterY =
-        areaY +
-        AREA_HEADER_HEIGHT +
-        AREA_PADDING_TOP +
-        columnOffset;
+      const clusterY = areaY + AREA_HEADER_HEIGHT + AREA_PADDING_TOP + columnOffset;
 
       clusters.push({
         areaName,
@@ -1190,6 +1412,9 @@ function buildReferenceGraph(
             path,
             role: entry?.role ?? '참조 파일',
             summary: getReferenceSummary(entry),
+            tagLabels: (tagIdsByPath.get(path) ?? [])
+              .map((tagId) => tagLabelById.get(tagId))
+              .filter((tagLabel): tagLabel is string => Boolean(tagLabel)),
             width: nodeWidth,
             x: groupX + ROLE_GROUP_PADDING_X,
             y:
@@ -1243,19 +1468,19 @@ function buildReferenceGraph(
   };
 }
 
-function filterReferenceGraphByArea(
+function filterReferenceGraphByAreas(
   graph: AnalysisReferenceGraph,
-  areaName: string | null,
+  areaNames: Set<string>,
 ): AnalysisReferenceGraph {
-  if (!areaName) {
+  if (areaNames.size === 0) {
     return graph;
   }
 
-  const areas = graph.areas.filter((area) => area.name === areaName);
-  const clusters = graph.clusters.filter((cluster) => cluster.areaName === areaName);
+  const areas = graph.areas.filter((area) => areaNames.has(area.name));
+  const clusters = graph.clusters.filter((cluster) => areaNames.has(cluster.areaName));
   const clusterKeys = new Set(clusters.map((cluster) => cluster.key));
   const roleGroups = graph.roleGroups.filter((group) => clusterKeys.has(group.clusterKey));
-  const nodes = graph.nodes.filter((node) => node.area === areaName);
+  const nodes = graph.nodes.filter((node) => areaNames.has(node.area));
   const nodePaths = new Set(nodes.map((node) => node.path));
   const edges = graph.edges.filter((edge) => nodePaths.has(edge.from) && nodePaths.has(edge.to));
   const clusterSummaries = graph.clusterSummaries.filter(
@@ -1319,14 +1544,10 @@ function buildRoleGroupEntries(input: {
       const groupKey = `${input.clusterName}|${category}`;
       const isExpanded =
         input.expandedGroupKeys.has(groupKey) || allPaths.length <= OVERVIEW_PREVIEW_NODE_LIMIT;
-      const visiblePaths = isExpanded
-        ? allPaths
-        : allPaths.slice(0, OVERVIEW_PREVIEW_NODE_LIMIT);
+      const visiblePaths = isExpanded ? allPaths : allPaths.slice(0, OVERVIEW_PREVIEW_NODE_LIMIT);
       const hiddenCount = Math.max(0, allPaths.length - visiblePaths.length);
       const footerHeight =
-        hiddenCount > 0
-          ? ROLE_GROUP_PREVIEW_FOOTER_GAP + ROLE_GROUP_PREVIEW_FOOTER_HEIGHT
-          : 0;
+        hiddenCount > 0 ? ROLE_GROUP_PREVIEW_FOOTER_GAP + ROLE_GROUP_PREVIEW_FOOTER_HEIGHT : 0;
 
       return {
         allPaths,
@@ -1412,26 +1633,17 @@ function getAreaPriority(areaName: string): number {
   }
 }
 
-function resolveAreaColumnCount(input: {
-  areaCount: number;
-  stageWidth: number;
-}): number {
+function resolveAreaColumnCount(input: { areaCount: number; stageWidth: number }): number {
   void input.stageWidth;
   return Math.max(1, input.areaCount);
 }
 
-function resolveAreaWidth(input: {
-  areaColumnCount: number;
-  stageWidth: number;
-}): number {
+function resolveAreaWidth(input: { areaColumnCount: number; stageWidth: number }): number {
   void input.stageWidth;
   return input.areaColumnCount <= 1 ? SINGLE_AREA_WIDTH : DEFAULT_AREA_WIDTH;
 }
 
-function resolveClusterColumnCount(input: {
-  areaWidth: number;
-  clusterCount: number;
-}): number {
+function resolveClusterColumnCount(input: { areaWidth: number; clusterCount: number }): number {
   if (input.clusterCount <= 1) {
     return 1;
   }
@@ -1625,10 +1837,7 @@ function getGraphBounds(graph: AnalysisReferenceGraph): {
     minY: minY - REFERENCE_GRAPH_TOP_OVERFLOW,
     width: maxX - minX + REFERENCE_MAP_VIEWPORT_PRESET.viewportPadding * 2,
     height:
-      maxY -
-      minY +
-      REFERENCE_GRAPH_TOP_OVERFLOW +
-      REFERENCE_MAP_VIEWPORT_PRESET.viewportPadding,
+      maxY - minY + REFERENCE_GRAPH_TOP_OVERFLOW + REFERENCE_MAP_VIEWPORT_PRESET.viewportPadding,
   };
 }
 
@@ -1651,6 +1860,17 @@ function createStageGridStyle(viewport: AnalysisViewport): Record<string, string
     backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
     backgroundSize: `${gridSize}px ${gridSize}px`,
   };
+}
+
+function createReferenceGraphResetKey(analysis: StructuredProjectAnalysis): string {
+  const fileKey = analysis.fileIndex
+    .map((entry) => `${entry.path}:${entry.layer ?? ''}:${entry.category}`)
+    .join('|');
+  const edgeKey = analysis.context.fileReferences
+    .map((edge) => `${edge.from}:${edge.to}:${edge.relationship}`)
+    .join('|');
+
+  return `${fileKey}#${edgeKey}`;
 }
 
 function resolveOrderedClusterNames(
@@ -1739,7 +1959,11 @@ function optimizeClusterNodeOrdering(input: {
           pathClusterIndex,
         });
 
-        if (leftBarycenter !== null && rightBarycenter !== null && leftBarycenter !== rightBarycenter) {
+        if (
+          leftBarycenter !== null &&
+          rightBarycenter !== null &&
+          leftBarycenter !== rightBarycenter
+        ) {
           return leftBarycenter - rightBarycenter;
         }
 
@@ -1832,9 +2056,7 @@ function buildClusterSummaries(input: {
   });
 }
 
-function buildNeighborPathMap(
-  edges: ProjectAnalysisFileReference[],
-): Map<string, Set<string>> {
+function buildNeighborPathMap(edges: ProjectAnalysisFileReference[]): Map<string, Set<string>> {
   const neighborPaths = new Map<string, Set<string>>();
 
   for (const edge of edges) {

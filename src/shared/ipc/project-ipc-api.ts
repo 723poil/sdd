@@ -4,6 +4,7 @@ import type {
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
@@ -18,9 +19,11 @@ import type {
   AnalyzeProjectInput,
   AnalyzeProjectOutput,
   CancelProjectAnalysisInput,
+  CancelProjectReferenceTagGenerationInput,
   CreateProjectSessionInput,
   CreateProjectSpecInput,
   CreateProjectSpecOutput,
+  GenerateProjectReferenceTagsInput,
   InspectProjectInput,
   ListProjectSessionsInput,
   ReadProjectAnalysisInput,
@@ -29,20 +32,15 @@ import type {
   ReadProjectSpecsInput,
   ReorderRecentProjectsInput,
   SaveProjectAnalysisDocumentLayoutsInput,
+  SaveProjectReferenceTagsInput,
   SelectProjectDirectoryOutput,
   SendProjectSessionMessageInput,
   SendProjectSessionMessageOutput,
 } from '@/shared/ipc/project-ipc';
 import { projectIpcChannels } from '@/shared/ipc/project-ipc';
-import {
-  bindIpcInvoke0,
-  bindIpcInvoke1,
-  type IpcRendererInvoke,
-} from '@/shared/ipc/ipc-bridge';
+import { bindIpcInvoke0, bindIpcInvoke1, type IpcRendererInvoke } from '@/shared/ipc/ipc-bridge';
 
-export function createRendererProjectApi(
-  invoke: IpcRendererInvoke['invoke'],
-): RendererProjectApi {
+export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): RendererProjectApi {
   return {
     selectDirectory: bindIpcInvoke0<Result<SelectProjectDirectoryOutput>>(
       invoke,
@@ -72,6 +70,18 @@ export function createRendererProjectApi(
       SaveProjectAnalysisDocumentLayoutsInput,
       Result<ProjectAnalysisDocumentLayoutMap>
     >(invoke, projectIpcChannels.saveAnalysisDocumentLayouts),
+    saveReferenceTags: bindIpcInvoke1<
+      SaveProjectReferenceTagsInput,
+      Result<ProjectReferenceTagDocument>
+    >(invoke, projectIpcChannels.saveReferenceTags),
+    generateReferenceTags: bindIpcInvoke1<
+      GenerateProjectReferenceTagsInput,
+      Result<ProjectReferenceTagDocument>
+    >(invoke, projectIpcChannels.generateReferenceTags),
+    cancelReferenceTagGeneration: bindIpcInvoke1<
+      CancelProjectReferenceTagGenerationInput,
+      Result<void>
+    >(invoke, projectIpcChannels.cancelReferenceTagGeneration),
     readSpecs: bindIpcInvoke1<ReadProjectSpecsInput, Result<ProjectSpecDocument[]>>(
       invoke,
       projectIpcChannels.readSpecs,
@@ -83,10 +93,7 @@ export function createRendererProjectApi(
     readAnalysisRunStatus: bindIpcInvoke1<
       ReadProjectAnalysisRunStatusInput,
       Result<ProjectAnalysisRunStatus>
-    >(
-      invoke,
-      projectIpcChannels.readAnalysisRunStatus,
-    ),
+    >(invoke, projectIpcChannels.readAnalysisRunStatus),
     analyze: bindIpcInvoke1<AnalyzeProjectInput, Result<AnalyzeProjectOutput>>(
       invoke,
       projectIpcChannels.analyze,
@@ -106,16 +113,10 @@ export function createRendererProjectApi(
     readSessionMessages: bindIpcInvoke1<
       ReadProjectSessionMessagesInput,
       Result<ProjectSessionMessage[]>
-    >(
-      invoke,
-      projectIpcChannels.readSessionMessages,
-    ),
+    >(invoke, projectIpcChannels.readSessionMessages),
     sendSessionMessage: bindIpcInvoke1<
       SendProjectSessionMessageInput,
       Result<SendProjectSessionMessageOutput>
-    >(
-      invoke,
-      projectIpcChannels.sendSessionMessage,
-    ),
+    >(invoke, projectIpcChannels.sendSessionMessage),
   };
 }

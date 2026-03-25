@@ -22,8 +22,8 @@ export function mergeReferenceAnalysisDraft(input: {
   const nextDocuments = PROJECT_ANALYSIS_DOCUMENT_IDS.flatMap((documentId) => {
     const preferredDocument =
       documentId === 'structure' || documentId === 'layers' || documentId === 'connectivity'
-        ? referenceDocumentMap.get(documentId) ?? existingDocumentMap.get(documentId)
-        : existingDocumentMap.get(documentId) ?? referenceDocumentMap.get(documentId);
+        ? (referenceDocumentMap.get(documentId) ?? existingDocumentMap.get(documentId))
+        : (existingDocumentMap.get(documentId) ?? referenceDocumentMap.get(documentId));
 
     return preferredDocument ? [preferredDocument] : [];
   });
@@ -37,7 +37,10 @@ export function mergeReferenceAnalysisDraft(input: {
     ),
     context: {
       ...input.referenceDraft.context,
-      confidence: Math.max(input.referenceDraft.context.confidence, existingAnalysis.context.confidence),
+      confidence: Math.max(
+        input.referenceDraft.context.confidence,
+        existingAnalysis.context.confidence,
+      ),
       detectedFrameworks: mergeStringLists(
         input.referenceDraft.context.detectedFrameworks,
         existingAnalysis.context.detectedFrameworks,
@@ -59,16 +62,23 @@ export function mergeReferenceAnalysisDraft(input: {
         input.referenceDraft.context.keyConfigs,
         existingAnalysis.context.keyConfigs,
       ),
-      modules: mergeStringLists(input.referenceDraft.context.modules, existingAnalysis.context.modules),
+      modules: mergeStringLists(
+        input.referenceDraft.context.modules,
+        existingAnalysis.context.modules,
+      ),
       projectPurpose:
         existingAnalysis.context.projectPurpose.trim().length > 0
           ? existingAnalysis.context.projectPurpose
           : input.referenceDraft.context.projectPurpose,
-      unknowns: mergeStringLists(input.referenceDraft.context.unknowns, existingAnalysis.context.unknowns),
+      unknowns: mergeStringLists(
+        input.referenceDraft.context.unknowns,
+        existingAnalysis.context.unknowns,
+      ),
     },
     documents: nextDocuments,
     fileIndex: input.referenceDraft.fileIndex,
     summaryMarkdown: overviewDocument?.markdown ?? input.referenceDraft.summaryMarkdown,
+    ...(existingAnalysis.referenceTags ? { referenceTags: existingAnalysis.referenceTags } : {}),
   };
 }
 

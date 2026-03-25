@@ -5,6 +5,7 @@ import type {
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
@@ -18,6 +19,9 @@ export const projectIpcChannels = {
   inspect: 'project/inspect',
   readAnalysis: 'project/read-analysis',
   saveAnalysisDocumentLayouts: 'project/save-analysis-document-layouts',
+  saveReferenceTags: 'project/save-reference-tags',
+  generateReferenceTags: 'project/generate-reference-tags',
+  cancelReferenceTagGeneration: 'project/cancel-reference-tag-generation',
   readSpecs: 'project/read-specs',
   createSpec: 'project/create-spec',
   readAnalysisRunStatus: 'project/read-analysis-run-status',
@@ -53,6 +57,19 @@ export interface AnalyzeProjectInput {
 export interface SaveProjectAnalysisDocumentLayoutsInput {
   rootPath: string;
   documentLayouts: ProjectAnalysisDocumentLayoutMap;
+}
+
+export interface SaveProjectReferenceTagsInput {
+  rootPath: string;
+  referenceTags: ProjectReferenceTagDocument;
+}
+
+export interface GenerateProjectReferenceTagsInput {
+  rootPath: string;
+}
+
+export interface CancelProjectReferenceTagGenerationInput {
+  rootPath: string;
 }
 
 export interface CancelProjectAnalysisInput {
@@ -131,6 +148,15 @@ export interface RendererProjectApi {
   saveAnalysisDocumentLayouts(
     input: SaveProjectAnalysisDocumentLayoutsInput,
   ): Promise<Result<ProjectAnalysisDocumentLayoutMap>>;
+  saveReferenceTags(
+    input: SaveProjectReferenceTagsInput,
+  ): Promise<Result<ProjectReferenceTagDocument>>;
+  generateReferenceTags(
+    input: GenerateProjectReferenceTagsInput,
+  ): Promise<Result<ProjectReferenceTagDocument>>;
+  cancelReferenceTagGeneration(
+    input: CancelProjectReferenceTagGenerationInput,
+  ): Promise<Result<void>>;
   readSpecs(input: ReadProjectSpecsInput): Promise<Result<ProjectSpecDocument[]>>;
   createSpec(input: CreateProjectSpecInput): Promise<Result<CreateProjectSpecOutput>>;
   readAnalysisRunStatus(

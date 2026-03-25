@@ -4,6 +4,7 @@ import type {
   ProjectAnalysisDocumentId,
   ProjectAnalysisDocumentLayoutMap,
 } from '@/domain/project/project-analysis-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 
 import { AnalysisReferenceMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap';
@@ -20,12 +21,19 @@ interface MainWorkspaceProps {
   activeWorkspacePage: WorkspacePageId;
   analysis: StructuredProjectAnalysis | null;
   analysisSessionKey: string;
+  canManageReferenceTags: boolean;
   specs: ProjectSpecDocument[];
+  isCancellingReferenceTags: boolean;
+  isGeneratingReferenceTags: boolean;
+  isSavingReferenceTags: boolean;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpecId: string | null;
   errorMessage: string | null;
+  onCancelReferenceTagGeneration: () => void;
   onSelectAnalysisDocument: (documentId: ProjectAnalysisDocumentId) => void;
+  onGenerateReferenceTags: () => Promise<'succeeded' | 'failed' | 'cancelled'>;
   onSaveAnalysisDocumentLayouts: (documentLayouts: ProjectAnalysisDocumentLayoutMap) => void;
+  onSaveReferenceTags: (referenceTags: ProjectReferenceTagDocument) => Promise<boolean>;
   onSelectSpec: (specId: string) => void;
   onSelectWorkspacePage: (page: WorkspacePageId) => void;
 }
@@ -84,7 +92,14 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           {props.analysis ? (
             <AnalysisReferenceMap
               analysis={props.analysis}
+              canManageTags={props.canManageReferenceTags}
               isActive={props.activeWorkspacePage === 'references'}
+              isCancellingTags={props.isCancellingReferenceTags}
+              isGeneratingTags={props.isGeneratingReferenceTags}
+              isSavingTags={props.isSavingReferenceTags}
+              onCancelReferenceTagGeneration={props.onCancelReferenceTagGeneration}
+              onGenerateReferenceTags={props.onGenerateReferenceTags}
+              onSaveReferenceTags={props.onSaveReferenceTags}
             />
           ) : (
             <section className="analysis-empty-panel">

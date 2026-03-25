@@ -13,6 +13,7 @@ import type {
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMessageRole,
@@ -40,6 +41,15 @@ export interface ProjectAnalyzerPort {
     rootPath: string;
     projectName: string;
   }): Promise<Result<ProjectAnalysisDraft>>;
+}
+
+export interface ProjectReferenceTagGeneratorPort {
+  generateReferenceTags(input: {
+    analysis: ProjectAnalysis;
+    projectName: string;
+    rootPath: string;
+  }): Promise<Result<ProjectReferenceTagDocument>>;
+  cancelReferenceTagGeneration(input: { rootPath: string }): Result<void>;
 }
 
 export interface ProjectAnalysisRunStatusPort {
@@ -102,6 +112,10 @@ export interface ProjectStoragePort {
     rootPath: string;
     documentLayouts: ProjectAnalysisDocumentLayoutMap;
   }): Promise<Result<ProjectAnalysisDocumentLayoutMap>>;
+  saveProjectReferenceTags(input: {
+    rootPath: string;
+    referenceTags: ProjectReferenceTagDocument;
+  }): Promise<Result<ProjectReferenceTagDocument>>;
 }
 
 export interface RecentProjectsStorePort {

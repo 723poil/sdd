@@ -11,9 +11,9 @@ Use this skill when the task is about product scope, feature planning, screen fl
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/01-product-overview.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/05-risks-and-questions.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/01-product-overview.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/05-risks-and-questions.md`
 
 ## Fixed assumptions
 

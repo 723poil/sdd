@@ -19,6 +19,19 @@ export const WORKSPACE_PAGE_IDS = ['analysis', 'specs', 'references'] as const;
 export type WorkspacePageId = (typeof WORKSPACE_PAGE_IDS)[number];
 
 export type StatusBadgeTone = 'positive' | 'warning' | 'neutral';
+export type WorkbenchProgressTaskStatus = Exclude<ProjectAnalysisRunStatusModel['status'], 'idle'>;
+export type ReferenceTagGenerationStatus = 'running' | 'cancelling';
+
+export type WorkbenchProgressTaskKind =
+  | 'analysis'
+  | 'project-activation'
+  | 'spec-create'
+  | 'session-create'
+  | 'message-send'
+  | 'reference-tags-save'
+  | 'reference-tags-generate'
+  | 'settings-save'
+  | 'recent-projects-reorder';
 
 export interface StatusBadgeModel {
   label: string;
@@ -38,6 +51,24 @@ export type SelectedProjectAnalysisDocumentId = ProjectAnalysisDocumentId | null
 export type StructuredProjectAnalysis = ProjectAnalysis;
 export type SelectedProjectSpecId = string | null;
 
+export interface WorkbenchProgressTask {
+  id: string;
+  kind: WorkbenchProgressTaskKind;
+  title: string;
+  detail: string;
+  projectName: string | null;
+  rootPath: string | null;
+  status: WorkbenchProgressTaskStatus;
+  startedAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  errorMessage: string | null;
+  stepIndex: number | null;
+  stepTotal: number | null;
+  progressPercent: number | null;
+  isCancellable: boolean;
+}
+
 export interface ProjectBootstrapWorkbenchState {
   selectedPath: string | null;
   activeWorkspacePage: WorkspacePageId;
@@ -45,6 +76,9 @@ export interface ProjectBootstrapWorkbenchState {
   analysis: StructuredProjectAnalysis | null;
   specs: ProjectSpecDocument[];
   analysisRunStatusesByRootPath: Record<string, ProjectAnalysisRunStatus>;
+  referenceTagGenerationStatusesByRootPath: Record<string, ReferenceTagGenerationStatus>;
+  requestProgressTasks: WorkbenchProgressTask[];
+  selectedProgressTaskId: string | null;
   sessions: ProjectSessionSummary[];
   selectedSessionId: string | null;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
@@ -58,6 +92,7 @@ export interface ProjectBootstrapWorkbenchState {
   isSelecting: boolean;
   isCreatingSpec: boolean;
   isCreatingSession: boolean;
+  isSavingReferenceTags: boolean;
   isSendingMessage: boolean;
   isSavingChatRuntimeSettings: boolean;
   isLeftSidebarOpen: boolean;
@@ -69,6 +104,7 @@ export interface ProjectBootstrapWorkbenchState {
 }
 
 export interface ProjectBootstrapWorkbenchViewModel {
+  activeProgressTask: WorkbenchProgressTask | null;
   analysisStatus: StatusBadgeModel;
   analysisRunStatus: ProjectAnalysisRunStatus | null;
   canAnalyzeProject: boolean;
@@ -80,5 +116,8 @@ export interface ProjectBootstrapWorkbenchViewModel {
   storageStatus: StatusBadgeModel;
   isAnalyzing: boolean;
   isCancellingAnalysis: boolean;
+  isGeneratingReferenceTags: boolean;
+  isCancellingReferenceTags: boolean;
+  progressTasks: WorkbenchProgressTask[];
   workbenchClassName: string;
 }

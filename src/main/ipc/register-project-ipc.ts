@@ -3,8 +3,10 @@ import { ipcMain } from 'electron';
 import { createActivateProjectUseCase } from '@/application/project/activate-project.use-case';
 import { createAnalyzeProjectUseCase } from '@/application/project/analyze-project.use-case';
 import { createCancelProjectAnalysisUseCase } from '@/application/project/cancel-project-analysis.use-case';
+import { createCancelProjectReferenceTagGenerationUseCase } from '@/application/project/cancel-project-reference-tag-generation.use-case';
 import { createCreateProjectSessionUseCase } from '@/application/project/create-project-session.use-case';
 import { createCreateProjectSpecUseCase } from '@/application/project/create-project-spec.use-case';
+import { createGenerateProjectReferenceTagsUseCase } from '@/application/project/generate-project-reference-tags.use-case';
 import { createInitializeProjectStorageUseCase } from '@/application/project/initialize-project-storage.use-case';
 import { createInspectProjectUseCase } from '@/application/project/inspect-project.use-case';
 import { createListRecentProjectsUseCase } from '@/application/project/list-recent-projects.use-case';
@@ -15,6 +17,7 @@ import { createReadProjectSessionMessagesUseCase } from '@/application/project/r
 import { createReadProjectSpecsUseCase } from '@/application/project/read-project-specs.use-case';
 import { createReorderRecentProjectsUseCase } from '@/application/project/reorder-recent-projects.use-case';
 import { createSaveProjectAnalysisDocumentLayoutsUseCase } from '@/application/project/save-project-analysis-document-layouts.use-case';
+import { createSaveProjectReferenceTagsUseCase } from '@/application/project/save-project-reference-tags.use-case';
 import { createSelectProjectDirectoryUseCase } from '@/application/project/select-project-directory.use-case';
 import { createSendProjectSessionMessageUseCase } from '@/application/project/send-project-session-message.use-case';
 import { createFsAgentCliSettingsRepository } from '@/infrastructure/app-settings/fs-agent-cli-settings.repository';
@@ -23,6 +26,7 @@ import { createInMemoryProjectAnalysisRunStatusStore } from '@/infrastructure/an
 import { createNodeProjectAnalyzerAdapter } from '@/infrastructure/analysis/node-project-analyzer.adapter';
 import { createElectronProjectDialogAdapter } from '@/infrastructure/dialog/electron-project-dialog.adapter';
 import { createNodeProjectInspectorAdapter } from '@/infrastructure/fs/node-project-inspector.adapter';
+import { createNodeProjectReferenceTagGeneratorAdapter } from '@/infrastructure/reference-tags/node-project-reference-tag-generator.adapter';
 import { createFsProjectSessionRepository } from '@/infrastructure/sdd/fs-project-session.repository';
 import { createFsProjectStorageRepository } from '@/infrastructure/sdd/fs-project-storage.repository';
 import { registerIpcHandle0, registerIpcHandle1 } from '@/shared/ipc/ipc-bridge';
@@ -30,8 +34,10 @@ import {
   type ActivateProjectInput,
   type AnalyzeProjectInput,
   type CancelProjectAnalysisInput,
+  type CancelProjectReferenceTagGenerationInput,
   type CreateProjectSessionInput,
   type CreateProjectSpecInput,
+  type GenerateProjectReferenceTagsInput,
   type InspectProjectInput,
   type ListProjectSessionsInput,
   type ReadProjectAnalysisInput,
@@ -40,6 +46,7 @@ import {
   type ReadProjectSpecsInput,
   type ReorderRecentProjectsInput,
   type SaveProjectAnalysisDocumentLayoutsInput,
+  type SaveProjectReferenceTagsInput,
   type SendProjectSessionMessageInput,
   projectIpcChannels,
 } from '@/shared/ipc/project-ipc';
@@ -51,6 +58,9 @@ export function registerProjectIpc(): void {
   const projectAnalyzer = createNodeProjectAnalyzerAdapter({
     agentCliSettingsStore,
     analysisRunStatusStore,
+  });
+  const projectReferenceTagGenerator = createNodeProjectReferenceTagGeneratorAdapter({
+    agentCliSettingsStore,
   });
   const projectInspector = createNodeProjectInspectorAdapter();
   const projectSessionStore = createFsProjectSessionRepository();
@@ -70,6 +80,18 @@ export function registerProjectIpc(): void {
   const saveProjectAnalysisDocumentLayouts = createSaveProjectAnalysisDocumentLayoutsUseCase({
     projectInspector,
     projectStorage,
+  });
+  const saveProjectReferenceTags = createSaveProjectReferenceTagsUseCase({
+    projectInspector,
+    projectStorage,
+  });
+  const generateProjectReferenceTags = createGenerateProjectReferenceTagsUseCase({
+    projectInspector,
+    projectReferenceTagGenerator,
+    projectStorage,
+  });
+  const cancelProjectReferenceTagGeneration = createCancelProjectReferenceTagGenerationUseCase({
+    projectReferenceTagGenerator,
   });
   const readProjectSpecs = createReadProjectSpecsUseCase({
     projectStorage,
@@ -137,6 +159,22 @@ export function registerProjectIpc(): void {
     (input: SaveProjectAnalysisDocumentLayoutsInput) =>
       saveProjectAnalysisDocumentLayouts.execute(input),
   );
+  registerIpcHandle1(
+    ipcMain,
+    projectIpcChannels.saveReferenceTags,
+    (input: SaveProjectReferenceTagsInput) => saveProjectReferenceTags.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
+    projectIpcChannels.generateReferenceTags,
+    (input: GenerateProjectReferenceTagsInput) => generateProjectReferenceTags.execute(input),
+  );
+  registerIpcHandle1(
+    ipcMain,
+    projectIpcChannels.cancelReferenceTagGeneration,
+    (input: CancelProjectReferenceTagGenerationInput) =>
+      cancelProjectReferenceTagGeneration.execute(input),
+  );
   registerIpcHandle1(ipcMain, projectIpcChannels.readSpecs, (input: ReadProjectSpecsInput) =>
     readProjectSpecs.execute(input),
   );
@@ -151,8 +189,10 @@ export function registerProjectIpc(): void {
   registerIpcHandle1(ipcMain, projectIpcChannels.listSessions, (input: ListProjectSessionsInput) =>
     listProjectSessions.execute(input),
   );
-  registerIpcHandle1(ipcMain, projectIpcChannels.createSession, (input: CreateProjectSessionInput) =>
-    createProjectSession.execute(input),
+  registerIpcHandle1(
+    ipcMain,
+    projectIpcChannels.createSession,
+    (input: CreateProjectSessionInput) => createProjectSession.execute(input),
   );
   registerIpcHandle1(
     ipcMain,

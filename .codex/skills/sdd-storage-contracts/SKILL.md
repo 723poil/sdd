@@ -11,9 +11,9 @@ Use this skill whenever the task touches `.sdd/`, spec storage, patch persistenc
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/04-storage-format.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/06-design-patterns.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/04-storage-format.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/06-design-patterns.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
 
 ## Fixed storage rules
 

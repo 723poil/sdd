@@ -11,9 +11,9 @@ Use this skill whenever the task involves code conventions, file organization, m
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/06-design-patterns.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/02-architecture.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/06-design-patterns.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/02-architecture.md`
 
 ## Core rules
 
@@ -53,6 +53,7 @@ Read these first:
 
 ## UI/UX conventions
 
+- For renderer UI work, especially when helper copy, empty states, card headers, dense panels, or help surfaces may change, also use `sdd-ui-disclosure`.
 - Use Korean-first user-facing text unless there is a strong reason not to.
 - Prefer concise labels and hide implementation details from end users.
 - Do not surface internal roadmap, future extensibility, transport choices, or other engineering-facing detail in the main UI copy.
@@ -92,4 +93,5 @@ If you change conventions, update:
 
 - `07-engineering-conventions.md`
 - `06-design-patterns.md` when pattern expectations change
+- `.codex/skills/sdd-ui-disclosure/SKILL.md` when UI disclosure/help-surface rules change
 - `AGENTS.md`

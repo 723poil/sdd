@@ -4,27 +4,29 @@
 
 ## 우선 읽을 문서
 
-- 전체 인덱스: `/Users/723poil/Desktop/projects/sdd/codex-spec-workflow-plan.md`
-- 문서 개요: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/README.md`
-- 제품/범위: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/01-product-overview.md`
-- 아키텍처: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/02-architecture.md`
-- MVP 계획: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
-- 저장 포맷: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/04-storage-format.md`
-- 리스크/오픈질문: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/05-risks-and-questions.md`
-- 설계 패턴: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/06-design-patterns.md`
-- 엔지니어링 컨벤션: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
-- Codex CLI 연동: `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
+- 전체 인덱스: `/Users/723poil/git/side/sdd/codex-spec-workflow-plan.md`
+- 문서 개요: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/README.md`
+- 제품/범위: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/01-product-overview.md`
+- 아키텍처: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/02-architecture.md`
+- MVP 계획: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
+- 저장 포맷: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/04-storage-format.md`
+- 리스크/오픈질문: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/05-risks-and-questions.md`
+- 설계 패턴: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/06-design-patterns.md`
+- 엔지니어링 컨벤션: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- Codex CLI 연동: `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
 
 ## 프로젝트 전용 스킬
 
 스킬 위치:
 
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-product-mvp/SKILL.md`
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-implementation-guardrails/SKILL.md`
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-engineering-conventions/SKILL.md`
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-storage-contracts/SKILL.md`
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-codex-cli/SKILL.md`
-- `/Users/723poil/Desktop/projects/sdd/.codex/skills/sdd-commit-workflow/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-product-mvp/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-implementation-guardrails/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-engineering-conventions/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-storage-contracts/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-codex-cli/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-commit-workflow/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-ui-disclosure/SKILL.md`
+- `/Users/723poil/git/side/sdd/.codex/skills/sdd-agent-xml-prompt/SKILL.md`
 
 각 스킬 용도:
 
@@ -40,12 +42,18 @@
   - Codex CLI 실행, subprocess 연결, auth, exec/app-server 판단 시 사용
 - `sdd-commit-workflow`
   - 커밋 범위 점검, staged/unstaged 확인, 문서 동기화 확인, Conventional Commit 메시지 작성 시 사용
+- `sdd-ui-disclosure`
+  - renderer UI 설명 문구 밀도, 툴팁/보조 도움말 노출, 빈 상태/보조 카피 설계 시 사용
+- `sdd-agent-xml-prompt`
+  - Codex exec/에이전트 요청 프롬프트를 XML 계약으로 작성하거나 수정할 때 사용
+  - 서브에이전트 활용 지시와 `분석 -> 실행 -> 검증` 기본 루틴을 프롬프트에 넣을 때 사용
 
 ## 고정된 프로젝트 규칙
 
 - 제품은 개발자 개인용 로컬 앱 전제다.
 - 별도 백엔드 서버는 사용하지 않는다.
 - 사용자 UI에는 내부 로드맵, 향후 확장 계획, 구현 디테일을 기본 설명으로 노출하지 않는다.
+- 사용자 UI 설명 문구는 기본 노출을 최소화하고, 반복되거나 선택형인 설명은 툴팁이나 다른 on-demand 도움말로 지연 노출한다.
 - 데이터 저장은 대상 프로젝트 내부 `.sdd/` 폴더가 기본이다.
 - spec 단위 source of truth는 `specs/<spec-slug>/meta.json`이다.
 - `specs/index.json`은 재생성 가능한 인덱스/캐시다.
@@ -73,7 +81,7 @@
 
 ## 현재 구현 상태
 
-- 실제 앱 소스는 `/Users/723poil/Desktop/projects/sdd/src/` 아래에 있다.
+- 실제 앱 소스는 `/Users/723poil/git/side/sdd/src/` 아래에 있다.
 - 계층은 `main / preload / renderer / application / domain / infrastructure / shared` 로 유지한다.
 - renderer feature는 `page 조립 + feature hook + components + constants/types/utils` 구조를 우선한다.
 - 현재 완료된 첫 수직 슬라이스는 아래다.
@@ -126,3 +134,7 @@
   - `02-architecture.md`
   - `06-design-patterns.md`
   - `07-engineering-conventions.md`
+- UI 설명 문구/툴팁/보조 도움말 규칙 변경
+  - `06-design-patterns.md`
+  - `07-engineering-conventions.md`
+  - `.codex/skills/sdd-ui-disclosure/SKILL.md`

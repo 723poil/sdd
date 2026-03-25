@@ -11,9 +11,9 @@ Use this skill when the task involves Codex CLI execution, subprocess management
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/08-codex-cli-integration.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/03-mvp-plan.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
 
 ## Fixed current policy
 

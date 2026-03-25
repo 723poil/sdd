@@ -67,6 +67,8 @@ export type AnalysisInteractionState =
       nodeId: ProjectAnalysisDocumentId;
       pointerOffsetX: number;
       pointerOffsetY: number;
+      startClientX: number;
+      startClientY: number;
     };
 
 export type AnalysisWorkspaceViewMode = 'map' | 'document';

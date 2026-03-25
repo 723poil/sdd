@@ -30,7 +30,6 @@ import {
   EMPTY_STAGE_SIZE,
   INITIAL_VIEWPORT,
   buildAnalysisDocumentBoardNodes,
-  buildAnalysisFileReferenceCards,
   buildAnalysisLinkPaths,
   createResolvedDocumentLayoutMap,
   createStageGridStyle,
@@ -41,6 +40,8 @@ import {
   toDocumentLayoutMap,
   toWorldPoint,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils';
+
+const NODE_DRAG_THRESHOLD_PX = 3;
 
 interface AnalysisWorkspaceProps {
   analysis: StructuredProjectAnalysis | null;
@@ -89,14 +90,6 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
     () => resolveAnalysisDocumentBoardLinks(storedDocumentLinks),
     [storedDocumentLinks],
   );
-  const fileReferenceCards = useMemo(
-    () => buildAnalysisFileReferenceCards(analysis),
-    [analysis],
-  );
-  const totalFileReferenceCount = useMemo(
-    () => fileReferenceCards.reduce((count, entry) => count + (entry.references?.length ?? 0), 0),
-    [fileReferenceCards],
-  );
   const boardPositions = useMemo(
     () =>
       mergeDocumentLayoutMaps({
@@ -118,10 +111,8 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
     hasAdjustedViewportRef.current = false;
     setViewport(INITIAL_VIEWPORT);
     setDraftBoardPositions({});
-    if (viewMode !== 'map') {
-      onViewModeChange('map');
-    }
-  }, [analysisSessionKey, documentsKey, onViewModeChange, viewMode]);
+    onViewModeChange('map');
+  }, [analysisSessionKey, documentsKey, onViewModeChange]);
 
   useEffect(() => {
     if (!isActive || viewMode !== 'map' || !analysis) {
@@ -227,6 +218,14 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
         return;
       }
 
+      const deltaX = event.clientX - interaction.startClientX;
+      const deltaY = event.clientY - interaction.startClientY;
+      const hasMovedEnough =
+        Math.abs(deltaX) > NODE_DRAG_THRESHOLD_PX || Math.abs(deltaY) > NODE_DRAG_THRESHOLD_PX;
+      if (!interaction.moved && !hasMovedEnough) {
+        return;
+      }
+
       const worldPoint = toWorldPoint({
         clientX: event.clientX,
         clientY: event.clientY,
@@ -253,9 +252,14 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
 
     const handlePointerUp = () => {
       const interaction = interactionRef.current;
-      if (interaction?.kind === 'node' && interaction.moved) {
+      if (interaction?.kind === 'node') {
         ignoreClickNodeIdRef.current = interaction.nodeId;
-        onSaveDocumentLayouts(toDocumentLayoutMap(boardPositionsRef.current, documents));
+        if (interaction.moved) {
+          onSaveDocumentLayouts(toDocumentLayoutMap(boardPositionsRef.current, documents));
+        } else {
+          onSelectDocument(interaction.nodeId);
+          onViewModeChange('document');
+        }
       }
 
       interactionRef.current = null;
@@ -270,7 +274,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [documents, onSaveDocumentLayouts, viewMode, viewport]);
+  }, [documents, onSaveDocumentLayouts, onSelectDocument, onViewModeChange, viewMode, viewport]);
 
   useEffect(() => {
     if (viewMode !== 'document') {
@@ -424,6 +428,8 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
       nodeId: node.id,
       pointerOffsetX: worldPoint.x - node.x,
       pointerOffsetY: worldPoint.y - node.y,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
     };
     setDraggingNodeId(node.id);
   };
@@ -434,10 +440,8 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
         <AnalysisWorkspaceEmptyState />
       ) : viewMode === 'document' && selectedDocument ? (
         <AnalysisWorkspaceDocumentView
-          fileReferenceCards={fileReferenceCards}
           onReturnToMap={returnToMap}
           selectedDocument={selectedDocument}
-          totalFileReferenceCount={totalFileReferenceCount}
         />
       ) : (
         <AnalysisWorkspaceMapView
@@ -457,6 +461,7 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
             applyScaleFromButton(1 / 1.16);
           }}
           selectedDocumentId={selectedDocument?.id ?? null}
+          stageSize={stageSize}
           stageGridStyle={createStageGridStyle(viewport)}
           stageRef={stageRef}
           viewportScale={viewport.scale}

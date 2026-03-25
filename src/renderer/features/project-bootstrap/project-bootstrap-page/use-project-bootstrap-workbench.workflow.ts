@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import type {
   AgentCliConnectionSettings,
@@ -13,11 +13,13 @@ import type {
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
+import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
+import { err, ok, type Result } from '@/shared/contracts/result';
 import type { RendererSddApi } from '@/shared/ipc/sdd-ipc';
 
 import {
@@ -28,10 +30,24 @@ import {
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils';
 import type {
   ProjectBootstrapWorkbenchState,
+  ReferenceTagGenerationStatus,
   SelectedProjectAnalysisDocumentId,
   StructuredProjectAnalysis,
+  WorkbenchProgressTask,
+  WorkbenchProgressTaskKind,
   WorkspacePageId,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import {
+  createWorkbenchProgressTask,
+  patchWorkbenchProgressTask,
+  updateWorkbenchProgressTaskList,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils';
+
+interface ProjectWorkspaceSnapshot {
+  analysis: StructuredProjectAnalysis | null;
+  sessions: ProjectSessionSummary[];
+  specs: ProjectSpecDocument[];
+}
 
 function getSddApi(): RendererSddApi | null {
   if (typeof window === 'undefined') {
@@ -49,13 +65,22 @@ function getSddApi(): RendererSddApi | null {
   return window.sdd;
 }
 
+function createEmptyProjectWorkspaceSnapshot(): ProjectWorkspaceSnapshot {
+  return {
+    analysis: null,
+    sessions: [],
+    specs: [],
+  };
+}
+
 export function useProjectBootstrapWorkbenchWorkflow(): {
   state: ProjectBootstrapWorkbenchState;
   actions: {
     onActivateProject(rootPath: string): Promise<void>;
     onAnalyzeProject(): void;
     onAnalyzeReferences(): void;
-    onCancelAnalysis(): void;
+    onCancelAnalysis(rootPath?: string): void;
+    onCancelReferenceTagGeneration(rootPath?: string): void;
     onChangeDraftMessage(value: string): void;
     onCreateSpec(): void;
     onDragOverProject(rootPath: string): void;
@@ -63,9 +88,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onEndDraggingProject(): void;
     onChangeChatModel(model: string): void;
     onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort): void;
+    onGenerateReferenceTags(): Promise<'succeeded' | 'failed' | 'cancelled'>;
     onSelectProject(): void;
     onSelectAnalysisDocument(documentId: ProjectAnalysisDocumentId): void;
+    onSelectProgressTask(taskId: string): void;
     onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap): void;
+    onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument): Promise<boolean>;
     onSelectSpec(specId: string): void;
     onSelectWorkspacePage(page: WorkspacePageId): void;
     onSendMessage(): void;
@@ -78,7 +106,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [activeWorkspacePage, setActiveWorkspacePage] = useState<WorkspacePageId>('analysis');
   const [inspection, setInspection] = useState<ProjectInspection | null>(null);
-  const [analysis, setAnalysis] = useState<StructuredProjectAnalysis | null>(null);
+  const [storedAnalysis, setStoredAnalysis] = useState<StructuredProjectAnalysis | null>(null);
+  const [transientAnalysis, setTransientAnalysis] = useState<StructuredProjectAnalysis | null>(
+    null,
+  );
   const [specs, setSpecs] = useState<ProjectSpecDocument[]>([]);
   const [sessions, setSessions] = useState<ProjectSessionSummary[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
@@ -88,6 +119,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [analysisRunStatusesByRootPath, setAnalysisRunStatusesByRootPath] = useState<
     Record<string, ProjectAnalysisRunStatus>
   >({});
+  const [referenceTagGenerationStatusesByRootPath, setReferenceTagGenerationStatusesByRootPath] =
+    useState<Record<string, ReferenceTagGenerationStatus>>({});
+  const [requestProgressTasks, setRequestProgressTasks] = useState<WorkbenchProgressTask[]>([]);
+  const [selectedProgressTaskId, setSelectedProgressTaskId] = useState<string | null>(null);
   const [sessionMessages, setSessionMessages] = useState<ProjectSessionMessage[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
@@ -97,22 +132,211 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCreatingSpec, setIsCreatingSpec] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [isSavingReferenceTags, setIsSavingReferenceTags] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isSavingChatRuntimeSettings, setIsSavingChatRuntimeSettings] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-  const [codexConnectionSettings, setCodexConnectionSettings] = useState<AgentCliConnectionSettings>(
-    () => createDefaultAgentCliConnectionSettings('codex'),
-  );
+  const [codexConnectionSettings, setCodexConnectionSettings] =
+    useState<AgentCliConnectionSettings>(() => createDefaultAgentCliConnectionSettings('codex'));
   const [message, setMessage] = useState<string>('로컬 프로젝트를 선택해 시작하세요.');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const selectedPathRef = useRef<string | null>(null);
+  const progressTaskSequenceRef = useRef(0);
+  const referenceTagGenerationStatusesByRootPathRef = useRef<
+    Record<string, ReferenceTagGenerationStatus>
+  >({});
+  const referenceTagGenerationTaskIdsByRootPathRef = useRef<Record<string, string>>({});
+  const analysis = transientAnalysis ?? storedAnalysis;
 
   const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
   const specSessions = selectedSpec
     ? sessions.filter((session) => session.specId === selectedSpec.meta.id)
     : [];
   const selectedSession = resolveSelectedSession(specSessions, selectedSessionId);
+
+  const applyProjectWorkspaceSnapshot = (input: {
+    snapshot: ProjectWorkspaceSnapshot;
+    transientAnalysis?: StructuredProjectAnalysis | null;
+  }) => {
+    setStoredAnalysis(input.snapshot.analysis);
+    setTransientAnalysis(input.transientAnalysis ?? null);
+    setSpecs(input.snapshot.specs);
+    setSessions(input.snapshot.sessions);
+  };
+
+  const clearProjectWorkspaceSnapshot = () => {
+    applyProjectWorkspaceSnapshot({
+      snapshot: createEmptyProjectWorkspaceSnapshot(),
+    });
+  };
+
+  const setReferenceTagGenerationStatus = (
+    rootPath: string,
+    status: ReferenceTagGenerationStatus | null,
+  ) => {
+    setReferenceTagGenerationStatusesByRootPath((current) => {
+      const nextStatuses = { ...current };
+
+      if (status === null) {
+        delete nextStatuses[rootPath];
+      } else {
+        nextStatuses[rootPath] = status;
+      }
+
+      referenceTagGenerationStatusesByRootPathRef.current = nextStatuses;
+      return nextStatuses;
+    });
+  };
+
+  const setReferenceTagGenerationTaskId = (rootPath: string, taskId: string | null) => {
+    if (taskId === null) {
+      delete referenceTagGenerationTaskIdsByRootPathRef.current[rootPath];
+      return;
+    }
+
+    referenceTagGenerationTaskIdsByRootPathRef.current[rootPath] = taskId;
+  };
+
+  const createRequestProgressTaskId = (kind: WorkbenchProgressTaskKind): string => {
+    progressTaskSequenceRef.current += 1;
+    return `${kind}:${progressTaskSequenceRef.current}`;
+  };
+
+  const applyRequestProgressTask = (task: WorkbenchProgressTask) => {
+    setRequestProgressTasks((current) => updateWorkbenchProgressTaskList(current, task));
+  };
+
+  const startRequestProgressTask = (input: {
+    detail: string;
+    isCancellable?: boolean;
+    kind: WorkbenchProgressTaskKind;
+    projectName?: string | null;
+    rootPath?: string | null;
+    title: string;
+  }): WorkbenchProgressTask => {
+    const now = new Date().toISOString();
+    const task = createWorkbenchProgressTask({
+      detail: input.detail,
+      id: createRequestProgressTaskId(input.kind),
+      kind: input.kind,
+      now,
+      projectName: input.projectName ?? null,
+      rootPath: input.rootPath ?? null,
+      title: input.title,
+      ...(typeof input.isCancellable === 'boolean'
+        ? { isCancellable: input.isCancellable }
+        : {}),
+    });
+    applyRequestProgressTask(task);
+    return task;
+  };
+
+  const updateRequestProgressTask = (
+    task: WorkbenchProgressTask,
+    patch: Partial<WorkbenchProgressTask>,
+  ): WorkbenchProgressTask => {
+    const nextTask = patchWorkbenchProgressTask({
+      patch,
+      task,
+    });
+    applyRequestProgressTask(nextTask);
+    return nextTask;
+  };
+
+  const updateRequestProgressTaskById = (
+    taskId: string,
+    patch: Partial<WorkbenchProgressTask>,
+  ): void => {
+    setRequestProgressTasks((current) => {
+      const task = current.find((candidate) => candidate.id === taskId);
+      if (!task) {
+        return current;
+      }
+
+      return updateWorkbenchProgressTaskList(
+        current,
+        patchWorkbenchProgressTask({
+          patch,
+          task,
+        }),
+      );
+    });
+  };
+
+  const startSessionCreateProgressTask = useEffectEvent((input: {
+    rootPath: string;
+    specTitle: string;
+  }) =>
+    startRequestProgressTask({
+      detail: `"${input.specTitle}" 명세 채팅 세션을 준비하고 있습니다.`,
+      kind: 'session-create',
+      projectName: inspection?.projectName ?? null,
+      rootPath: input.rootPath,
+      title: '명세 채팅 준비',
+    }),
+  );
+
+  const updateSessionCreateProgressTask = useEffectEvent(
+    (task: WorkbenchProgressTask, patch: Partial<WorkbenchProgressTask>) => {
+      updateRequestProgressTask(task, patch);
+    },
+  );
+
+  const applyReferenceTagsToAnalysis = (referenceTags: ProjectReferenceTagDocument) => {
+    setStoredAnalysis((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        referenceTags,
+      };
+    });
+
+    setTransientAnalysis((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        referenceTags,
+      };
+    });
+  };
+
+  const syncProjectWorkspaceSnapshot = async (input: {
+    inspection: ProjectInspection;
+    rootPath: string;
+    transientAnalysis?: StructuredProjectAnalysis | null;
+  }): Promise<void> => {
+    const sddApi = getSddApi();
+    if (!sddApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    const snapshotResult = await readProjectWorkspaceSnapshot({
+      inspection: input.inspection,
+      rootPath: input.rootPath,
+      sddApi,
+    });
+    if (selectedPathRef.current !== input.rootPath) {
+      return;
+    }
+
+    if (!snapshotResult.ok) {
+      setErrorMessage(snapshotResult.error.message);
+      return;
+    }
+
+    applyProjectWorkspaceSnapshot({
+      snapshot: snapshotResult.value,
+      transientAnalysis: input.transientAnalysis ?? null,
+    });
+  };
 
   useEffect(() => {
     selectedPathRef.current = selectedPath;
@@ -279,8 +503,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     let isCancelled = false;
+    let createSessionTask: WorkbenchProgressTask | null = null;
+    let didFinalizeSessionTask = false;
 
     void (async () => {
+      createSessionTask = startSessionCreateProgressTask({
+        rootPath: selectedPath,
+        specTitle: selectedSpec.meta.title,
+      });
       setIsCreatingSession(true);
       try {
         const createSessionResult = await sddApi.project.createSession({
@@ -290,6 +520,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         });
         if (!createSessionResult.ok) {
           if (!isCancelled) {
+            updateSessionCreateProgressTask(createSessionTask, {
+              detail: createSessionResult.error.message,
+              errorMessage: createSessionResult.error.message,
+              status: 'failed',
+            });
+            didFinalizeSessionTask = true;
             setErrorMessage(createSessionResult.error.message);
           }
           return;
@@ -300,6 +536,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         });
         if (!sessionsResult.ok) {
           if (!isCancelled) {
+            updateSessionCreateProgressTask(createSessionTask, {
+              detail: sessionsResult.error.message,
+              errorMessage: sessionsResult.error.message,
+              status: 'failed',
+            });
+            didFinalizeSessionTask = true;
             setErrorMessage(sessionsResult.error.message);
           }
           return;
@@ -311,15 +553,25 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
         setSessions(sessionsResult.value);
         setSelectedSessionId(createSessionResult.value.id);
+        updateSessionCreateProgressTask(createSessionTask, {
+          detail: `"${selectedSpec.meta.title}" 명세 채팅 세션을 준비했습니다.`,
+          status: 'succeeded',
+        });
+        didFinalizeSessionTask = true;
       } finally {
-        if (!isCancelled) {
-          setIsCreatingSession(false);
-        }
+        setIsCreatingSession(false);
       }
     })();
 
     return () => {
       isCancelled = true;
+      setIsCreatingSession(false);
+      if (createSessionTask && !didFinalizeSessionTask) {
+        updateSessionCreateProgressTask(createSessionTask, {
+          detail: `"${selectedSpec.meta.title}" 명세 채팅 준비를 중단했습니다.`,
+          status: 'cancelled',
+        });
+      }
     };
   }, [
     activeWorkspacePage,
@@ -339,14 +591,28 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const activationTask = startRequestProgressTask({
+      detail: '프로젝트 작업 공간과 최근 상태를 불러오고 있습니다.',
+      kind: 'project-activation',
+      projectName: inspection?.rootPath === rootPath ? inspection.projectName : null,
+      rootPath,
+      title: '프로젝트 열기',
+    });
+
     setMessage('프로젝트를 불러오고 작업 공간을 확인하는 중입니다.');
     setErrorMessage(null);
 
     const result = await sddApi.project.activate({ rootPath });
     if (!result.ok) {
+      updateRequestProgressTask(activationTask, {
+        detail: result.error.message,
+        errorMessage: result.error.message,
+        status: 'failed',
+      });
+      selectedPathRef.current = null;
+      setSelectedPath(null);
       setInspection(null);
-      setAnalysis(null);
-      setSpecs([]);
+      clearProjectWorkspaceSnapshot();
       setSelectedAnalysisDocumentId(null);
       setSelectedSpecId(null);
       setSessions([]);
@@ -358,104 +624,32 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     const nextRootPath = result.value.inspection.rootPath;
+    selectedPathRef.current = nextRootPath;
     setSelectedPath(nextRootPath);
     setInspection(result.value.inspection);
     setRecentProjects(result.value.recentProjects);
     setExpandedProjectRootPaths((current) =>
       current.includes(nextRootPath) ? current : [...current, nextRootPath],
     );
+    clearProjectWorkspaceSnapshot();
+    setSelectedAnalysisDocumentId(null);
+    setSelectedSpecId(null);
+    setSelectedSessionId(null);
+    setSessionMessages([]);
     setDraftMessage('');
     setErrorMessage(null);
     setMessage(describeInitializationState(result.value.inspection));
 
-    await Promise.all([
-      loadProjectAnalysis({
-        inspection: result.value.inspection,
-        rootPath: nextRootPath,
-      }),
-      loadProjectSpecs({
-        inspection: result.value.inspection,
-        rootPath: nextRootPath,
-      }),
-      loadProjectSessions({
-        inspection: result.value.inspection,
-        rootPath: nextRootPath,
-      }),
-    ]);
-  }
-
-  async function loadProjectAnalysis(input: {
-    inspection: ProjectInspection;
-    rootPath: string;
-  }): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi || input.inspection.initializationState !== 'ready') {
-      setAnalysis(null);
-      setSelectedAnalysisDocumentId(null);
-      return;
-    }
-
-    const result = await sddApi.project.readAnalysis({
-      rootPath: input.rootPath,
+    await syncProjectWorkspaceSnapshot({
+      inspection: result.value.inspection,
+      rootPath: nextRootPath,
     });
-    if (!result.ok) {
-      setAnalysis(null);
-      setSelectedAnalysisDocumentId(null);
-      setErrorMessage(result.error.message);
-      return;
-    }
-
-    const structuredAnalysis = toStructuredProjectAnalysis(result.value);
-    setAnalysis(structuredAnalysis);
-    setSelectedAnalysisDocumentId(structuredAnalysis?.documents?.[0]?.id ?? null);
-  }
-
-  async function loadProjectSpecs(input: {
-    inspection: ProjectInspection;
-    rootPath: string;
-  }): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi || input.inspection.initializationState !== 'ready') {
-      setSpecs([]);
-      setSelectedSpecId(null);
-      return;
-    }
-
-    const result = await sddApi.project.readSpecs({
-      rootPath: input.rootPath,
+    updateRequestProgressTask(activationTask, {
+      detail: '프로젝트 작업 공간을 열고 최신 상태를 준비했습니다.',
+      projectName: result.value.inspection.projectName,
+      rootPath: nextRootPath,
+      status: 'succeeded',
     });
-    if (!result.ok) {
-      setSpecs([]);
-      setSelectedSpecId(null);
-      setErrorMessage(result.error.message);
-      return;
-    }
-
-    setSpecs(result.value);
-  }
-
-  async function loadProjectSessions(input: {
-    inspection: ProjectInspection;
-    rootPath: string;
-  }): Promise<void> {
-    const sddApi = getSddApi();
-    if (!sddApi || input.inspection.initializationState !== 'ready') {
-      setSessions([]);
-      setSelectedSessionId(null);
-      return;
-    }
-
-    const sessionsResult = await sddApi.project.listSessions({
-      rootPath: input.rootPath,
-    });
-    if (!sessionsResult.ok) {
-      setSessions([]);
-      setSelectedSessionId(null);
-      setErrorMessage(sessionsResult.error.message);
-      return;
-    }
-
-    setSessions(sessionsResult.value);
   }
 
   async function handleSelectProject(): Promise<void> {
@@ -501,7 +695,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     const sddApi = getSddApi();
     if (!sddApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
-      setMessage(mode === 'references' ? '참조 분석을 시작할 수 없습니다.' : '전체 분석을 시작할 수 없습니다.');
+      setMessage(
+        mode === 'references'
+          ? '참조 분석을 시작할 수 없습니다.'
+          : '전체 분석을 시작할 수 없습니다.',
+      );
       return;
     }
 
@@ -547,17 +745,21 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         }));
       }
 
-        if (!result.ok) {
-          if (selectedPathRef.current === analysisRootPath) {
-            if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
-              setErrorMessage(null);
-              setMessage(mode === 'references' ? '참조 분석이 취소되었습니다.' : '전체 분석이 취소되었습니다.');
-            } else {
-              setErrorMessage(result.error.message);
-              setMessage(mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.');
-            }
+      if (!result.ok) {
+        if (selectedPathRef.current === analysisRootPath) {
+          if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+            setErrorMessage(null);
+            setMessage(
+              mode === 'references' ? '참조 분석이 취소되었습니다.' : '전체 분석이 취소되었습니다.',
+            );
+          } else {
+            setErrorMessage(result.error.message);
+            setMessage(
+              mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.',
+            );
           }
-          return;
+        }
+        return;
       }
 
       if (selectedPathRef.current !== analysisRootPath) {
@@ -565,9 +767,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
 
       setInspection(result.value.inspection);
-      const structuredAnalysis = toStructuredProjectAnalysis(result.value.analysis);
-      setAnalysis(structuredAnalysis);
-      setSelectedAnalysisDocumentId(structuredAnalysis?.documents?.[0]?.id ?? null);
+      await syncProjectWorkspaceSnapshot({
+        inspection: result.value.inspection,
+        rootPath: analysisRootPath,
+        transientAnalysis:
+          mode === 'references' && !result.value.inspection.isWritable
+            ? toStructuredProjectAnalysis(result.value.analysis)
+            : null,
+      });
       if (mode === 'references') {
         setActiveWorkspacePage('references');
       }
@@ -595,13 +802,15 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
       if (selectedPathRef.current === analysisRootPath) {
         setErrorMessage(nextMessage);
-        setMessage(mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.');
+        setMessage(
+          mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.',
+        );
       }
     }
   }
 
-  async function handleCancelAnalysis(): Promise<void> {
-    const rootPath = selectedPathRef.current;
+  async function handleCancelAnalysis(rootPathOverride?: string): Promise<void> {
+    const rootPath = rootPathOverride ?? selectedPathRef.current;
     if (!rootPath) {
       return;
     }
@@ -651,6 +860,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const createSpecTask = startRequestProgressTask({
+      detail: '새 명세 문서와 연결 채팅을 준비하고 있습니다.',
+      kind: 'spec-create',
+      projectName: inspection?.projectName ?? null,
+      rootPath: selectedPath,
+      title: '새 명세 만들기',
+    });
+
     setIsCreatingSpec(true);
     setErrorMessage(null);
     setMessage('새 명세 채팅을 준비하는 중입니다.');
@@ -660,6 +877,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         rootPath: selectedPath,
       });
       if (!result.ok) {
+        updateRequestProgressTask(createSpecTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          status: 'failed',
+        });
         setErrorMessage(result.error.message);
         setMessage('새 명세를 만들지 못했습니다.');
         return;
@@ -673,16 +895,16 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setDraftMessage('');
       setMessage(`"${result.value.spec.meta.title}" 명세 채팅을 시작할 수 있습니다.`);
 
-      await Promise.all([
-        loadProjectSpecs({
-          inspection: result.value.inspection,
-          rootPath: result.value.inspection.rootPath,
-        }),
-        loadProjectSessions({
-          inspection: result.value.inspection,
-          rootPath: result.value.inspection.rootPath,
-        }),
-      ]);
+      await syncProjectWorkspaceSnapshot({
+        inspection: result.value.inspection,
+        rootPath: result.value.inspection.rootPath,
+      });
+      updateRequestProgressTask(createSpecTask, {
+        detail: `"${result.value.spec.meta.title}" 명세와 연결 채팅을 만들었습니다.`,
+        projectName: result.value.inspection.projectName,
+        rootPath: result.value.inspection.rootPath,
+        status: 'succeeded',
+      });
     } finally {
       setIsCreatingSpec(false);
     }
@@ -699,6 +921,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const sendMessageTask = startRequestProgressTask({
+      detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장하고 있습니다.`,
+      kind: 'message-send',
+      projectName: inspection?.projectName ?? null,
+      rootPath: selectedPath,
+      title: '채팅 메시지 저장',
+    });
+
     setIsSendingMessage(true);
     setErrorMessage(null);
 
@@ -709,6 +939,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         text: draftMessage,
       });
       if (!result.ok) {
+        updateRequestProgressTask(sendMessageTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          status: 'failed',
+        });
         setErrorMessage(result.error.message);
         setMessage('메시지를 저장하지 못했습니다.');
         return;
@@ -734,6 +969,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       );
       setDraftMessage('');
       setMessage(`"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했습니다.`);
+      updateRequestProgressTask(sendMessageTask, {
+        detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했습니다.`,
+        status: 'succeeded',
+      });
     } finally {
       setIsSendingMessage(false);
     }
@@ -757,19 +996,183 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    setAnalysis((current) => {
-      if (!current) {
-        return current;
+    if (!inspection) {
+      return;
+    }
+
+    await syncProjectWorkspaceSnapshot({
+      inspection,
+      rootPath,
+    });
+  }
+
+  async function handleSaveReferenceTags(
+    referenceTags: ProjectReferenceTagDocument,
+  ): Promise<boolean> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.saveReferenceTags !== 'function') {
+      return false;
+    }
+
+    const saveReferenceTagsTask = startRequestProgressTask({
+      detail: '현재 파일 태그 변경을 저장하고 있습니다.',
+      kind: 'reference-tags-save',
+      projectName: inspection?.projectName ?? null,
+      rootPath,
+      title: '파일 태그 저장',
+    });
+
+    setIsSavingReferenceTags(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.project.saveReferenceTags({
+        rootPath,
+        referenceTags,
+      });
+      if (!result.ok) {
+        updateRequestProgressTask(saveReferenceTagsTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          status: 'failed',
+        });
+        setErrorMessage(result.error.message);
+        return false;
       }
 
-      return {
-        ...current,
-        context: {
-          ...current.context,
-          documentLayouts: result.value,
-        },
-      };
+      if (selectedPathRef.current === rootPath) {
+        applyReferenceTagsToAnalysis(result.value);
+      }
+      setMessage('참조 태그를 저장했습니다.');
+      updateRequestProgressTask(saveReferenceTagsTask, {
+        detail: '파일 태그 변경을 저장했습니다.',
+        status: 'succeeded',
+      });
+
+      return true;
+    } finally {
+      setIsSavingReferenceTags(false);
+    }
+  }
+
+  async function handleGenerateReferenceTags(): Promise<'succeeded' | 'failed' | 'cancelled'> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getSddApi();
+    if (
+      !rootPath ||
+      !sddApi ||
+      typeof sddApi.project.generateReferenceTags !== 'function' ||
+      referenceTagGenerationStatusesByRootPathRef.current[rootPath]
+    ) {
+      return 'failed';
+    }
+
+    const projectName = inspection?.projectName ?? null;
+    const generateReferenceTagsTask = startRequestProgressTask({
+      detail: '에이전트가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.',
+      isCancellable: true,
+      kind: 'reference-tags-generate',
+      projectName,
+      rootPath,
+      title: '파일 태그 자동 생성',
     });
+
+    setReferenceTagGenerationStatus(rootPath, 'running');
+    setReferenceTagGenerationTaskId(rootPath, generateReferenceTagsTask.id);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.project.generateReferenceTags({
+        rootPath,
+      });
+      if (!result.ok) {
+        if (result.error.code === 'PROJECT_REFERENCE_TAG_GENERATION_CANCELLED') {
+          updateRequestProgressTask(generateReferenceTagsTask, {
+            detail: '에이전트 파일 태그 자동 생성을 취소했습니다.',
+            errorMessage: null,
+            isCancellable: false,
+            status: 'cancelled',
+          });
+          setMessage(
+            `${projectName ?? '프로젝트'} 파일 태그 자동 생성을 취소했습니다.`,
+          );
+          return 'cancelled';
+        }
+
+        updateRequestProgressTask(generateReferenceTagsTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          isCancellable: false,
+          status: 'failed',
+        });
+        setErrorMessage(result.error.message);
+        return 'failed';
+      }
+
+      if (selectedPathRef.current === rootPath) {
+        applyReferenceTagsToAnalysis(result.value);
+      }
+      setMessage(
+        `${projectName ?? '프로젝트'}에서 에이전트가 분석 -> 실행 -> 검증 단계를 거쳐 파일 태그를 자동 생성했습니다.`,
+      );
+      updateRequestProgressTask(generateReferenceTagsTask, {
+        detail: '에이전트가 분석, 실행, 검증을 거쳐 파일 태그를 자동 생성했습니다.',
+        isCancellable: false,
+        status: 'succeeded',
+      });
+
+      return 'succeeded';
+    } finally {
+      setReferenceTagGenerationStatus(rootPath, null);
+      setReferenceTagGenerationTaskId(rootPath, null);
+    }
+  }
+
+  async function handleCancelReferenceTagGeneration(rootPathOverride?: string): Promise<void> {
+    const rootPath = rootPathOverride ?? selectedPathRef.current;
+    const sddApi = getSddApi();
+    if (
+      !rootPath ||
+      !sddApi ||
+      typeof sddApi.project.cancelReferenceTagGeneration !== 'function'
+    ) {
+      return;
+    }
+
+    const currentStatus = referenceTagGenerationStatusesByRootPathRef.current[rootPath];
+    if (!currentStatus || currentStatus === 'cancelling') {
+      return;
+    }
+
+    setReferenceTagGenerationStatus(rootPath, 'cancelling');
+    const taskId = referenceTagGenerationTaskIdsByRootPathRef.current[rootPath];
+    if (taskId) {
+      updateRequestProgressTaskById(taskId, {
+        detail: '에이전트 실행을 종료하고 있습니다.',
+        errorMessage: null,
+        isCancellable: false,
+        status: 'cancelling',
+      });
+    }
+
+    const result = await sddApi.project.cancelReferenceTagGeneration({
+      rootPath,
+    });
+    if (result.ok) {
+      return;
+    }
+
+    setReferenceTagGenerationStatus(rootPath, 'running');
+    if (taskId) {
+      updateRequestProgressTaskById(taskId, {
+        detail: '에이전트가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.',
+        errorMessage: null,
+        isCancellable: true,
+        status: 'running',
+      });
+    }
+    setErrorMessage(result.error.message);
   }
 
   async function saveCodexConnectionSettings(
@@ -780,6 +1183,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
       return;
     }
+
+    const saveSettingsTask = startRequestProgressTask({
+      detail: 'Codex 연결 설정을 저장하고 있습니다.',
+      kind: 'settings-save',
+      projectName: inspection?.projectName ?? null,
+      rootPath: selectedPathRef.current,
+      title: 'Codex 설정 저장',
+    });
 
     const previousSettings = codexConnectionSettings;
     const nextSettings: AgentCliConnectionSettings = {
@@ -802,12 +1213,21 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       });
 
       if (!result.ok) {
+        updateRequestProgressTask(saveSettingsTask, {
+          detail: result.error.message,
+          errorMessage: result.error.message,
+          status: 'failed',
+        });
         setCodexConnectionSettings(previousSettings);
         setErrorMessage(result.error.message);
         return;
       }
 
       setCodexConnectionSettings(result.value.settings);
+      updateRequestProgressTask(saveSettingsTask, {
+        detail: 'Codex 모델과 추론 강도 설정을 저장했습니다.',
+        status: 'succeeded',
+      });
     } finally {
       setIsSavingChatRuntimeSettings(false);
     }
@@ -841,12 +1261,24 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     const nextRootPaths = reorderItems(orderedRootPaths, fromIndex, toIndex);
+    const reorderProjectsTask = startRequestProgressTask({
+      detail: '최근 프로젝트 목록 순서를 저장하고 있습니다.',
+      kind: 'recent-projects-reorder',
+      projectName: null,
+      rootPath: null,
+      title: '프로젝트 목록 순서 저장',
+    });
 
     const result = await sddApi.project.reorderRecentProjects({
       rootPaths: nextRootPaths,
     });
 
     if (!result.ok) {
+      updateRequestProgressTask(reorderProjectsTask, {
+        detail: result.error.message,
+        errorMessage: result.error.message,
+        status: 'failed',
+      });
       setErrorMessage(result.error.message);
       setMessage('프로젝트 순서를 저장하지 못했습니다.');
       setDraggingProjectRootPath(null);
@@ -856,6 +1288,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     setRecentProjects(result.value);
     setMessage('프로젝트 목록 순서를 저장했습니다.');
+    updateRequestProgressTask(reorderProjectsTask, {
+      detail: '최근 프로젝트 목록 순서를 저장했습니다.',
+      status: 'succeeded',
+    });
     setErrorMessage(null);
     setDraggingProjectRootPath(null);
     setDropTargetRootPath(null);
@@ -869,6 +1305,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       analysis,
       specs,
       analysisRunStatusesByRootPath,
+      referenceTagGenerationStatusesByRootPath,
+      requestProgressTasks,
+      selectedProgressTaskId,
       selectedAnalysisDocumentId,
       selectedSpecId,
       sessions,
@@ -882,6 +1321,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       isSelecting,
       isCreatingSpec,
       isCreatingSession,
+      isSavingReferenceTags,
       isSendingMessage,
       isSavingChatRuntimeSettings,
       isLeftSidebarOpen,
@@ -899,8 +1339,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onAnalyzeReferences() {
         void handleAnalyzeProject('references');
       },
-      onCancelAnalysis() {
-        void handleCancelAnalysis();
+      onCancelAnalysis(rootPath?: string) {
+        void handleCancelAnalysis(rootPath);
+      },
+      onCancelReferenceTagGeneration(rootPath?: string) {
+        void handleCancelReferenceTagGeneration(rootPath);
       },
       onChangeDraftMessage(value: string) {
         setDraftMessage(value);
@@ -913,6 +1356,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
       onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort) {
         void saveCodexConnectionSettings({ modelReasoningEffort });
+      },
+      onGenerateReferenceTags() {
+        return handleGenerateReferenceTags();
       },
       onDragOverProject(rootPath: string) {
         if (draggingProjectRootPath && draggingProjectRootPath !== rootPath) {
@@ -932,8 +1378,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onSelectAnalysisDocument(documentId: ProjectAnalysisDocumentId) {
         setSelectedAnalysisDocumentId(documentId);
       },
+      onSelectProgressTask(taskId: string) {
+        setSelectedProgressTaskId(taskId);
+      },
       onSaveAnalysisDocumentLayouts(documentLayouts: ProjectAnalysisDocumentLayoutMap) {
         void handleSaveAnalysisDocumentLayouts(documentLayouts);
+      },
+      onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument) {
+        return handleSaveReferenceTags(referenceTags);
       },
       onSelectSpec(specId: string) {
         setSelectedSpecId(specId);
@@ -969,6 +1421,46 @@ function toStructuredProjectAnalysis(
   value: ProjectAnalysis | null,
 ): StructuredProjectAnalysis | null {
   return value;
+}
+
+async function readProjectWorkspaceSnapshot(input: {
+  inspection: ProjectInspection;
+  rootPath: string;
+  sddApi: RendererSddApi;
+}): Promise<Result<ProjectWorkspaceSnapshot>> {
+  if (input.inspection.initializationState !== 'ready') {
+    return ok(createEmptyProjectWorkspaceSnapshot());
+  }
+
+  const [analysisResult, specsResult, sessionsResult] = await Promise.all([
+    input.sddApi.project.readAnalysis({
+      rootPath: input.rootPath,
+    }),
+    input.sddApi.project.readSpecs({
+      rootPath: input.rootPath,
+    }),
+    input.sddApi.project.listSessions({
+      rootPath: input.rootPath,
+    }),
+  ]);
+
+  if (!analysisResult.ok) {
+    return err(analysisResult.error);
+  }
+
+  if (!specsResult.ok) {
+    return err(specsResult.error);
+  }
+
+  if (!sessionsResult.ok) {
+    return err(sessionsResult.error);
+  }
+
+  return ok({
+    analysis: toStructuredProjectAnalysis(analysisResult.value),
+    specs: specsResult.value,
+    sessions: sessionsResult.value,
+  });
 }
 
 async function readAnalysisRunStatus(rootPath: string): Promise<ProjectAnalysisRunStatus | null> {

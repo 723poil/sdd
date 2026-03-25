@@ -11,9 +11,9 @@ Use this skill for any implementation, refactor, module design, IPC work, render
 
 Read these first:
 
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/02-architecture.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/06-design-patterns.md`
-- `/Users/723poil/Desktop/projects/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/02-architecture.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/06-design-patterns.md`
+- `/Users/723poil/git/side/sdd/docs/codex-spec-workflow/07-engineering-conventions.md`
 
 ## Required architecture
 
@@ -73,6 +73,7 @@ Prefer these patterns:
 
 ## Renderer UX rules
 
+- For renderer UI work, especially when user-facing copy, card headers, empty states, dense panels, or help surfaces may change, also use `sdd-ui-disclosure`.
 - User-facing UI should describe product actions, not implementation details like IPC or internal transport.
 - Do not expose internal roadmap, future expansion plans, experimental options, or implementation detail as primary user-facing copy.
 - If future capability or technical limitation must be mentioned, keep it short and user-task oriented; move the real detail to docs, not the main UI.
