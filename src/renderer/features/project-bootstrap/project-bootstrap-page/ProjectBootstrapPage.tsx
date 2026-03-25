@@ -2,11 +2,13 @@ import type { ProjectAnalysisDocumentId } from '@/domain/project/project-analysi
 import type { AppView } from '@/renderer/app-view';
 import type { WorkbenchProgressTask } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
+import { WorkbenchSidebarResizeHandle } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle';
 import { BottomStatusBar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar';
 import { InfoSidebar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar';
 import { MainWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace';
 import { ProjectSidebar } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar';
 import { useProjectBootstrapWorkbench } from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench';
+import { useWorkbenchSidebarResize } from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize';
 
 interface ProjectBootstrapPageProps {
   activeAppView: AppView;
@@ -15,6 +17,7 @@ interface ProjectBootstrapPageProps {
 
 export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const workbench = useProjectBootstrapWorkbench();
+  const sidebarResize = useWorkbenchSidebarResize();
   const handleActivateProject = (rootPath: string) => {
     void workbench.onActivateProject(rootPath);
   };
@@ -109,7 +112,11 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   return (
     <div className="workbench-shell">
       <div className="workbench-shell__body">
-        <main className={workbench.workbenchClassName}>
+        <main
+          className={workbench.workbenchClassName}
+          ref={sidebarResize.workbenchRef}
+          style={sidebarResize.workbenchStyle}
+        >
           {workbench.isLeftSidebarOpen ? (
             <ProjectSidebar
               draggingProjectRootPath={workbench.draggingProjectRootPath}
@@ -136,6 +143,24 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             </button>
           )}
 
+          {workbench.isLeftSidebarOpen ? (
+            <WorkbenchSidebarResizeHandle
+              isActive={sidebarResize.activeResizeSide === 'left'}
+              onAdjustByKeyboard={(delta) => {
+                sidebarResize.nudgeSidebarWidth('left', delta);
+              }}
+              onPointerDown={(event) => {
+                if (event.button !== 0) {
+                  return;
+                }
+
+                event.preventDefault();
+                sidebarResize.startResize('left', event.clientX);
+              }}
+              side="left"
+            />
+          ) : null}
+
           <MainWorkspace
             activeWorkspacePage={workbench.activeWorkspacePage}
             analysis={workbench.analysis}
@@ -159,6 +184,24 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             selectedSpecId={workbench.selectedSpecId}
             specs={workbench.specs}
           />
+
+          {workbench.isRightSidebarOpen ? (
+            <WorkbenchSidebarResizeHandle
+              isActive={sidebarResize.activeResizeSide === 'right'}
+              onAdjustByKeyboard={(delta) => {
+                sidebarResize.nudgeSidebarWidth('right', delta);
+              }}
+              onPointerDown={(event) => {
+                if (event.button !== 0) {
+                  return;
+                }
+
+                event.preventDefault();
+                sidebarResize.startResize('right', event.clientX);
+              }}
+              side="right"
+            />
+          ) : null}
 
           {workbench.isRightSidebarOpen ? (
             <InfoSidebar

@@ -9,7 +9,10 @@ import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 
 import { AnalysisReferenceMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap';
 import { AnalysisWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace';
-import { SpecsWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace';
+import {
+  SpecsWorkspace,
+  type SpecsWorkspaceViewMode,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace';
 import type { AnalysisWorkspaceViewMode } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
 import type {
   SelectedProjectAnalysisDocumentId,
@@ -40,10 +43,17 @@ interface MainWorkspaceProps {
 
 export function MainWorkspace(props: MainWorkspaceProps) {
   const [analysisViewMode, setAnalysisViewMode] = useState<AnalysisWorkspaceViewMode>('map');
+  const [specsViewMode, setSpecsViewMode] = useState<SpecsWorkspaceViewMode>('map');
 
   useEffect(() => {
     if (props.activeWorkspacePage !== 'analysis') {
       setAnalysisViewMode('map');
+    }
+  }, [props.activeWorkspacePage]);
+
+  useEffect(() => {
+    if (props.activeWorkspacePage !== 'specs') {
+      setSpecsViewMode('map');
     }
   }, [props.activeWorkspacePage]);
 
@@ -79,8 +89,10 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           <SpecsWorkspace
             isActive={props.activeWorkspacePage === 'specs'}
             onSelectSpec={props.onSelectSpec}
+            onViewModeChange={setSpecsViewMode}
             selectedSpecId={props.selectedSpecId}
             specs={props.specs}
+            viewMode={specsViewMode}
           />
         </div>
 
@@ -114,7 +126,7 @@ export function MainWorkspace(props: MainWorkspaceProps) {
           )}
         </div>
 
-        {analysisViewMode !== 'document' ? (
+        {analysisViewMode !== 'document' && specsViewMode !== 'document' ? (
           <div className="workspace-page-floating-tabs" role="tablist" aria-label="작업 페이지">
             <button
               aria-selected={props.activeWorkspacePage === 'analysis'}

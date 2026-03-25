@@ -21,7 +21,9 @@ export const MODULE_ROOT_DIRECTORIES = new Set([
   'app',
   'apps',
   'client',
+  'libs',
   'main',
+  'modules',
   'packages',
   'renderer',
   'server',
@@ -32,16 +34,20 @@ export const MODULE_ROOT_DIRECTORIES = new Set([
 
 export const KEY_CONFIG_MATCHERS = [
   /^composer\.json$/u,
+  /^jsconfig(?:\.[\w-]+)?\.json$/u,
   /^pom\.xml$/u,
   /^build\.gradle(?:\.kts)?$/u,
   /^settings\.gradle(?:\.kts)?$/u,
   /^gradle\.properties$/u,
+  /^lerna\.json$/u,
+  /^nest-cli\.json$/u,
   /^package\.json$/u,
   /^tsconfig(?:\.[\w-]+)?\.json$/u,
   /^vite\.config\./u,
   /^vitest\.config\./u,
   /^next\.config\./u,
   /^nuxt\.config\./u,
+  /^vue\.config\./u,
   /^electron\.vite\.config\./u,
   /^eslint\.config\./u,
   /^prettier\.config\./u,
@@ -74,6 +80,6 @@ export const LOCKFILE_TO_PACKAGE_MANAGER: Record<string, string> = {
   'yarn.lock': 'yarn',
 };
 
-export const MAX_SCAN_DEPTH = 8;
-export const MAX_DIRECTORY_COUNT = 420;
-export const MAX_FILE_COUNT = 1400;
+export const MAX_SCAN_DEPTH = 16;
+export const MAX_DIRECTORY_COUNT = 10000;
+export const MAX_FILE_COUNT = 30000;

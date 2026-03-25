@@ -29,6 +29,7 @@ import { createNodeProjectInspectorAdapter } from '@/infrastructure/fs/node-proj
 import { createNodeProjectReferenceTagGeneratorAdapter } from '@/infrastructure/reference-tags/node-project-reference-tag-generator.adapter';
 import { createFsProjectSessionRepository } from '@/infrastructure/sdd/fs-project-session.repository';
 import { createFsProjectStorageRepository } from '@/infrastructure/sdd/fs-project-storage.repository';
+import { createNodeProjectSpecChatAdapter } from '@/infrastructure/spec-chat/node-project-spec-chat.adapter';
 import { registerIpcHandle0, registerIpcHandle1 } from '@/shared/ipc/ipc-bridge';
 import {
   type ActivateProjectInput,
@@ -60,6 +61,9 @@ export function registerProjectIpc(): void {
     analysisRunStatusStore,
   });
   const projectReferenceTagGenerator = createNodeProjectReferenceTagGeneratorAdapter({
+    agentCliSettingsStore,
+  });
+  const projectSpecChat = createNodeProjectSpecChatAdapter({
     agentCliSettingsStore,
   });
   const projectInspector = createNodeProjectInspectorAdapter();
@@ -134,6 +138,7 @@ export function registerProjectIpc(): void {
   });
   const sendProjectSessionMessage = createSendProjectSessionMessageUseCase({
     projectInspector,
+    projectSpecChat,
     projectSessionStore,
     projectStorage,
   });

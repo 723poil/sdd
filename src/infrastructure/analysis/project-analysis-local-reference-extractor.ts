@@ -21,7 +21,14 @@ import {
   getLayerAreaDisplayName,
   type SupportedSourceLanguage,
 } from '@/infrastructure/analysis/project-analysis-file-descriptions';
+import {
+  createProjectPathAliasResolver,
+  type AliasMatcher,
+  type PathAliasConfig,
+  type ProjectPathAliasResolver,
+} from '@/infrastructure/analysis/project-analysis-path-alias-resolver';
 import type { ProjectAnalysisScanState } from '@/infrastructure/analysis/project-analysis-scanner';
+import { parseVueSingleFileComponent } from '@/infrastructure/analysis/project-analysis-vue-sfc';
 
 const SUPPORTED_SOURCE_EXTENSIONS = new Map<string, SupportedSourceLanguage>([
   ['.ts', 'typescript'],
@@ -32,6 +39,7 @@ const SUPPORTED_SOURCE_EXTENSIONS = new Map<string, SupportedSourceLanguage>([
   ['.jsx', 'javascript'],
   ['.mjs', 'javascript'],
   ['.cjs', 'javascript'],
+  ['.vue', 'vue'],
   ['.kt', 'kotlin'],
   ['.kts', 'kotlin'],
   ['.php', 'php'],
@@ -47,6 +55,7 @@ const SOURCE_RESOLUTION_EXTENSIONS = [
   '.jsx',
   '.mjs',
   '.cjs',
+  '.vue',
   '.kt',
   '.kts',
   '.php',
@@ -55,6 +64,7 @@ const SOURCE_RESOLUTION_EXTENSIONS = [
 ] as const;
 
 const JAVASCRIPT_RUNTIME_EXTENSIONS = new Set(['.js', '.jsx', '.mjs', '.cjs']);
+const MONOREPO_ROOT_DIRECTORIES = new Set(['apps', 'libs', 'modules', 'packages']);
 const ROOT_AREA_NAMES = new Set([
   'api',
   'application',
@@ -254,6 +264,10 @@ type ExtractedReferenceRelationship =
   | 'exports';
 
 interface LoadedSourceFile {
+  additionalReferences: Array<{
+    relationship: ExtractedReferenceRelationship;
+    specifier: string;
+  }>;
   path: string;
   language: SupportedSourceLanguage;
   content: string;
@@ -261,6 +275,7 @@ interface LoadedSourceFile {
   packageName: string | null;
   namespaceName: string | null;
   declarations: string[];
+  scriptKind: ts.ScriptKind;
 }
 
 interface PhpUseImport {
@@ -280,28 +295,6 @@ interface PhpIncludeReference {
   path: string;
   rawSpecifier: string;
   rootConstant: keyof typeof PHP_PATH_CONSTANT_BASE_PATHS | null;
-}
-
-interface PathAliasRule {
-  matcher: AliasMatcher;
-  replacements: AliasReplacementRule[];
-}
-
-interface AliasMatcher {
-  prefix: string;
-  suffix: string;
-  wildcard: boolean;
-}
-
-interface AliasReplacementRule {
-  prefix: string;
-  suffix: string;
-  wildcard: boolean;
-}
-
-interface PathAliasConfig {
-  baseUrl: string;
-  rules: PathAliasRule[];
 }
 
 interface ExtractedReference {
@@ -339,7 +332,10 @@ export async function analyzeLocalProjectReferences(input: {
   const filePaths = [...input.scanState.files].map((path) => normalizeRelativePath(path));
   const allFilePaths = new Set(filePaths);
   const caseInsensitiveFilePathIndex = buildCaseInsensitiveFilePathIndex(allFilePaths);
-  const aliasConfig = await readPathAliasConfig(input.rootPath);
+  const pathAliasResolver = createProjectPathAliasResolver({
+    rootPath: input.rootPath,
+    scanState: input.scanState,
+  });
   const sourceFiles = await loadSourceFiles({
     allFilePaths,
     rootPath: input.rootPath,
@@ -350,11 +346,11 @@ export async function analyzeLocalProjectReferences(input: {
   const fileReferences = deduplicateFileReferences(
     sourceFiles.flatMap((file) =>
       extractReferencesForFile({
-        aliasConfig,
         allFilePaths,
         caseInsensitiveFilePathIndex,
         file,
         namespaceSymbolIndex,
+        pathAliasResolver,
         packageSymbolIndex,
       }),
     ),
@@ -420,22 +416,31 @@ function createLoadedSourceFile(input: {
   path: string;
 }): LoadedSourceFile {
   const baseName = getBaseNameWithoutExtension(input.path);
+  const parsedVueSource =
+    input.language === 'vue' ? parseVueSingleFileComponent(input.content) : null;
+  const analysisContent = parsedVueSource?.scriptContent ?? input.content;
 
   return {
+    additionalReferences:
+      parsedVueSource?.additionalReferences.map((reference) => ({
+        relationship: reference.relationship,
+        specifier: reference.specifier,
+      })) ?? [],
     path: input.path,
     language: input.language,
-    content: input.content,
+    content: analysisContent,
     baseName,
     packageName:
       input.language === 'java' || input.language === 'kotlin'
-        ? extractPackageName(input.content)
+        ? extractPackageName(analysisContent)
         : null,
-    namespaceName: input.language === 'php' ? extractPhpNamespace(input.content) : null,
+    namespaceName: input.language === 'php' ? extractPhpNamespace(analysisContent) : null,
     declarations: extractTopLevelDeclarations({
       baseName,
-      content: input.content,
+      content: analysisContent,
       language: input.language,
     }),
+    scriptKind: parsedVueSource?.scriptKind ?? resolveScriptKind(input.path),
   };
 }
 
@@ -483,17 +488,23 @@ function buildNamespaceSymbolIndex(sourceFiles: LoadedSourceFile[]): Map<string,
 }
 
 function extractReferencesForFile(input: {
-  aliasConfig: PathAliasConfig;
   allFilePaths: Set<string>;
   caseInsensitiveFilePathIndex: Map<string, string>;
   file: LoadedSourceFile;
   namespaceSymbolIndex: Map<string, string>;
+  pathAliasResolver: ProjectPathAliasResolver;
   packageSymbolIndex: Map<string, string>;
 }): ExtractedReference[] {
   switch (input.file.language) {
     case 'typescript':
     case 'javascript':
       return extractJavaScriptLikeReferences(input);
+    case 'vue':
+      return extractVueReferences({
+        allFilePaths: input.allFilePaths,
+        file: input.file,
+        pathAliasResolver: input.pathAliasResolver,
+      });
     case 'java':
       return extractPackageManagedReferences({
         file: input.file,
@@ -515,9 +526,9 @@ function extractReferencesForFile(input: {
 }
 
 function extractJavaScriptLikeReferences(input: {
-  aliasConfig: PathAliasConfig;
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
+  pathAliasResolver: ProjectPathAliasResolver;
 }): ExtractedReference[] {
   const references: ExtractedReference[] = [];
   const importedSymbolTargets = new Map<string, string>();
@@ -526,7 +537,7 @@ function extractJavaScriptLikeReferences(input: {
     input.file.content,
     ts.ScriptTarget.Latest,
     true,
-    resolveScriptKind(input.file.path),
+    input.file.scriptKind,
   );
 
   const visitNode = (node: ts.Node): void => {
@@ -536,9 +547,9 @@ function extractJavaScriptLikeReferences(input: {
       ts.isStringLiteralLike(node.moduleSpecifier)
     ) {
       const resolvedPath = resolveJavaScriptReferencePath({
-        aliasConfig: input.aliasConfig,
         allFilePaths: input.allFilePaths,
         file: input.file,
+        pathAliasResolver: input.pathAliasResolver,
         specifier: node.moduleSpecifier.text,
       });
       pushResolvedReference({
@@ -557,9 +568,9 @@ function extractJavaScriptLikeReferences(input: {
       const expression = node.moduleReference.expression;
       if (expression && ts.isStringLiteralLike(expression)) {
         const resolvedPath = resolveJavaScriptReferencePath({
-          aliasConfig: input.aliasConfig,
           allFilePaths: input.allFilePaths,
           file: input.file,
+          pathAliasResolver: input.pathAliasResolver,
           specifier: expression.text,
         });
         pushResolvedReference({
@@ -584,9 +595,9 @@ function extractJavaScriptLikeReferences(input: {
 
       if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
         pushJavaScriptReference({
-          aliasConfig: input.aliasConfig,
           allFilePaths: input.allFilePaths,
           file: input.file,
+          pathAliasResolver: input.pathAliasResolver,
           references,
           relationship: 'requires',
           specifier: firstArgument.text,
@@ -595,9 +606,9 @@ function extractJavaScriptLikeReferences(input: {
 
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         pushJavaScriptReference({
-          aliasConfig: input.aliasConfig,
           allFilePaths: input.allFilePaths,
           file: input.file,
+          pathAliasResolver: input.pathAliasResolver,
           references,
           relationship: 'dynamic-import',
           specifier: firstArgument.text,
@@ -609,9 +620,9 @@ function extractJavaScriptLikeReferences(input: {
       const literal = node.argument.literal;
       if (ts.isStringLiteralLike(literal)) {
         pushJavaScriptReference({
-          aliasConfig: input.aliasConfig,
           allFilePaths: input.allFilePaths,
           file: input.file,
+          pathAliasResolver: input.pathAliasResolver,
           references,
           relationship: 'imports',
           specifier: literal.text,
@@ -639,7 +650,30 @@ function extractJavaScriptLikeReferences(input: {
 
   visitNode(sourceFile);
 
+  for (const additionalReference of input.file.additionalReferences) {
+    pushJavaScriptReference({
+      allFilePaths: input.allFilePaths,
+      file: input.file,
+      pathAliasResolver: input.pathAliasResolver,
+      references,
+      relationship: additionalReference.relationship,
+      specifier: additionalReference.specifier,
+    });
+  }
+
   return references;
+}
+
+function extractVueReferences(input: {
+  allFilePaths: Set<string>;
+  file: LoadedSourceFile;
+  pathAliasResolver: ProjectPathAliasResolver;
+}): ExtractedReference[] {
+  return extractJavaScriptLikeReferences({
+    allFilePaths: input.allFilePaths,
+    file: input.file,
+    pathAliasResolver: input.pathAliasResolver,
+  });
 }
 
 function pushJavaScriptHeritageReferences(input: {
@@ -828,17 +862,17 @@ function resolveNestModuleRelationship(
 }
 
 function pushJavaScriptReference(input: {
-  aliasConfig: PathAliasConfig;
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
+  pathAliasResolver: ProjectPathAliasResolver;
   references: ExtractedReference[];
   relationship: ExtractedReferenceRelationship;
   specifier: string;
 }): void {
   const resolvedPath = resolveJavaScriptReferencePath({
-    aliasConfig: input.aliasConfig,
     allFilePaths: input.allFilePaths,
     file: input.file,
+    pathAliasResolver: input.pathAliasResolver,
     specifier: input.specifier,
   });
 
@@ -852,13 +886,13 @@ function pushJavaScriptReference(input: {
 }
 
 function resolveJavaScriptReferencePath(input: {
-  aliasConfig: PathAliasConfig;
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
+  pathAliasResolver: ProjectPathAliasResolver;
   specifier: string;
 }): string | null {
   return resolveModuleSpecifier({
-    aliasConfig: input.aliasConfig,
+    aliasConfig: input.pathAliasResolver.getAliasConfigForFile(input.file.path),
     allFilePaths: input.allFilePaths,
     fromPath: input.file.path,
     specifier: input.specifier,
@@ -1534,9 +1568,7 @@ function resolveAliasCandidates(aliasConfig: PathAliasConfig, specifier: string)
         ? `${replacement.prefix}${wildcardValue}${replacement.suffix}`
         : replacement.prefix;
 
-      resolvedCandidates.push(
-        normalizeRelativePath(join(aliasConfig.baseUrl, replacedPath)).replace(/^\.\/+/u, ''),
-      );
+      resolvedCandidates.push(normalizeRelativePath(replacedPath).replace(/^\.\/+/u, ''));
     }
   }
 
@@ -1637,118 +1669,6 @@ function createResolutionCandidates(basePath: string): string[] {
   }
 
   return [...candidates];
-}
-
-async function readPathAliasConfig(rootPath: string): Promise<PathAliasConfig> {
-  const configFileNames = ['tsconfig.json', 'jsconfig.json'];
-
-  for (const fileName of configFileNames) {
-    try {
-      const filePath = join(rootPath, fileName);
-      const text = await readFile(filePath, 'utf8');
-      const parsed = ts.parseConfigFileTextToJson(filePath, text);
-      const rawConfig: unknown = parsed.config;
-      if (parsed.error || !rawConfig || typeof rawConfig !== 'object') {
-        continue;
-      }
-
-      const config = rawConfig as Record<string, unknown>;
-      const compilerOptions =
-        'compilerOptions' in config &&
-        config.compilerOptions &&
-        typeof config.compilerOptions === 'object'
-          ? (config.compilerOptions as Record<string, unknown>)
-          : {};
-      const baseUrl =
-        typeof compilerOptions.baseUrl === 'string' && compilerOptions.baseUrl.length > 0
-          ? normalizeRelativePath(compilerOptions.baseUrl)
-          : '.';
-      const rawPaths =
-        compilerOptions.paths && typeof compilerOptions.paths === 'object'
-          ? (compilerOptions.paths as Record<string, unknown>)
-          : {};
-
-      return {
-        baseUrl,
-        rules: Object.entries(rawPaths)
-          .flatMap(([key, value]) => {
-            if (!Array.isArray(value)) {
-              return [];
-            }
-
-            const matcher = createAliasMatcher(key);
-            if (!matcher) {
-              return [];
-            }
-
-            const replacements = value
-              .filter((item): item is string => typeof item === 'string')
-              .map((item) => createAliasReplacementRule(item))
-              .filter((item): item is AliasReplacementRule => item !== null);
-            if (replacements.length === 0) {
-              return [];
-            }
-
-            return [
-              {
-                matcher,
-                replacements,
-              } satisfies PathAliasRule,
-            ];
-          })
-          .sort((left, right) => right.matcher.prefix.length - left.matcher.prefix.length),
-      };
-    } catch {
-      continue;
-    }
-  }
-
-  return {
-    baseUrl: '.',
-    rules: [],
-  };
-}
-
-function createAliasMatcher(pattern: string): AliasMatcher | null {
-  const wildcardIndex = pattern.indexOf('*');
-  if (wildcardIndex < 0) {
-    return {
-      prefix: pattern,
-      suffix: '',
-      wildcard: false,
-    };
-  }
-
-  if (pattern.indexOf('*', wildcardIndex + 1) >= 0) {
-    return null;
-  }
-
-  return {
-    prefix: pattern.slice(0, wildcardIndex),
-    suffix: pattern.slice(wildcardIndex + 1),
-    wildcard: true,
-  };
-}
-
-function createAliasReplacementRule(pattern: string): AliasReplacementRule | null {
-  const wildcardIndex = pattern.indexOf('*');
-  if (wildcardIndex < 0) {
-    return {
-      prefix: pattern,
-      suffix: '',
-      wildcard: false,
-    };
-  }
-
-  if (pattern.indexOf('*', wildcardIndex + 1) >= 0) {
-    return null;
-  }
-
-  return {
-    prefix: pattern.slice(0, wildcardIndex),
-    suffix: pattern.slice(wildcardIndex + 1),
-    wildcard: true,
-  };
 }
 
 function extractPackageName(content: string): string | null {
@@ -2237,7 +2157,6 @@ function resolvePhpIncludeReference(input: {
 
   return resolveModuleSpecifier({
     aliasConfig: {
-      baseUrl: '.',
       rules: [],
     },
     allFilePaths: input.allFilePaths,
@@ -2902,6 +2821,10 @@ function inferLayerName(input: {
       return `${areaName}/${featureScopeSegments.join('/')}/entrypoint`;
     }
 
+    if (isMonorepoAreaName(areaName)) {
+      return `${areaName}/entrypoint`;
+    }
+
     return 'entrypoint';
   }
 
@@ -2956,7 +2879,16 @@ function resolveAreaName(path: string): string | null {
   return areaContext?.areaName ?? null;
 }
 
-function resolveAreaContext(path: string): { areaName: string; scopeStartIndex: number } | null {
+function resolveAreaContext(path: string): {
+  areaName: string;
+  scopeStartIndex: number;
+  sourceSegments: string[];
+} | null {
+  const monorepoAreaContext = resolveMonorepoAreaContext(path);
+  if (monorepoAreaContext) {
+    return monorepoAreaContext;
+  }
+
   const segments = resolveSourceRelativeSegments(path);
   if (segments.length === 0) {
     return null;
@@ -2971,6 +2903,7 @@ function resolveAreaContext(path: string): { areaName: string; scopeStartIndex: 
     return {
       areaName: 'test',
       scopeStartIndex: 1,
+      sourceSegments: segments,
     };
   }
 
@@ -2978,6 +2911,7 @@ function resolveAreaContext(path: string): { areaName: string; scopeStartIndex: 
     return {
       areaName: 'entrypoint',
       scopeStartIndex: 1,
+      sourceSegments: segments,
     };
   }
 
@@ -2990,19 +2924,21 @@ function resolveAreaContext(path: string): { areaName: string; scopeStartIndex: 
     return {
       areaName: normalizeAreaName(firstSegment),
       scopeStartIndex: 1,
+      sourceSegments: segments,
     };
   }
 
   return {
     areaName: normalizeAreaName(firstSegment),
     scopeStartIndex: 1,
+    sourceSegments: segments,
   };
 }
 
 function resolvePhpApplicationAreaContext(
   segments: string[],
   path: string,
-): { areaName: string; scopeStartIndex: number } | null {
+): { areaName: string; scopeStartIndex: number; sourceSegments: string[] } | null {
   if (extname(path).toLowerCase() !== '.php') {
     return null;
   }
@@ -3016,6 +2952,7 @@ function resolvePhpApplicationAreaContext(
     return {
       areaName: 'application',
       scopeStartIndex: 1,
+      sourceSegments: segments,
     };
   }
 
@@ -3025,6 +2962,7 @@ function resolvePhpApplicationAreaContext(
       return {
         areaName: 'config',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'controller':
     case 'controllers': {
@@ -3033,61 +2971,136 @@ function resolvePhpApplicationAreaContext(
         return {
           areaName: 'api',
           scopeStartIndex: 3,
+          sourceSegments: segments,
         };
       }
 
       return {
         areaName: 'controller',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     }
     case 'core':
       return {
         areaName: 'core',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'domain':
     case 'domains':
       return {
         areaName: 'domain',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'helper':
     case 'helpers':
       return {
         areaName: 'util',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'libraries':
     case 'library':
       return {
         areaName: 'library',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'model':
     case 'models':
       return {
         areaName: 'model',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     case 'service':
     case 'services':
       return {
         areaName: 'service',
         scopeStartIndex: 2,
+        sourceSegments: segments,
       };
     default:
       return {
         areaName: 'application',
         scopeStartIndex: 1,
+        sourceSegments: segments,
       };
   }
 }
 
+function resolveMonorepoAreaContext(path: string): {
+  areaName: string;
+  scopeStartIndex: number;
+  sourceSegments: string[];
+} | null {
+  const normalizedSegments = resolveNormalizedPathSegments(path);
+  const packageRootSegments = resolveMonorepoPackageRootSegments(normalizedSegments);
+  if (!packageRootSegments) {
+    return null;
+  }
+
+  const sourceSegments = resolveMonorepoSourceSegments({
+    normalizedSegments,
+    packageRootSegments,
+  });
+  const packageAreaName = packageRootSegments.map((segment) => segment.toLowerCase()).join('/');
+
+  return {
+    areaName: packageAreaName,
+    scopeStartIndex: 0,
+    sourceSegments,
+  };
+}
+
+function resolveMonorepoPackageRootSegments(normalizedSegments: string[]): string[] | null {
+  if (normalizedSegments.length < 2) {
+    return null;
+  }
+
+  const monorepoRoot = normalizedSegments[0]?.toLowerCase();
+  if (!monorepoRoot || !MONOREPO_ROOT_DIRECTORIES.has(monorepoRoot)) {
+    return null;
+  }
+
+  let packageRootLength = 2;
+  for (const segment of normalizedSegments.slice(2)) {
+    const normalizedSegment = segment.toLowerCase();
+    if (
+      normalizedSegment === 'src' ||
+      TEST_PATH_SEGMENTS.has(normalizedSegment) ||
+      ROOT_AREA_NAMES.has(normalizedSegment) ||
+      STRUCTURAL_PATH_SEGMENTS.has(normalizedSegment) ||
+      segment.includes('.')
+    ) {
+      break;
+    }
+
+    packageRootLength += 1;
+  }
+
+  return normalizedSegments.slice(0, packageRootLength);
+}
+
+function resolveMonorepoSourceSegments(input: {
+  normalizedSegments: string[];
+  packageRootSegments: string[];
+}): string[] {
+  const sourceRootIndex = input.normalizedSegments.lastIndexOf('src');
+  if (sourceRootIndex >= 0) {
+    return input.normalizedSegments.slice(sourceRootIndex + 1);
+  }
+
+  return input.normalizedSegments.slice(input.packageRootSegments.length);
+}
+
 function resolveSourceRelativeSegments(path: string): string[] {
   const normalizedSegments = resolveNormalizedPathSegments(path);
-  if (normalizedSegments[0] === 'src') {
-    return normalizedSegments.slice(1);
+  const sourceRootIndex = normalizedSegments.lastIndexOf('src');
+  if (sourceRootIndex >= 0 && sourceRootIndex < normalizedSegments.length - 1) {
+    return normalizedSegments.slice(sourceRootIndex + 1);
   }
 
   return normalizedSegments;
@@ -3127,7 +3140,8 @@ function shouldUseFeatureScopedLayer(input: {
 }
 
 function resolveFeatureScopeSegments(input: { areaName: string; path: string }): string[] {
-  const sourceSegments = resolveSourceRelativeSegments(input.path);
+  const areaContext = resolveAreaContext(input.path);
+  const sourceSegments = areaContext?.sourceSegments ?? resolveSourceRelativeSegments(input.path);
   if (sourceSegments.length <= 1) {
     return [];
   }
@@ -3136,12 +3150,12 @@ function resolveFeatureScopeSegments(input: { areaName: string; path: string }):
     return [];
   }
 
-  const areaContext = resolveAreaContext(input.path);
   const scopeStartIndex = areaContext?.scopeStartIndex ?? 1;
   const directorySegments = sourceSegments.slice(scopeStartIndex, -1);
   const featureScopeSegments: string[] = [];
   const shouldSkipLeadingStructuralSegments =
-    input.areaName === 'application' && scopeStartIndex <= 1;
+    (input.areaName === 'application' && scopeStartIndex <= 1) ||
+    (isMonorepoAreaName(input.areaName) && scopeStartIndex <= 0);
   const featureScopeLimit = resolveFeatureScopeLimit({
     areaName: input.areaName,
     directorySegments,
@@ -3167,6 +3181,11 @@ function resolveFeatureScopeSegments(input: { areaName: string; path: string }):
   }
 
   return featureScopeSegments;
+}
+
+function isMonorepoAreaName(areaName: string): boolean {
+  const [rootSegment, packageName] = areaName.split('/').filter(Boolean);
+  return Boolean(rootSegment && packageName && MONOREPO_ROOT_DIRECTORIES.has(rootSegment));
 }
 
 function resolveFeatureScopeLimit(input: {

@@ -76,9 +76,9 @@ export const DOCUMENT_MAP_GRID_PRESET = {
 };
 
 export const REFERENCE_MAP_VIEWPORT_PRESET: WorkspaceMapViewportPreset = {
-  minScale: 0.28,
+  minScale: 0.08,
   maxScale: 2.6,
-  fitMinScale: 0.52,
+  fitMinScale: 0.08,
   fitMaxScale: 1,
   viewportPadding: 28,
 };

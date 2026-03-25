@@ -1,6 +1,8 @@
 import type { ProjectAnalysisFileIndexEntry } from '@/domain/project/project-analysis-model';
 
-export type SupportedSourceLanguage = 'typescript' | 'javascript' | 'kotlin' | 'php' | 'java';
+export type SupportedSourceLanguage = 'typescript' | 'javascript' | 'vue' | 'kotlin' | 'php' | 'java';
+
+const MONOREPO_AREA_ROOTS = new Set(['apps', 'libs', 'modules', 'packages']);
 
 export function createFileSummary(input: {
   category: string;
@@ -87,6 +89,8 @@ export function getLanguageDisplayName(language: SupportedSourceLanguage): strin
       return 'TypeScript';
     case 'javascript':
       return 'JavaScript';
+    case 'vue':
+      return 'Vue';
     case 'java':
       return 'Java';
     case 'kotlin':
@@ -97,9 +101,18 @@ export function getLanguageDisplayName(language: SupportedSourceLanguage): strin
 }
 
 export function getLayerAreaDisplayName(areaName: string): string {
+  const segments = areaName.split('/').filter(Boolean);
+  if (segments.length > 1) {
+    const [rootAreaName = areaName, ...restSegments] = segments;
+    const rootAreaLabel = getLayerAreaDisplayName(rootAreaName);
+    return `${rootAreaLabel} ${restSegments.join('/')}`.trim();
+  }
+
   switch (areaName) {
     case 'api':
       return 'API';
+    case 'apps':
+      return '앱';
     case 'application':
       return '애플리케이션';
     case 'client':
@@ -118,10 +131,14 @@ export function getLayerAreaDisplayName(areaName: string): string {
       return '인프라';
     case 'library':
       return '라이브러리';
+    case 'libs':
+      return '라이브러리';
     case 'main':
       return '메인';
     case 'model':
       return '모델';
+    case 'modules':
+      return '모듈';
     case 'packages':
       return '패키지';
     case 'preload':
@@ -241,13 +258,14 @@ function getLayerDisplayName(layerName: string): string {
   }
 
   const segments = layerName.split('/').filter(Boolean);
-  const [areaName = layerName] = segments;
-  if (segments.length === 1) {
+  const areaSegmentLength = resolveLayerAreaSegmentLength(segments);
+  const areaName = segments.slice(0, areaSegmentLength).join('/') || layerName;
+  if (segments.length <= areaSegmentLength) {
     return getLayerAreaDisplayName(areaName);
   }
 
   const categoryName = segments[segments.length - 1] ?? '';
-  const scopeSegments = segments.slice(1, -1);
+  const scopeSegments = segments.slice(areaSegmentLength, -1);
   const labelParts = [getLayerAreaDisplayName(areaName)];
 
   if (scopeSegments.length > 0) {
@@ -265,4 +283,13 @@ function getLayerDisplayName(layerName: string): string {
   }
 
   return labelParts.join(' ');
+}
+
+function resolveLayerAreaSegmentLength(segments: string[]): number {
+  const [rootSegment, packageName] = segments;
+  if (rootSegment && packageName && MONOREPO_AREA_ROOTS.has(rootSegment)) {
+    return 2;
+  }
+
+  return 1;
 }

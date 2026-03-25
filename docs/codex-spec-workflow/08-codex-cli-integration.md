@@ -162,9 +162,11 @@ Codex를 MCP 서버로 실행하는 방식이다.
 
 현재 채팅 UI에서도 이 설정을 직접 확인하고 바로 조정할 수 있다.
 
+현재 명세 채팅 실행 경로는 renderer가 typed IPC로 현재 turn 을 전달하고, main process가 저장된 CLI 연결 정보와 현재 선택된 모델/추론 강도를 합쳐 `codex exec` 를 실행한 뒤, 최종 assistant 응답을 세션 로그에 append 한다. 이때 prompt 는 선택된 명세 Markdown 과 최근 세션 메시지를 함께 넘겨 현재 명세 문맥을 유지한다.
+
 아직 분리된 것:
 
-- assistant 응답 생성과 patch 생성은 다음 단계의 연결 대상으로 남겨둔다
+- patch 생성은 다음 단계의 연결 대상으로 남겨둔다
 
 ## Electron 연결 위치
 

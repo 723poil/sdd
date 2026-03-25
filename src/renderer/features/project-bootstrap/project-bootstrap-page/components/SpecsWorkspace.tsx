@@ -10,13 +10,24 @@ import {
   getWorkspaceMapNodeFontScale,
   getWorkspaceMapNodeSpacingScale,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
+import { SpecsWorkspaceDocumentView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView';
+import {
+  describeSpecStatus,
+  formatSpecDayLabel,
+  getSpecSummary,
+  resolveSelectedSpec,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils';
 
 interface SpecsWorkspaceProps {
   isActive: boolean;
+  onViewModeChange: (viewMode: SpecsWorkspaceViewMode) => void;
   selectedSpecId: string | null;
   specs: ProjectSpecDocument[];
   onSelectSpec: (specId: string) => void;
+  viewMode: SpecsWorkspaceViewMode;
 }
+
+export type SpecsWorkspaceViewMode = 'map' | 'document';
 
 interface SpecBoardNode {
   height: number;
@@ -63,15 +74,16 @@ const INITIAL_VIEWPORT: SpecsViewport = {
 };
 
 export function SpecsWorkspace(props: SpecsWorkspaceProps) {
-  const selectedSpec = resolveSelectedSpec(props.specs, props.selectedSpecId);
-  const specsKey = useMemo(() => props.specs.map((spec) => spec.meta.id).join('|'), [props.specs]);
+  const { isActive, onSelectSpec, onViewModeChange, selectedSpecId, specs, viewMode } = props;
+  const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
+  const specsKey = useMemo(() => specs.map((spec) => spec.meta.id).join('|'), [specs]);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const hasAdjustedViewportRef = useRef(false);
   const interactionRef = useRef<SpecsPanState | null>(null);
   const [isPanning, setIsPanning] = useState(false);
   const [stageSize, setStageSize] = useState<SpecsStageSize>(EMPTY_STAGE_SIZE);
   const [viewport, setViewport] = useState<SpecsViewport>(INITIAL_VIEWPORT);
-  const boardNodes = useMemo(() => buildSpecBoardNodes(props.specs), [props.specs]);
+  const boardNodes = useMemo(() => buildSpecBoardNodes(specs), [specs]);
   const worldStyle = useMemo<CSSProperties>(
     () => ({
       transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
@@ -86,10 +98,11 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   useEffect(() => {
     hasAdjustedViewportRef.current = false;
     setViewport(INITIAL_VIEWPORT);
-  }, [specsKey]);
+    onViewModeChange('map');
+  }, [onViewModeChange, specsKey]);
 
   useEffect(() => {
-    if (!props.isActive || props.specs.length === 0) {
+    if (!isActive || specs.length === 0 || viewMode !== 'map') {
       return;
     }
 
@@ -128,10 +141,16 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
       window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, [props.isActive, props.specs.length]);
+  }, [isActive, specs.length, viewMode]);
 
   useEffect(() => {
-    if (!props.isActive || boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
+    if (
+      !isActive ||
+      viewMode !== 'map' ||
+      boardNodes.length === 0 ||
+      stageSize.width === 0 ||
+      stageSize.height === 0
+    ) {
       return;
     }
 
@@ -141,9 +160,32 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
     setViewport(createViewportToFitNodes(boardNodes, stageSize));
     hasAdjustedViewportRef.current = true;
-  }, [boardNodes, props.isActive, stageSize]);
+  }, [boardNodes, isActive, viewMode, stageSize]);
 
   useEffect(() => {
+    if (viewMode !== 'document') {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      onViewModeChange('map');
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onViewModeChange, viewMode]);
+
+  useEffect(() => {
+    if (viewMode !== 'map') {
+      return;
+    }
+
     const handlePointerMove = (event: PointerEvent) => {
       const interaction = interactionRef.current;
       if (!interaction) {
@@ -176,7 +218,7 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, []);
+  }, [viewMode]);
 
   const fitBoardToStage = () => {
     if (boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
@@ -215,7 +257,7 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     });
   };
 
-  if (props.specs.length === 0) {
+  if (specs.length === 0) {
     return (
       <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
         <section className="analysis-empty-panel">
@@ -227,6 +269,19 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
             </p>
           </div>
         </section>
+      </section>
+    );
+  }
+
+  if (viewMode === 'document' && selectedSpec) {
+    return (
+      <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
+        <SpecsWorkspaceDocumentView
+          onReturnToMap={() => {
+            onViewModeChange('map');
+          }}
+          selectedSpec={selectedSpec}
+        />
       </section>
     );
   }
@@ -354,7 +409,11 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
                   }`}
                   key={node.id}
                   onClick={() => {
-                    props.onSelectSpec(node.id);
+                    onSelectSpec(node.id);
+                    onViewModeChange('document');
+                  }}
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
                   }}
                   style={{
                     left: `${node.x}px`,
@@ -398,18 +457,15 @@ function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
       id: spec.meta.id,
       slug: spec.meta.slug,
       status: describeSpecStatus(spec.meta.status),
-      summary:
-        spec.meta.summary ??
-        `${describeSpecStatus(spec.meta.status)} · ${spec.meta.latestVersion} · 선택해서 채팅 대상 변경`,
+      summary: getSpecSummary(spec),
       title: spec.meta.title,
-      updatedAtLabel: formatSpecTimestamp(spec.meta.updatedAt),
+      updatedAtLabel: formatSpecDayLabel(spec.meta.updatedAt),
       version: spec.meta.latestVersion,
       width: SPECS_BOARD_LAYOUT_PRESET.cardWidth,
       height: SPECS_BOARD_LAYOUT_PRESET.cardHeight,
       x:
         startX +
-        columnIndex *
-          (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
+        columnIndex * (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
         (rowIndex % 2 === 0 ? 0 : SPECS_BOARD_LAYOUT_PRESET.rowOffset),
       y:
         startY +
@@ -418,18 +474,10 @@ function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
   });
 }
 
-function resolveSelectedSpec(
-  specs: ProjectSpecDocument[],
-  selectedSpecId: string | null,
-): ProjectSpecDocument | null {
-  if (specs.length === 0) {
-    return null;
-  }
-
-  return specs.find((spec) => spec.meta.id === selectedSpecId) ?? specs[0] ?? null;
-}
-
-function createViewportToFitNodes(nodes: SpecBoardNode[], stageSize: SpecsStageSize): SpecsViewport {
+function createViewportToFitNodes(
+  nodes: SpecBoardNode[],
+  stageSize: SpecsStageSize,
+): SpecsViewport {
   const bounds = getNodeBounds(nodes);
   const scale = getWorkspaceMapFitScale({
     boundsWidth: bounds.width,
@@ -472,27 +520,4 @@ function createStageGridStyle(viewport: SpecsViewport): Record<string, string> {
     backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
     backgroundSize: `${gridSize}px ${gridSize}px`,
   };
-}
-
-function describeSpecStatus(status: ProjectSpecDocument['meta']['status']): string {
-  switch (status) {
-    case 'draft':
-      return '초안';
-    case 'approved':
-      return '확정';
-    case 'archived':
-      return '보관';
-  }
-}
-
-function formatSpecTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    month: 'numeric',
-    day: 'numeric',
-  }).format(date);
 }

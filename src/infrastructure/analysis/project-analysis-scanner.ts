@@ -1,6 +1,6 @@
 import type { Dirent } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
-import { extname, join, relative } from 'node:path';
+import { extname, join, relative, resolve } from 'node:path';
 
 import {
   ENTRYPOINT_CANDIDATES,
@@ -102,15 +102,13 @@ export async function scanProjectAnalysis(input: {
       continue;
     }
 
-    if (input.scanState.files.size >= MAX_FILE_COUNT) {
-      input.scanState.reachedFileLimit = true;
-      break;
-    }
-
     const filePath = join(input.currentPath, entry.name);
     const relativePath = normalizeRelativePath(relative(input.rootPath, filePath));
+    const shouldTrackFile = shouldTrackAnalysisFile({
+      fileName: entry.name,
+      relativePath,
+    });
 
-    input.scanState.files.add(relativePath);
     collectLanguageExtension({
       fileName: entry.name,
       languageExtensions: input.scanState.languageExtensions,
@@ -130,12 +128,30 @@ export async function scanProjectAnalysis(input: {
     }
 
     if (entry.name === 'package.json') {
-      input.scanState.packageJson = await readPackageJson(filePath);
-      const packageMain = input.scanState.packageJson?.main;
+      const parsedPackageJson = await readPackageJson(filePath);
+      input.scanState.packageJson = mergePackageJsonShapes({
+        existing: input.scanState.packageJson,
+        next: parsedPackageJson,
+        preferMain: relativePath === 'package.json',
+      });
+      const packageMain = parsedPackageJson?.main;
       if (typeof packageMain === 'string' && packageMain.length > 0) {
-        input.scanState.entrypoints.add(normalizeRelativePath(packageMain));
+        input.scanState.entrypoints.add(
+          normalizeRelativePath(relative(input.rootPath, resolve(input.currentPath, packageMain))),
+        );
       }
     }
+
+    if (!shouldTrackFile) {
+      continue;
+    }
+
+    if (input.scanState.files.size >= MAX_FILE_COUNT) {
+      input.scanState.reachedFileLimit = true;
+      break;
+    }
+
+    input.scanState.files.add(relativePath);
   }
 }
 
@@ -226,9 +242,48 @@ function isSupportedSourceFile(fileName: string): boolean {
   return getLanguageName(extname(fileName).toLowerCase()) !== null;
 }
 
+function shouldTrackAnalysisFile(input: {
+  fileName: string;
+  relativePath: string;
+}): boolean {
+  if (matchesKeyConfig(input.fileName)) {
+    return true;
+  }
+
+  if (LOCKFILE_TO_PACKAGE_MANAGER[input.fileName]) {
+    return true;
+  }
+
+  if (isEntrypointCandidate(input.relativePath, input.fileName)) {
+    return true;
+  }
+
+  const extension = extname(input.fileName).toLowerCase();
+  return (
+    extension === '.cjs' ||
+    extension === '.cts' ||
+    extension === '.json' ||
+    extension === '.java' ||
+    extension === '.js' ||
+    extension === '.jsx' ||
+    extension === '.kt' ||
+    extension === '.kts' ||
+    extension === '.mjs' ||
+    extension === '.mts' ||
+    extension === '.php' ||
+    extension === '.ts' ||
+    extension === '.tsx' ||
+    extension === '.vue'
+  );
+}
+
 function getLanguageName(extension: string): string | null {
-  if (extension === '.ts' || extension === '.tsx') {
+  if (extension === '.ts' || extension === '.tsx' || extension === '.mts' || extension === '.cts') {
     return 'TypeScript';
+  }
+
+  if (extension === '.vue') {
+    return 'Vue';
   }
 
   if (extension === '.js' || extension === '.jsx' || extension === '.mjs' || extension === '.cjs') {
@@ -300,12 +355,47 @@ function collectModulePath(input: {
     return;
   }
 
-  if ((firstSegment === 'packages' || firstSegment === 'apps') && secondSegment) {
+  if (
+    (firstSegment === 'apps' ||
+      firstSegment === 'libs' ||
+      firstSegment === 'modules' ||
+      firstSegment === 'packages') &&
+    secondSegment
+  ) {
+    const moduleRootPath = resolveMonorepoModulePath(segments);
+    if (moduleRootPath) {
+      input.modules.add(moduleRootPath);
+      return;
+    }
+
     input.modules.add(`${firstSegment}/${secondSegment}`);
     return;
   }
 
   input.modules.add(firstSegment);
+}
+
+function resolveMonorepoModulePath(segments: string[]): string | null {
+  if (segments.length < 2) {
+    return null;
+  }
+
+  let moduleRootLength = 2;
+  for (const segment of segments.slice(2)) {
+    const normalizedSegment = segment.toLowerCase();
+    if (
+      normalizedSegment === 'src' ||
+      normalizedSegment === 'test' ||
+      normalizedSegment === 'tests' ||
+      segment.includes('.')
+    ) {
+      break;
+    }
+
+    moduleRootLength += 1;
+  }
+
+  return segments.slice(0, moduleRootLength).join('/');
 }
 
 async function readPackageJson(filePath: string): Promise<PackageJsonShape | null> {
@@ -319,6 +409,37 @@ async function readPackageJson(filePath: string): Promise<PackageJsonShape | nul
   } catch {
     return null;
   }
+}
+
+function mergePackageJsonShapes(input: {
+  existing: PackageJsonShape | null;
+  next: PackageJsonShape | null;
+  preferMain: boolean;
+}): PackageJsonShape | null {
+  if (!input.existing) {
+    return input.next;
+  }
+
+  if (!input.next) {
+    return input.existing;
+  }
+
+  const mergedMain =
+    input.preferMain && typeof input.next.main === 'string' && input.next.main.length > 0
+      ? input.next.main
+      : input.existing.main;
+
+  return {
+    dependencies: {
+      ...input.existing.dependencies,
+      ...input.next.dependencies,
+    },
+    devDependencies: {
+      ...input.existing.devDependencies,
+      ...input.next.devDependencies,
+    },
+    ...(typeof mergedMain === 'string' && mergedMain.length > 0 ? { main: mergedMain } : {}),
+  };
 }
 
 function normalizeRelativePath(value: string): string {

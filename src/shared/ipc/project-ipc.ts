@@ -1,3 +1,4 @@
+import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectAnalysis,
   ProjectAnalysisDocumentLayoutMap,
@@ -105,6 +106,8 @@ export interface ReadProjectSessionMessagesInput {
 }
 
 export interface SendProjectSessionMessageInput {
+  model: string;
+  modelReasoningEffort: AgentCliModelReasoningEffort;
   rootPath: string;
   sessionId: string;
   text: string;
@@ -129,7 +132,8 @@ export interface AnalyzeProjectOutput {
 }
 
 export interface SendProjectSessionMessageOutput {
-  message: ProjectSessionMessage;
+  assistantErrorMessage: string | null;
+  messages: ProjectSessionMessage[];
   session: ProjectSessionMeta;
 }
 

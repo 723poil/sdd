@@ -60,6 +60,46 @@
   grid-template-columns: 1fr;
 }
 
+.workbench-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 12;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.workbench-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--border-strong) 76%, transparent);
+  transition:
+    background-color 140ms ease,
+    width 140ms ease;
+}
+
+.workbench-resize-handle:hover::after,
+.workbench-resize-handle:focus-visible::after,
+.workbench-resize-handle--active::after {
+  width: 3px;
+  background: color-mix(in srgb, var(--accent) 28%, var(--border-strong));
+}
+
+.workbench-resize-handle--left {
+  left: calc(var(--left-sidebar-width) - 6px);
+}
+
+.workbench-resize-handle--right {
+  right: calc(var(--right-sidebar-width) - 6px);
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;

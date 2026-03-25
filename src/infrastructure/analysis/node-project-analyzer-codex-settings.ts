@@ -1,7 +1,9 @@
 import type { AgentCliSettingsPort } from '@/application/app-settings/app-settings.ports';
 import {
+  createAgentCliConnectionSettings,
   createDefaultAgentCliConnectionSettings,
   findAgentCliConnectionDefinition,
+  type AgentCliModelReasoningEffort,
   type AgentCliConnectionSettings,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import { createProjectError } from '@/domain/project/project-errors';
@@ -14,6 +16,10 @@ export interface CodexRuntimeSettings {
 
 export async function resolveCodexRuntimeSettings(input: {
   agentCliSettingsStore: AgentCliSettingsPort;
+  overrides?: {
+    model?: string | null;
+    modelReasoningEffort?: AgentCliModelReasoningEffort | null;
+  };
 }): Promise<Result<CodexRuntimeSettings>> {
   const definition = findAgentCliConnectionDefinition('codex');
   if (!definition) {
@@ -31,9 +37,19 @@ export async function resolveCodexRuntimeSettings(input: {
     );
   }
 
-  const codexSettings =
+  const storedCodexSettings =
     connectionSettingsResult.value.find((connection) => connection.agentId === 'codex') ??
-    createDefaultAgentCliConnectionSettings('codex');
+    createDefaultAgentCliConnectionSettings('codex', input.overrides);
+  const codexSettings = createAgentCliConnectionSettings({
+    agentId: storedCodexSettings.agentId,
+    authMode: storedCodexSettings.authMode,
+    commandMode: storedCodexSettings.commandMode,
+    executablePath: storedCodexSettings.executablePath,
+    model: input.overrides?.model ?? storedCodexSettings.model,
+    modelReasoningEffort:
+      input.overrides?.modelReasoningEffort ?? storedCodexSettings.modelReasoningEffort,
+    updatedAt: storedCodexSettings.updatedAt,
+  });
 
   if (codexSettings.commandMode === 'custom') {
     if (!codexSettings.executablePath) {

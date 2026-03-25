@@ -112,9 +112,17 @@
 }
 @media (max-width: 1320px) {
   .workbench,
-  .workbench--left-collapsed,
   .workbench--right-collapsed {
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: var(--left-sidebar-width) minmax(0, 1fr);
+  }
+
+  .workbench--left-collapsed,
+  .workbench--left-collapsed.workbench--right-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workbench-resize-handle--right {
+    display: none;
   }
 
   .sidebar--sessions {
@@ -135,6 +143,10 @@
   .workbench--left-collapsed.workbench--right-collapsed {
     grid-template-columns: 1fr;
     height: auto;
+  }
+
+  .workbench-resize-handle {
+    display: none;
   }
 
   .sidebar {

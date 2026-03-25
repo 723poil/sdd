@@ -1,3 +1,4 @@
+import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectDirectoryStatus,
   ProjectMeta,
@@ -93,6 +94,17 @@ export interface ProjectSessionPort {
     role: ProjectSessionMessageRole;
     text: string;
   }): Promise<Result<{ message: ProjectSessionMessage; session: ProjectSessionMeta }>>;
+}
+
+export interface ProjectSpecChatPort {
+  generateReply(input: {
+    model: string;
+    modelReasoningEffort: AgentCliModelReasoningEffort;
+    projectName: string;
+    rootPath: string;
+    sessionMessages: ProjectSessionMessage[];
+    spec: ProjectSpecDocument;
+  }): Promise<Result<string>>;
 }
 
 export interface ProjectStoragePort {

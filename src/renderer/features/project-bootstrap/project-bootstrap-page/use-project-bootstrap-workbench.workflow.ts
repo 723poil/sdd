@@ -224,9 +224,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       projectName: input.projectName ?? null,
       rootPath: input.rootPath ?? null,
       title: input.title,
-      ...(typeof input.isCancellable === 'boolean'
-        ? { isCancellable: input.isCancellable }
-        : {}),
+      ...(typeof input.isCancellable === 'boolean' ? { isCancellable: input.isCancellable } : {}),
     });
     applyRequestProgressTask(task);
     return task;
@@ -264,17 +262,15 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     });
   };
 
-  const startSessionCreateProgressTask = useEffectEvent((input: {
-    rootPath: string;
-    specTitle: string;
-  }) =>
-    startRequestProgressTask({
-      detail: `"${input.specTitle}" 명세 채팅 세션을 준비하고 있습니다.`,
-      kind: 'session-create',
-      projectName: inspection?.projectName ?? null,
-      rootPath: input.rootPath,
-      title: '명세 채팅 준비',
-    }),
+  const startSessionCreateProgressTask = useEffectEvent(
+    (input: { rootPath: string; specTitle: string }) =>
+      startRequestProgressTask({
+        detail: `"${input.specTitle}" 명세 채팅 세션을 준비하고 있습니다.`,
+        kind: 'session-create',
+        projectName: inspection?.projectName ?? null,
+        rootPath: input.rootPath,
+        title: '명세 채팅 준비',
+      }),
   );
 
   const updateSessionCreateProgressTask = useEffectEvent(
@@ -922,11 +918,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     const sendMessageTask = startRequestProgressTask({
-      detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장하고 있습니다.`,
+      detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 응답을 기다리고 있습니다.`,
       kind: 'message-send',
       projectName: inspection?.projectName ?? null,
       rootPath: selectedPath,
-      title: '채팅 메시지 저장',
+      title: '채팅 메시지 전송',
     });
 
     setIsSendingMessage(true);
@@ -934,6 +930,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     try {
       const result = await sddApi.project.sendSessionMessage({
+        model: codexConnectionSettings.model,
+        modelReasoningEffort: codexConnectionSettings.modelReasoningEffort,
         rootPath: selectedPath,
         sessionId: selectedSession.id,
         text: draftMessage,
@@ -949,7 +947,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      setSessionMessages((current) => [...current, result.value.message]);
+      setSessionMessages((current) => [...current, ...result.value.messages]);
       setSessions((current) =>
         current
           .map((session) =>
@@ -968,9 +966,23 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
       );
       setDraftMessage('');
-      setMessage(`"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했습니다.`);
+
+      if (result.value.assistantErrorMessage) {
+        updateRequestProgressTask(sendMessageTask, {
+          detail: result.value.assistantErrorMessage,
+          errorMessage: result.value.assistantErrorMessage,
+          status: 'failed',
+        });
+        setErrorMessage(result.value.assistantErrorMessage);
+        setMessage(
+          `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했지만 응답은 받지 못했습니다.`,
+        );
+        return;
+      }
+
+      setMessage(`"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`);
       updateRequestProgressTask(sendMessageTask, {
-        detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했습니다.`,
+        detail: `"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`,
         status: 'succeeded',
       });
     } finally {
@@ -1094,9 +1106,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             isCancellable: false,
             status: 'cancelled',
           });
-          setMessage(
-            `${projectName ?? '프로젝트'} 파일 태그 자동 생성을 취소했습니다.`,
-          );
+          setMessage(`${projectName ?? '프로젝트'} 파일 태그 자동 생성을 취소했습니다.`);
           return 'cancelled';
         }
 
@@ -1132,11 +1142,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   async function handleCancelReferenceTagGeneration(rootPathOverride?: string): Promise<void> {
     const rootPath = rootPathOverride ?? selectedPathRef.current;
     const sddApi = getSddApi();
-    if (
-      !rootPath ||
-      !sddApi ||
-      typeof sddApi.project.cancelReferenceTagGeneration !== 'function'
-    ) {
+    if (!rootPath || !sddApi || typeof sddApi.project.cancelReferenceTagGeneration !== 'function') {
       return;
     }
 

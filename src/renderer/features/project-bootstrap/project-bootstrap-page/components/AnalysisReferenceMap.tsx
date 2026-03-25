@@ -112,16 +112,6 @@ interface AnalysisReferenceRoleGroup {
   y: number;
 }
 
-interface AnalysisReferenceClusterSummary {
-  count: number;
-  fromCategory: string | null;
-  fromCluster: string;
-  isInternal: boolean;
-  key: string;
-  toCategory: string | null;
-  toCluster: string;
-}
-
 interface AnalysisReferenceLink {
   from: string;
   isActive: boolean;
@@ -137,11 +127,14 @@ interface AnalysisReferenceLink {
 
 interface AnalysisReferenceGraph {
   areas: AnalysisReferenceArea[];
-  clusterSummaries: AnalysisReferenceClusterSummary[];
   clusters: AnalysisReferenceCluster[];
   edges: ProjectAnalysisFileReference[];
+  isReduced: boolean;
   nodes: AnalysisReferenceNode[];
+  retainedNodeCount: number;
   roleGroups: AnalysisReferenceRoleGroup[];
+  totalEdgeCount: number;
+  totalNodeCount: number;
 }
 
 type AnalysisInteractionState = {
@@ -232,11 +225,25 @@ const NODE_SUMMARY_PIXEL_WIDTH = 7.2;
 const NODE_META_PIXEL_WIDTH = 6.2;
 const NODE_META_MIN_WIDTH = 52;
 const NODE_META_HORIZONTAL_PADDING = 18;
+const LARGE_REFERENCE_GRAPH_FILE_THRESHOLD = 360;
+const LARGE_REFERENCE_GRAPH_EDGE_THRESHOLD = 960;
+const MAX_REFERENCE_GRAPH_FILE_COUNT = 240;
+const MAX_REFERENCE_GRAPH_EDGE_COUNT = 720;
+const MIN_RETAINED_CLUSTER_FILE_COUNT = 2;
+const MAX_RETAINED_CLUSTER_FILE_COUNT = 14;
+const MAX_CLUSTER_ORDERING_OPTIMIZATION_FILE_COUNT = 320;
+const MIN_SELECTED_NODE_FOCUS_SCALE = 0.42;
+const REFERENCE_MAP_OVERLAY_INSET_DESKTOP = 28;
+const REFERENCE_MAP_OVERLAY_INSET_MOBILE = 18;
+const REFERENCE_MAP_OVERLAY_MAX_WIDTH_DESKTOP = 408;
+const REFERENCE_MAP_OVERLAY_MAX_WIDTH_MOBILE = 360;
+const REFERENCE_MAP_VIEWPORT_FRAME_GAP = 20;
+const REFERENCE_MAP_MOBILE_BREAKPOINT = 980;
 
 export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const interactionRef = useRef<AnalysisInteractionState | null>(null);
-  const hasAdjustedViewportRef = useRef(false);
+  const isFollowingHomeViewportRef = useRef(true);
   const [activeAreaNames, setActiveAreaNames] = useState<string[]>([]);
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
   const [isPanning, setIsPanning] = useState(false);
@@ -277,10 +284,6 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     () => new Set(referenceTags.assignments.map((assignment) => assignment.path)).size,
     [referenceTags.assignments],
   );
-  const graphResetKey = useMemo(
-    () => createReferenceGraphResetKey(props.analysis),
-    [props.analysis],
-  );
   const filterViewportResetKey = useMemo(
     () => `${activeAreaNames.join('|')}#${activeTagIds.join('|')}`,
     [activeAreaNames, activeTagIds],
@@ -300,6 +303,30 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     () => filterReferenceGraphByAreas(graph, activeAreaNameSet),
     [activeAreaNameSet, graph],
   );
+  const viewportFrame = useMemo(
+    () =>
+      resolveReferenceMapViewportFrame({
+        isInspectorCollapsed,
+        stageSize,
+      }),
+    [isInspectorCollapsed, stageSize],
+  );
+  const homeViewport = useMemo(() => {
+    if (
+      !props.isActive ||
+      visibleGraph.nodes.length === 0 ||
+      stageSize.width === 0 ||
+      stageSize.height === 0
+    ) {
+      return null;
+    }
+
+    return createViewportToFitGraph({
+      graph: visibleGraph,
+      stageSize,
+      viewportFrame,
+    });
+  }, [props.isActive, stageSize, viewportFrame, visibleGraph]);
   const areaSummaries = useMemo(
     () => graph.areas.map((area) => ({ count: area.count, label: area.label, name: area.name })),
     [graph.areas],
@@ -343,13 +370,17 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     () => new Map(visibleGraph.nodes.map((node) => [node.path, node.fileName])),
     [visibleGraph.nodes],
   );
+  const isAtHomeViewport = useMemo(
+    () => (homeViewport ? areViewportsClose(viewport, homeViewport) : true),
+    [homeViewport, viewport],
+  );
 
   useEffect(() => {
     setActiveAreaNames([]);
     setSelectedPath(null);
-    hasAdjustedViewportRef.current = false;
+    isFollowingHomeViewportRef.current = true;
     setViewport(INITIAL_VIEWPORT);
-  }, [graphResetKey]);
+  }, [props.analysis.fileIndex, props.analysis.context.fileReferences]);
 
   useEffect(() => {
     const availableTagIds = new Set(tagSummaries.map((summary) => summary.tag.id));
@@ -370,7 +401,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   }, [graph.areas]);
 
   useEffect(() => {
-    hasAdjustedViewportRef.current = false;
+    isFollowingHomeViewportRef.current = true;
     setViewport(INITIAL_VIEWPORT);
   }, [filterViewportResetKey]);
 
@@ -423,22 +454,16 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   }, [props.isActive]);
 
   useEffect(() => {
-    if (
-      !props.isActive ||
-      visibleGraph.nodes.length === 0 ||
-      stageSize.width === 0 ||
-      stageSize.height === 0
-    ) {
+    if (!props.isActive || !homeViewport) {
       return;
     }
 
-    if (hasAdjustedViewportRef.current) {
+    if (!isFollowingHomeViewportRef.current) {
       return;
     }
 
-    setViewport(createViewportToFitGraph(visibleGraph, stageSize));
-    hasAdjustedViewportRef.current = true;
-  }, [props.isActive, stageSize, visibleGraph]);
+    setViewport((current) => (areViewportsClose(current, homeViewport) ? current : homeViewport));
+  }, [homeViewport, props.isActive]);
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
@@ -450,13 +475,16 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
 
       const deltaX = event.clientX - interaction.startClientX;
       const deltaY = event.clientY - interaction.startClientY;
+      const hasMoved = interaction.moved || Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2;
 
       interactionRef.current = {
         ...interaction,
-        moved: interaction.moved || Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2,
+        moved: hasMoved,
       };
 
-      hasAdjustedViewportRef.current = true;
+      if (hasMoved) {
+        isFollowingHomeViewportRef.current = false;
+      }
       setViewport({
         ...viewport,
         offsetX: interaction.startOffsetX + deltaX,
@@ -481,8 +509,6 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const linkPaths = useMemo(
     () =>
       buildReferenceLinkPaths({
-        clusters: visibleGraph.clusters,
-        clusterSummaries: visibleGraph.clusterSummaries,
         edges: visibleGraph.edges,
         nodes: visibleGraph.nodes,
         selectedPath,
@@ -493,20 +519,34 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
       selectedPath,
       stageSize,
       viewport,
-      visibleGraph.clusterSummaries,
-      visibleGraph.clusters,
       visibleGraph.edges,
       visibleGraph.nodes,
     ],
   );
 
-  const fitBoardToStage = () => {
-    if (visibleGraph.nodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
+  const returnToHomeViewport = () => {
+    if (!homeViewport) {
       return;
     }
 
-    hasAdjustedViewportRef.current = true;
-    setViewport(createViewportToFitGraph(visibleGraph, stageSize));
+    isFollowingHomeViewportRef.current = true;
+    setViewport(homeViewport);
+  };
+
+  const focusSelectedNodeInViewport = () => {
+    if (!selectedNode) {
+      return;
+    }
+
+    isFollowingHomeViewportRef.current = false;
+    setViewport((current) =>
+      createViewportToCenterRect({
+        rect: selectedNode,
+        scale: Math.max(current.scale, MIN_SELECTED_NODE_FOCUS_SCALE),
+        stageSize,
+        viewportFrame,
+      }),
+    );
   };
 
   const saveReferenceTags = async (nextReferenceTags: ProjectReferenceTagDocument) => {
@@ -573,7 +613,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     const anchorX = stageRect.width / 2;
     const anchorY = stageRect.height / 2;
 
-    hasAdjustedViewportRef.current = true;
+    isFollowingHomeViewportRef.current = false;
     setViewport((current) => {
       const nextScale = clamp(
         current.scale * scaleDelta,
@@ -640,7 +680,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
             const worldX = (stageX - centerX - viewport.offsetX) / viewport.scale;
             const worldY = (stageY - centerY - viewport.offsetY) / viewport.scale;
 
-            hasAdjustedViewportRef.current = true;
+            isFollowingHomeViewportRef.current = false;
             setViewport({
               scale: nextScale,
               offsetX: stageX - centerX - worldX * nextScale,
@@ -656,7 +696,9 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
               event.stopPropagation();
             }}
           >
-            <div className="analysis-map__zoom-badge">{Math.round(viewport.scale * 100)}%</div>
+            <div className="analysis-map__zoom-badge">
+              {Math.round(viewport.scale * 100)}% · {isAtHomeViewport ? '기준' : '이동 중'}
+            </div>
             <div className="analysis-map__zoom-controls">
               <button
                 aria-label="축소"
@@ -695,14 +737,16 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                 </svg>
               </button>
               <button
-                aria-label="화면에 맞추기"
+                aria-label="원위치로 돌아가기"
                 className="analysis-map__control-button"
-                onClick={fitBoardToStage}
+                disabled={!homeViewport}
+                onClick={returnToHomeViewport}
+                title={isAtHomeViewport ? '기준 위치' : '원위치로 돌아가기'}
                 type="button"
               >
                 <svg aria-hidden="true" viewBox="0 0 20 20">
                   <path
-                    d="M7 4H4v3M13 4h3v3M4 13v3h3M16 13v3h-3"
+                    d="M4 9.5 10 4l6 5.5M6.5 8.8V16h7V8.8"
                     fill="none"
                     stroke="currentColor"
                     strokeLinecap="round"
@@ -711,6 +755,26 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                   />
                 </svg>
               </button>
+              {selectedNode ? (
+                <button
+                  aria-label="선택 카드 위치로 이동"
+                  className="analysis-map__control-button"
+                  onClick={focusSelectedNodeInViewport}
+                  title="선택 카드 위치로 이동"
+                  type="button"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 20 20">
+                    <path
+                      d="M10 4v12M4 10h12M10 7.2a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6Z"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -994,6 +1058,14 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                 </div>
               </div>
 
+              {graph.isReduced ? (
+                <p className="analysis-reference-map__empty-copy">
+                  대규모 참조 맵이라 대표 파일 {graph.retainedNodeCount}/{graph.totalNodeCount}
+                  개와 참조선 {graph.edges.length}/{graph.totalEdgeCount}건만 우선 표시합니다.
+                  영역이나 태그로 좁히면 더 가볍게 확인할 수 있습니다.
+                </p>
+              ) : null}
+
               <div className="analysis-reference-map__filter-panel">
                 <div className="analysis-reference-map__filter-header">
                   <span className="analysis-reference-map__eyebrow">영역 선택</span>
@@ -1072,6 +1144,13 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                         <span className="analysis-reference-map__meta-chip">
                           {resolveRoleGroupDisplayName(selectedNode.groupCategory)}
                         </span>
+                        <button
+                          className="analysis-reference-map__action-button"
+                          onClick={focusSelectedNodeInViewport}
+                          type="button"
+                        >
+                          카드 위치로 이동
+                        </button>
                         <button
                           className="analysis-reference-map__action-button"
                           onClick={() => {
@@ -1223,17 +1302,21 @@ function buildReferenceGraph(
   );
   const incomingCounts = new Map<string, number>();
   const outgoingCounts = new Map<string, number>();
-  const groupCategoryByPath = new Map<string, string>();
-  const referencedPaths = new Set(
-    analysis.fileIndex
-      .map((entry) => entry.path)
-      .filter(
-        (path) =>
-          options.activeTagIds.size === 0 ||
-          (tagIdsByPath.get(path)?.some((tagId) => options.activeTagIds.has(tagId)) ?? false),
-      ),
-  );
-  const edges = deduplicateFileReferences(analysis.context.fileReferences).filter(
+  const referencedPaths = new Set<string>();
+
+  for (const entry of analysis.fileIndex) {
+    const path = entry.path;
+    if (
+      options.activeTagIds.size > 0 &&
+      !(tagIdsByPath.get(path)?.some((tagId) => options.activeTagIds.has(tagId)) ?? false)
+    ) {
+      continue;
+    }
+
+    referencedPaths.add(path);
+  }
+
+  const allEdges = deduplicateFileReferences(analysis.context.fileReferences).filter(
     (edge) =>
       indexedPaths.has(edge.from) &&
       indexedPaths.has(edge.to) &&
@@ -1241,7 +1324,7 @@ function buildReferenceGraph(
       referencedPaths.has(edge.to),
   );
 
-  for (const edge of edges) {
+  for (const edge of allEdges) {
     outgoingCounts.set(edge.from, (outgoingCounts.get(edge.from) ?? 0) + 1);
     incomingCounts.set(edge.to, (incomingCounts.get(edge.to) ?? 0) + 1);
   }
@@ -1276,15 +1359,26 @@ function buildReferenceGraph(
     );
   }
 
-  const orderedPathsByCluster = optimizeClusterNodeOrdering({
+  const graphSelection = selectReferenceGraphSelection({
     clusterNames,
-    edges,
+    edges: allEdges,
     entryByPath,
     groupedPaths,
     incomingCounts,
     outgoingCounts,
   });
-  const areaNames = resolveOrderedAreaNames(clusterNames);
+  const orderedPathsByCluster =
+    graphSelection.selectedPathCount <= MAX_CLUSTER_ORDERING_OPTIMIZATION_FILE_COUNT
+      ? optimizeClusterNodeOrdering({
+          clusterNames: graphSelection.clusterNames,
+          edges: graphSelection.edges,
+          entryByPath,
+          groupedPaths: graphSelection.groupedPaths,
+          incomingCounts,
+          outgoingCounts,
+        })
+      : graphSelection.groupedPaths;
+  const areaNames = resolveOrderedAreaNames(graphSelection.clusterNames);
   const areas: AnalysisReferenceArea[] = [];
   const clusters: AnalysisReferenceCluster[] = [];
   const roleGroups: AnalysisReferenceRoleGroup[] = [];
@@ -1308,7 +1402,7 @@ function buildReferenceGraph(
       currentAreaRowHeight = 0;
     }
 
-    const areaClusters = clusterNames.filter(
+    const areaClusters = graphSelection.clusterNames.filter(
       (clusterName) => resolveClusterAreaName(clusterName) === areaName,
     );
     const clusterColumnCount = resolveClusterColumnCount({
@@ -1462,10 +1556,6 @@ function buildReferenceGraph(
           y: groupY,
         });
 
-        groupLayout.allPaths.forEach((path) => {
-          groupCategoryByPath.set(path, groupLayout.category);
-        });
-
         groupLayout.visiblePaths.forEach((path, nodeIndex) => {
           const entry = entryByPath.get(path);
           const tagLabels = resolveReferenceNodeTagLabels({
@@ -1528,17 +1618,205 @@ function buildReferenceGraph(
 
   return {
     areas,
-    clusterSummaries: buildClusterSummaries({
-      clusterNames,
-      edges,
-      entryByPath,
-      groupCategoryByPath,
-    }),
     clusters,
-    edges,
+    edges: graphSelection.edges,
+    isReduced: graphSelection.isReduced,
     nodes,
+    retainedNodeCount: graphSelection.selectedPathCount,
     roleGroups,
+    totalEdgeCount: allEdges.length,
+    totalNodeCount: referencedPaths.size,
   };
+}
+
+function selectReferenceGraphSelection(input: {
+  clusterNames: string[];
+  edges: ProjectAnalysisFileReference[];
+  entryByPath: Map<string, ProjectAnalysisFileIndexEntry>;
+  groupedPaths: Map<string, string[]>;
+  incomingCounts: Map<string, number>;
+  outgoingCounts: Map<string, number>;
+}): {
+  clusterNames: string[];
+  edges: ProjectAnalysisFileReference[];
+  groupedPaths: Map<string, string[]>;
+  isReduced: boolean;
+  selectedPathCount: number;
+} {
+  const totalPathCount = [...input.groupedPaths.values()].reduce((sum, paths) => sum + paths.length, 0);
+  const shouldReduce =
+    totalPathCount > LARGE_REFERENCE_GRAPH_FILE_THRESHOLD ||
+    input.edges.length > LARGE_REFERENCE_GRAPH_EDGE_THRESHOLD;
+  if (!shouldReduce) {
+    return {
+      clusterNames: input.clusterNames,
+      edges: input.edges,
+      groupedPaths: input.groupedPaths,
+      isReduced: false,
+      selectedPathCount: totalPathCount,
+    };
+  }
+
+  const reducedGroupedPaths = selectRepresentativeClusterPaths({
+    clusterNames: input.clusterNames,
+    groupedPaths: input.groupedPaths,
+  });
+  const selectedPathSet = new Set<string>();
+  const reducedClusterNames = input.clusterNames.filter((clusterName) => {
+    const paths = reducedGroupedPaths.get(clusterName) ?? [];
+    for (const path of paths) {
+      selectedPathSet.add(path);
+    }
+
+    return paths.length > 0;
+  });
+  const reducedEdges = selectRepresentativeReferenceEdges({
+    edges: input.edges,
+    entryByPath: input.entryByPath,
+    incomingCounts: input.incomingCounts,
+    outgoingCounts: input.outgoingCounts,
+    selectedPathSet,
+  });
+
+  return {
+    clusterNames: reducedClusterNames,
+    edges: reducedEdges,
+    groupedPaths: reducedGroupedPaths,
+    isReduced: true,
+    selectedPathCount: selectedPathSet.size,
+  };
+}
+
+function selectRepresentativeClusterPaths(input: {
+  clusterNames: string[];
+  groupedPaths: Map<string, string[]>;
+}): Map<string, string[]> {
+  const selectedPathsByCluster = new Map<string, string[]>();
+  const reservedPathCountByCluster = new Map<string, number>();
+  const minPerCluster =
+    input.clusterNames.length * MIN_RETAINED_CLUSTER_FILE_COUNT <= MAX_REFERENCE_GRAPH_FILE_COUNT
+      ? MIN_RETAINED_CLUSTER_FILE_COUNT
+      : 1;
+  let remainingSlots = MAX_REFERENCE_GRAPH_FILE_COUNT;
+
+  for (const clusterName of input.clusterNames) {
+    const sourcePaths = input.groupedPaths.get(clusterName) ?? [];
+    const retainedCount = Math.min(
+      sourcePaths.length,
+      minPerCluster,
+      MAX_RETAINED_CLUSTER_FILE_COUNT,
+    );
+    selectedPathsByCluster.set(clusterName, sourcePaths.slice(0, retainedCount));
+    reservedPathCountByCluster.set(clusterName, retainedCount);
+    remainingSlots -= retainedCount;
+  }
+
+  while (remainingSlots > 0) {
+    let didAppend = false;
+
+    for (const clusterName of input.clusterNames) {
+      const sourcePaths = input.groupedPaths.get(clusterName) ?? [];
+      const selectedPaths = selectedPathsByCluster.get(clusterName) ?? [];
+      const nextIndex = reservedPathCountByCluster.get(clusterName) ?? selectedPaths.length;
+      if (
+        nextIndex >= sourcePaths.length ||
+        selectedPaths.length >= MAX_RETAINED_CLUSTER_FILE_COUNT ||
+        remainingSlots <= 0
+      ) {
+        continue;
+      }
+
+      selectedPaths.push(sourcePaths[nextIndex] as string);
+      selectedPathsByCluster.set(clusterName, selectedPaths);
+      reservedPathCountByCluster.set(clusterName, nextIndex + 1);
+      remainingSlots -= 1;
+      didAppend = true;
+
+      if (remainingSlots <= 0) {
+        break;
+      }
+    }
+
+    if (!didAppend) {
+      break;
+    }
+  }
+
+  return selectedPathsByCluster;
+}
+
+function selectRepresentativeReferenceEdges(input: {
+  edges: ProjectAnalysisFileReference[];
+  entryByPath: Map<string, ProjectAnalysisFileIndexEntry>;
+  incomingCounts: Map<string, number>;
+  outgoingCounts: Map<string, number>;
+  selectedPathSet: Set<string>;
+}): ProjectAnalysisFileReference[] {
+  const selectedEdges = input.edges.filter(
+    (edge) => input.selectedPathSet.has(edge.from) && input.selectedPathSet.has(edge.to),
+  );
+  if (selectedEdges.length <= MAX_REFERENCE_GRAPH_EDGE_COUNT) {
+    return selectedEdges;
+  }
+
+  return [...selectedEdges]
+    .sort((left, right) =>
+      compareEdgesByImportance({
+        entryByPath: input.entryByPath,
+        incomingCounts: input.incomingCounts,
+        left,
+        outgoingCounts: input.outgoingCounts,
+        right,
+      }),
+    )
+    .slice(0, MAX_REFERENCE_GRAPH_EDGE_COUNT);
+}
+
+function compareEdgesByImportance(input: {
+  entryByPath: Map<string, ProjectAnalysisFileIndexEntry>;
+  incomingCounts: Map<string, number>;
+  left: ProjectAnalysisFileReference;
+  outgoingCounts: Map<string, number>;
+  right: ProjectAnalysisFileReference;
+}): number {
+  const leftPriority = getEdgeImportanceScore({
+    edge: input.left,
+    entryByPath: input.entryByPath,
+    incomingCounts: input.incomingCounts,
+    outgoingCounts: input.outgoingCounts,
+  });
+  const rightPriority = getEdgeImportanceScore({
+    edge: input.right,
+    entryByPath: input.entryByPath,
+    incomingCounts: input.incomingCounts,
+    outgoingCounts: input.outgoingCounts,
+  });
+  if (leftPriority !== rightPriority) {
+    return rightPriority - leftPriority;
+  }
+
+  return (
+    input.left.from.localeCompare(input.right.from) ||
+    input.left.to.localeCompare(input.right.to) ||
+    input.left.relationship.localeCompare(input.right.relationship)
+  );
+}
+
+function getEdgeImportanceScore(input: {
+  edge: ProjectAnalysisFileReference;
+  entryByPath: Map<string, ProjectAnalysisFileIndexEntry>;
+  incomingCounts: Map<string, number>;
+  outgoingCounts: Map<string, number>;
+}): number {
+  const fromCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.from)?.layer);
+  const toCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.to)?.layer);
+  const crossClusterBonus = fromCluster === toCluster ? 0 : 20;
+  const fromScore =
+    (input.incomingCounts.get(input.edge.from) ?? 0) + (input.outgoingCounts.get(input.edge.from) ?? 0);
+  const toScore =
+    (input.incomingCounts.get(input.edge.to) ?? 0) + (input.outgoingCounts.get(input.edge.to) ?? 0);
+
+  return crossClusterBonus + fromScore + toScore;
 }
 
 function filterReferenceGraphByAreas(
@@ -1556,17 +1834,17 @@ function filterReferenceGraphByAreas(
   const nodes = graph.nodes.filter((node) => areaNames.has(node.area));
   const nodePaths = new Set(nodes.map((node) => node.path));
   const edges = graph.edges.filter((edge) => nodePaths.has(edge.from) && nodePaths.has(edge.to));
-  const clusterSummaries = graph.clusterSummaries.filter(
-    (summary) => clusterKeys.has(summary.fromCluster) && clusterKeys.has(summary.toCluster),
-  );
 
   return compactReferenceGraphLayout({
     areas,
-    clusterSummaries,
     clusters,
     edges,
+    isReduced: graph.isReduced,
     nodes,
+    retainedNodeCount: graph.retainedNodeCount,
     roleGroups,
+    totalEdgeCount: graph.totalEdgeCount,
+    totalNodeCount: graph.totalNodeCount,
   });
 }
 
@@ -1930,8 +2208,21 @@ function getAreaPriority(areaName: string): number {
 }
 
 function resolveAreaColumnCount(input: { areaCount: number; stageWidth: number }): number {
-  void input.stageWidth;
-  return Math.max(1, input.areaCount);
+  if (input.areaCount <= 2) {
+    return Math.max(1, input.areaCount);
+  }
+
+  const balancedColumnCount = Math.ceil(Math.sqrt(input.areaCount));
+  if (input.stageWidth <= 0) {
+    return balancedColumnCount;
+  }
+
+  const stageColumnHint = Math.max(
+    1,
+    Math.round(input.stageWidth / (DEFAULT_AREA_WIDTH + AREA_GAP)),
+  );
+
+  return clamp(Math.max(balancedColumnCount, stageColumnHint), 1, input.areaCount);
 }
 
 function resolveAreaWidth(input: { areaColumnCount: number; stageWidth: number }): number {
@@ -1967,8 +2258,6 @@ function deduplicateFileReferences(
 }
 
 function buildReferenceLinkPaths(input: {
-  clusters: AnalysisReferenceCluster[];
-  clusterSummaries: AnalysisReferenceClusterSummary[];
   edges: ProjectAnalysisFileReference[];
   nodes: AnalysisReferenceNode[];
   selectedPath: string | null;
@@ -2086,24 +2375,64 @@ function buildCurvedLinkGeometry(input: {
   };
 }
 
-function createViewportToFitGraph(
-  graph: AnalysisReferenceGraph,
-  stageSize: AnalysisStageSize,
-): AnalysisViewport {
-  const bounds = getGraphBounds(graph);
+function createViewportToFitGraph(input: {
+  graph: AnalysisReferenceGraph;
+  stageSize: AnalysisStageSize;
+  viewportFrame: AnalysisRect;
+}): AnalysisViewport {
+  const bounds = getGraphBounds(input.graph);
   const scale = getWorkspaceMapFitScale({
     boundsWidth: bounds.width,
     boundsHeight: bounds.height,
-    stageWidth: stageSize.width,
-    stageHeight: stageSize.height,
+    stageWidth: input.viewportFrame.width,
+    stageHeight: input.viewportFrame.height,
     viewportPreset: REFERENCE_MAP_VIEWPORT_PRESET,
   });
+  const frameCenterX = input.viewportFrame.x + input.viewportFrame.width / 2;
+  const frameCenterY = input.viewportFrame.y + input.viewportFrame.height / 2;
 
   return {
     scale,
-    offsetX: -(bounds.minX + bounds.width / 2) * scale,
-    offsetY: -(bounds.minY + bounds.height / 2) * scale,
+    offsetX:
+      frameCenterX -
+      input.stageSize.width / 2 -
+      (bounds.minX + bounds.width / 2) * scale,
+    offsetY:
+      frameCenterY -
+      input.stageSize.height / 2 -
+      (bounds.minY + bounds.height / 2) * scale,
   };
+}
+
+function createViewportToCenterRect(input: {
+  rect: AnalysisRect;
+  scale: number;
+  stageSize: AnalysisStageSize;
+  viewportFrame: AnalysisRect;
+}): AnalysisViewport {
+  const scale = clamp(
+    input.scale,
+    REFERENCE_MAP_VIEWPORT_PRESET.minScale,
+    REFERENCE_MAP_VIEWPORT_PRESET.maxScale,
+  );
+  const centerX = input.rect.x + input.rect.width / 2;
+  const centerY = input.rect.y + input.rect.height / 2;
+  const frameCenterX = input.viewportFrame.x + input.viewportFrame.width / 2;
+  const frameCenterY = input.viewportFrame.y + input.viewportFrame.height / 2;
+
+  return {
+    scale,
+    offsetX: frameCenterX - input.stageSize.width / 2 - centerX * scale,
+    offsetY: frameCenterY - input.stageSize.height / 2 - centerY * scale,
+  };
+}
+
+function areViewportsClose(left: AnalysisViewport, right: AnalysisViewport): boolean {
+  return (
+    Math.abs(left.scale - right.scale) < 0.001 &&
+    Math.abs(left.offsetX - right.offsetX) < 4 &&
+    Math.abs(left.offsetY - right.offsetY) < 4
+  );
 }
 
 function getGraphBounds(graph: AnalysisReferenceGraph): {
@@ -2158,15 +2487,46 @@ function createStageGridStyle(viewport: AnalysisViewport): Record<string, string
   };
 }
 
-function createReferenceGraphResetKey(analysis: StructuredProjectAnalysis): string {
-  const fileKey = analysis.fileIndex
-    .map((entry) => `${entry.path}:${entry.layer ?? ''}:${entry.category}`)
-    .join('|');
-  const edgeKey = analysis.context.fileReferences
-    .map((edge) => `${edge.from}:${edge.to}:${edge.relationship}`)
-    .join('|');
+function resolveReferenceMapViewportFrame(input: {
+  isInspectorCollapsed: boolean;
+  stageSize: AnalysisStageSize;
+}): AnalysisRect {
+  const stageWidth = Math.max(input.stageSize.width, 1);
+  const stageHeight = Math.max(input.stageSize.height, 1);
 
-  return `${fileKey}#${edgeKey}`;
+  if (input.isInspectorCollapsed) {
+    return {
+      x: 0,
+      y: 0,
+      width: stageWidth,
+      height: stageHeight,
+    };
+  }
+
+  const isMobileStage = stageWidth <= REFERENCE_MAP_MOBILE_BREAKPOINT;
+  const overlayInset = isMobileStage
+    ? REFERENCE_MAP_OVERLAY_INSET_MOBILE
+    : REFERENCE_MAP_OVERLAY_INSET_DESKTOP;
+  const overlayMaxWidth = isMobileStage
+    ? REFERENCE_MAP_OVERLAY_MAX_WIDTH_MOBILE
+    : REFERENCE_MAP_OVERLAY_MAX_WIDTH_DESKTOP;
+  const overlayWidth = Math.min(
+    overlayMaxWidth,
+    Math.max(stageWidth - overlayInset * 2, 0),
+  );
+  const occupiedLeftWidth = Math.min(
+    stageWidth,
+    overlayInset + overlayWidth + REFERENCE_MAP_VIEWPORT_FRAME_GAP,
+  );
+  const frameX = Math.min(occupiedLeftWidth, stageWidth / 2);
+  const frameWidth = Math.max(stageWidth - frameX, stageWidth / 2);
+
+  return {
+    x: frameX,
+    y: 0,
+    width: frameWidth,
+    height: stageHeight,
+  };
 }
 
 function resolveOrderedClusterNames(
@@ -2291,67 +2651,6 @@ function optimizeClusterNodeOrdering(input: {
   return optimizedPaths;
 }
 
-function buildClusterSummaries(input: {
-  clusterNames: string[];
-  edges: ProjectAnalysisFileReference[];
-  entryByPath: Map<string, ProjectAnalysisFileIndexEntry>;
-  groupCategoryByPath: Map<string, string>;
-}): AnalysisReferenceClusterSummary[] {
-  const clusterIndexByName = new Map(input.clusterNames.map((name, index) => [name, index]));
-  const summaries = new Map<string, AnalysisReferenceClusterSummary>();
-
-  for (const edge of input.edges) {
-    const fromCluster = resolveNodeClusterName(input.entryByPath.get(edge.from)?.layer);
-    const toCluster = resolveNodeClusterName(input.entryByPath.get(edge.to)?.layer);
-    const fromCategory = input.groupCategoryByPath.get(edge.from) ?? null;
-    const toCategory = input.groupCategoryByPath.get(edge.to) ?? null;
-
-    if (fromCluster === toCluster && fromCategory === toCategory) {
-      continue;
-    }
-
-    const isInternal = fromCluster === toCluster;
-    const key = isInternal
-      ? `${fromCluster}|${fromCategory ?? 'support'}|${toCategory ?? 'support'}`
-      : `${fromCluster}|${toCluster}`;
-    const currentSummary = summaries.get(key);
-    if (currentSummary) {
-      currentSummary.count += 1;
-      continue;
-    }
-
-    summaries.set(key, {
-      count: 1,
-      fromCategory: isInternal ? fromCategory : null,
-      fromCluster,
-      isInternal,
-      key,
-      toCategory: isInternal ? toCategory : null,
-      toCluster,
-    });
-  }
-
-  return [...summaries.values()].sort((left, right) => {
-    const leftFromIndex = clusterIndexByName.get(left.fromCluster) ?? Number.MAX_SAFE_INTEGER;
-    const rightFromIndex = clusterIndexByName.get(right.fromCluster) ?? Number.MAX_SAFE_INTEGER;
-    if (leftFromIndex !== rightFromIndex) {
-      return leftFromIndex - rightFromIndex;
-    }
-
-    const leftToIndex = clusterIndexByName.get(left.toCluster) ?? Number.MAX_SAFE_INTEGER;
-    const rightToIndex = clusterIndexByName.get(right.toCluster) ?? Number.MAX_SAFE_INTEGER;
-    if (leftToIndex !== rightToIndex) {
-      return leftToIndex - rightToIndex;
-    }
-
-    if (left.isInternal !== right.isInternal) {
-      return left.isInternal ? 1 : -1;
-    }
-
-    return right.count - left.count;
-  });
-}
-
 function buildNeighborPathMap(edges: ProjectAnalysisFileReference[]): Map<string, Set<string>> {
   const neighborPaths = new Map<string, Set<string>>();
 
@@ -2422,14 +2721,24 @@ function resolveNodeClusterName(layerName: string | null | undefined): string {
 }
 
 function resolveClusterAreaName(clusterName: string): string {
-  const [areaName = clusterName] = clusterName.split('/').filter(Boolean);
-  return areaName;
+  const segments = clusterName.split('/').filter(Boolean);
+  const areaSegmentLength = resolveClusterAreaSegmentLength(segments);
+  return segments.slice(0, areaSegmentLength).join('/') || clusterName;
 }
 
 function resolveAreaDisplayName(areaName: string): string {
+  const segments = areaName.split('/').filter(Boolean);
+  if (segments.length > 1) {
+    const [rootAreaName = areaName, ...restSegments] = segments;
+    const rootAreaLabel = resolveAreaDisplayName(rootAreaName);
+    return `${rootAreaLabel} ${restSegments.join('/')}`.trim();
+  }
+
   switch (areaName) {
     case 'api':
       return 'API';
+    case 'apps':
+      return '앱';
     case 'application':
       return '애플리케이션';
     case 'client':
@@ -2444,8 +2753,12 @@ function resolveAreaDisplayName(areaName: string): string {
       return '진입점';
     case 'infrastructure':
       return '인프라';
+    case 'libs':
+      return '라이브러리';
     case 'main':
       return '메인';
+    case 'modules':
+      return '모듈';
     case 'packages':
       return '패키지';
     case 'preload':
@@ -2474,11 +2787,12 @@ function resolveAreaDisplayName(areaName: string): string {
 
 function resolveClusterDisplayName(clusterName: string): string {
   const segments = clusterName.split('/').filter(Boolean);
-  if (segments.length <= 1) {
+  const areaSegmentLength = resolveClusterAreaSegmentLength(segments);
+  if (segments.length <= areaSegmentLength) {
     return resolveAreaDisplayName(clusterName);
   }
 
-  return segments.slice(1).join('/');
+  return segments.slice(areaSegmentLength).join('/');
 }
 
 function getClusterDisplayText(clusterName: string): string {
@@ -2487,6 +2801,22 @@ function getClusterDisplayText(clusterName: string): string {
   const clusterLabel = resolveClusterDisplayName(clusterName);
 
   return clusterLabel === areaLabel ? areaLabel : `${areaLabel} / ${clusterLabel}`;
+}
+
+function resolveClusterAreaSegmentLength(segments: string[]): number {
+  const [rootSegment, packageName] = segments;
+  if (
+    rootSegment &&
+    packageName &&
+    (rootSegment === 'apps' ||
+      rootSegment === 'libs' ||
+      rootSegment === 'modules' ||
+      rootSegment === 'packages')
+  ) {
+    return 2;
+  }
+
+  return 1;
 }
 
 function comparePathsByReferenceScore(input: {
