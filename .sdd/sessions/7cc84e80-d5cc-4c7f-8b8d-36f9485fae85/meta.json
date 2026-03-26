@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "7cc84e80-d5cc-4c7f-8b8d-36f9485fae85",
+  "specId": "spec-02",
+  "title": "새 명세 02 채팅",
+  "createdAt": "2026-03-25T23:48:48.557Z",
+  "updatedAt": "2026-03-25T23:49:05.908Z",
+  "revision": 2,
+  "lastMessageAt": "2026-03-25T23:49:05.908Z",
+  "lastMessagePreview": "명세 상세 페이지 수정 작업이 필요해. 1. 왜 새 명세를 만들면 해당 처음이 v1로 관리가 돼? 아무내용이 없는데? 거기서 내용 변경이 되어야...",
+  "messageCount": 1
+}

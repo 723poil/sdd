@@ -88,6 +88,7 @@ export async function createLocalProjectAnalysisDraft(input: {
       fileReferences: referenceAnalysis.fileReferences,
       layers: referenceAnalysis.layers,
       projectPurpose,
+      referenceAnalysis: referenceAnalysis.referenceAnalysis,
     },
     packageManager: scanState.packageManager,
     projectName: input.projectName,
@@ -119,6 +120,7 @@ export async function createLocalProjectAnalysisDraft(input: {
       fileReferences: referenceAnalysis.fileReferences,
       layers: referenceAnalysis.layers,
       projectPurpose,
+      referenceAnalysis: referenceAnalysis.referenceAnalysis,
     },
     detectedStack: detection.detectedStack,
     documents,
@@ -185,6 +187,7 @@ export function mergeProjectAnalysisWithLocalDraft(input: {
         input.codexDraft.context.unknowns,
         input.localDraft.context.unknowns,
       ),
+      referenceAnalysis: input.localDraft.context.referenceAnalysis,
       directorySummaries:
         input.localDraft.context.directorySummaries.length > 0
           ? input.localDraft.context.directorySummaries
@@ -264,8 +267,13 @@ function createProjectPurpose(detectedFrameworks: string[]): string {
 }
 
 function createArchitectureSummary(referenceAnalysis: LocalProjectReferenceAnalysis): string {
+  const unresolvedCount = referenceAnalysis.referenceAnalysis.unresolvedFileReferences.length;
+  const scanLimitCount = referenceAnalysis.referenceAnalysis.scanLimits.length;
+
   if (referenceAnalysis.layers.length === 0) {
-    return '정적 분석 기준으로는 뚜렷한 계층을 확정하지 못했습니다.';
+    return unresolvedCount > 0 || scanLimitCount > 0
+      ? '정적 분석 기준으로는 뚜렷한 계층을 확정하지 못했고, 미해결 참조와 스캔 한도 도달 정보도 함께 기록했습니다.'
+      : '정적 분석 기준으로는 뚜렷한 계층을 확정하지 못했습니다.';
   }
 
   const layerNames = referenceAnalysis.layers.map((layer) => layer.name).join(', ');
@@ -273,7 +281,7 @@ function createArchitectureSummary(referenceAnalysis: LocalProjectReferenceAnaly
     return `주요 경로는 ${layerNames} 중심으로 나뉘어 있습니다. 파일 간 정적 참조는 감지했지만 레이어 간 연결은 두드러지지 않았습니다.`;
   }
 
-  return `주요 경로는 ${layerNames} 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계를 함께 저장합니다.`;
+  return `주요 경로는 ${layerNames} 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계${unresolvedCount > 0 ? `와 미해결 참조 ${unresolvedCount}건` : ''}${scanLimitCount > 0 ? `, 스캔 한도 도달 정보 ${scanLimitCount}건` : ''}을 함께 저장합니다.`;
 }
 
 function mergeAnalysisDocuments(input: {
@@ -373,6 +381,9 @@ function createPurposeMarkdown(input: {
           ),
           input.referenceAnalysis.fileIndex.length > 0
             ? `대표 파일 인덱스는 ${input.referenceAnalysis.fileIndex.length}개이며, 상위 항목부터 읽으면 구조 이해가 빠릅니다.`
+            : null,
+          input.referenceAnalysis.referenceAnalysis.structureDiscovery.sourceRoots.length > 0
+            ? `발견한 소스 루트: ${formatCodeList(input.referenceAnalysis.referenceAnalysis.structureDiscovery.sourceRoots.map((sourceRoot) => sourceRoot.path).slice(0, 4))}`
             : null,
         ]),
         '구조상 눈에 띄는 작업 축을 아직 정리하지 못했습니다.',
@@ -550,6 +561,12 @@ function createConnectivityMarkdown(input: {
             : null,
           input.referenceAnalysis.fileReferences.length > 0
             ? `전체 파일 참조는 ${input.referenceAnalysis.fileReferences.length}건이며, 자세한 관계는 파일 인덱스와 참조 맵에서 확인할 수 있습니다.`
+            : null,
+          input.referenceAnalysis.referenceAnalysis.unresolvedFileReferences.length > 0
+            ? `미해결 참조 ${input.referenceAnalysis.referenceAnalysis.unresolvedFileReferences.length}건을 함께 저장해 해석 실패를 숨기지 않습니다.`
+            : null,
+          input.referenceAnalysis.referenceAnalysis.scanLimits.length > 0
+            ? `스캔 한도 도달 정보 ${input.referenceAnalysis.referenceAnalysis.scanLimits.length}건을 함께 저장했습니다.`
             : null,
         ]),
         '추가로 볼 파일 인덱스 해석 팁이 없습니다.',

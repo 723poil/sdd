@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "bf3c8588-d1e3-4eff-9277-0042582c859d",
+  "specId": "spec-01",
+  "title": "새 명세 01 채팅",
+  "createdAt": "2026-03-25T23:20:32.782Z",
+  "updatedAt": "2026-03-25T23:20:32.782Z",
+  "revision": 1,
+  "lastMessageAt": null,
+  "lastMessagePreview": null,
+  "messageCount": 0
+}

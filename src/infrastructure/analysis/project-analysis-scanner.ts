@@ -28,6 +28,7 @@ export interface ProjectAnalysisScanState {
   modules: Set<string>;
   packageJson: PackageJsonShape | null;
   packageManager: string | null;
+  reachedDepthLimit: boolean;
   reachedDirectoryLimit: boolean;
   reachedFileLimit: boolean;
 }
@@ -42,6 +43,7 @@ export function createEmptyProjectAnalysisScanState(): ProjectAnalysisScanState 
     modules: new Set<string>(),
     packageJson: null,
     packageManager: null,
+    reachedDepthLimit: false,
     reachedDirectoryLimit: false,
     reachedFileLimit: false,
   };
@@ -54,6 +56,7 @@ export async function scanProjectAnalysis(input: {
   scanState: ProjectAnalysisScanState;
 }): Promise<void> {
   if (input.depth > MAX_SCAN_DEPTH) {
+    input.scanState.reachedDepthLimit = true;
     return;
   }
 

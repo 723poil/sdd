@@ -1,6 +1,7 @@
 import {
+  createEmptyProjectAnalysisReferenceAnalysis,
   createProjectAnalysisDocument,
-  isProjectAnalysisFileIndexDocument,
+  normalizeProjectAnalysisFileIndexDocument,
   normalizeProjectAnalysisContext,
   orderProjectAnalysisDocuments,
   PROJECT_ANALYSIS_DOCUMENT_IDS,
@@ -182,6 +183,7 @@ export function createInitialProjectStorageDocuments(input: {
       connections: [],
       documentLinks: [],
       fileReferences: [],
+      referenceAnalysis: createEmptyProjectAnalysisReferenceAnalysis(),
     },
     analysisFileIndex: {
       schemaVersion: ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
@@ -233,7 +235,10 @@ async function readProjectAnalysisFileIndexDocument(input: {
     return err(fileIndexResult.error);
   }
 
-  if (!isProjectAnalysisFileIndexDocument(fileIndexResult.value)) {
+  const normalizedFileIndexDocument = normalizeProjectAnalysisFileIndexDocument(
+    fileIndexResult.value,
+  );
+  if (!normalizedFileIndexDocument) {
     return err(
       createProjectError(
         'INVALID_PROJECT_STORAGE',
@@ -244,10 +249,11 @@ async function readProjectAnalysisFileIndexDocument(input: {
   }
 
   return ok({
-    ...fileIndexResult.value,
-    entries: fileIndexResult.value.entries.map((entry) => ({
+    ...normalizedFileIndexDocument,
+    entries: normalizedFileIndexDocument.entries.map((entry) => ({
       ...entry,
       references: entry.references ?? [],
+      unresolvedReferences: entry.unresolvedReferences ?? [],
     })),
   });
 }

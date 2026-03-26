@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "fdc850f5-1d2d-4fd3-adbc-403bb0a3a6fc",
+  "specId": "spec-01",
+  "title": "새 명세 01 채팅",
+  "createdAt": "2026-03-25T23:20:32.868Z",
+  "updatedAt": "2026-03-25T23:32:59.309Z",
+  "revision": 3,
+  "lastMessageAt": "2026-03-25T23:32:59.309Z",
+  "lastMessagePreview": "현재 범위는 `Fits current MVP`로 잡는 것이 맞습니다. 초안은 고정 규칙 중심 참조 분석을 `구조 발견 + 언어별 전략 + 미해결...",
+  "messageCount": 2
+}

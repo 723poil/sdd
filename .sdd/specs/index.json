@@ -1,5 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-03-25T23:18:51.233Z",
-  "specs": []
+  "generatedAt": "2026-03-26T00:17:41.350Z",
+  "specs": [
+    {
+      "id": "spec-02",
+      "slug": "spec-02",
+      "title": "새 명세 02",
+      "status": "draft",
+      "latestVersion": "v1",
+      "updatedAt": "2026-03-25T23:47:11.961Z",
+      "summary": "채팅으로 작성 중인 초안입니다."
+    },
+    {
+      "id": "spec-01",
+      "slug": "spec-01",
+      "title": "프로젝트 구조 발견형 참조 분석기 고도화",
+      "status": "draft",
+      "latestVersion": "v2",
+      "updatedAt": "2026-03-25T23:32:59.304Z",
+      "summary": "고정 패턴 중심의 참조 분석을 구조 발견형 분석기로 개선한다. 현재 지원 언어의 reference coverage와 file index 분류 유연성을 함께 높이는 명세다."
+    }
+  ]
 }

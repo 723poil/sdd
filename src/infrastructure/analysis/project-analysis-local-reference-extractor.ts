@@ -6,10 +6,16 @@ import ts from 'typescript';
 import type {
   ProjectAnalysisConnection,
   ProjectAnalysisDirectorySummary,
+  ProjectAnalysisFileClassification,
+  ProjectAnalysisFileGrouping,
   ProjectAnalysisFileIndexEntry,
   ProjectAnalysisFileReference,
   ProjectAnalysisFileReferenceTarget,
   ProjectAnalysisLayerSummary,
+  ProjectAnalysisReferenceAnalysis,
+  ProjectAnalysisStructureDiscovery,
+  ProjectAnalysisUnresolvedFileReference,
+  ProjectAnalysisUnresolvedFileReferenceTarget,
 } from '@/domain/project/project-analysis-model';
 
 import {
@@ -27,7 +33,18 @@ import {
   type PathAliasConfig,
   type ProjectPathAliasResolver,
 } from '@/infrastructure/analysis/project-analysis-path-alias-resolver';
+import {
+  MAX_DIRECTORY_COUNT,
+  MAX_FILE_COUNT,
+  MAX_SCAN_DEPTH,
+} from '@/infrastructure/analysis/project-analysis.constants';
 import type { ProjectAnalysisScanState } from '@/infrastructure/analysis/project-analysis-scanner';
+import {
+  discoverProjectAnalysisStructure,
+  resolveDiscoveredFeatureClusterPath,
+  resolveDiscoveredWorkspacePackageCandidates,
+  resolveNearestDiscoveredSourceRoot,
+} from '@/infrastructure/analysis/project-analysis-structure-discovery';
 import { parseVueSingleFileComponent } from '@/infrastructure/analysis/project-analysis-vue-sfc';
 
 const SUPPORTED_SOURCE_EXTENSIONS = new Map<string, SupportedSourceLanguage>([
@@ -304,6 +321,31 @@ interface ExtractedReference {
   to: string;
 }
 
+interface UnresolvedExtractedReference extends ProjectAnalysisUnresolvedFileReference {
+  relationship: ExtractedReferenceRelationship;
+}
+
+interface ExtractedStructuralHint {
+  confidence: number;
+  kind: string;
+  reason: string;
+  value: string;
+}
+
+interface ReferenceResolution {
+  candidatePaths: string[];
+  reason: string;
+  resolutionKind: string;
+  resolvedPath: string | null;
+}
+
+interface ReferenceExtractionResult {
+  path: string;
+  resolvedReferences: ExtractedReference[];
+  structuralHints: ExtractedStructuralHint[];
+  unresolvedReferences: UnresolvedExtractedReference[];
+}
+
 interface LayerConnectionAccumulator {
   count: number;
   from: string;
@@ -313,6 +355,8 @@ interface LayerConnectionAccumulator {
 
 interface FileClassification {
   category: string;
+  classification: ProjectAnalysisFileClassification;
+  grouping: ProjectAnalysisFileGrouping;
   layer: string | null;
   role: string;
 }
@@ -323,6 +367,7 @@ export interface LocalProjectReferenceAnalysis {
   fileIndex: ProjectAnalysisFileIndexEntry[];
   fileReferences: ProjectAnalysisFileReference[];
   layers: ProjectAnalysisLayerSummary[];
+  referenceAnalysis: ProjectAnalysisReferenceAnalysis;
 }
 
 export async function analyzeLocalProjectReferences(input: {
@@ -340,26 +385,55 @@ export async function analyzeLocalProjectReferences(input: {
     allFilePaths,
     rootPath: input.rootPath,
   });
+  const structureDiscovery = await discoverProjectAnalysisStructure({
+    rootPath: input.rootPath,
+    scanState: input.scanState,
+    sourceFiles: sourceFiles.map((file) => ({
+      content: file.content,
+      path: file.path,
+    })),
+  });
 
   const packageSymbolIndex = buildPackageSymbolIndex(sourceFiles);
+  const knownPackageNames = new Set(
+    sourceFiles
+      .map((file) => file.packageName)
+      .filter((packageName): packageName is string => Boolean(packageName)),
+  );
   const namespaceSymbolIndex = buildNamespaceSymbolIndex(sourceFiles);
+  const knownNamespaces = new Set(
+    sourceFiles
+      .map((file) => file.namespaceName)
+      .filter((namespaceName): namespaceName is string => Boolean(namespaceName)),
+  );
+  const extractionResults = sourceFiles.map((file) =>
+    extractReferencesForFile({
+      allFilePaths,
+      caseInsensitiveFilePathIndex,
+      file,
+      knownNamespaces,
+      knownPackageNames,
+      namespaceSymbolIndex,
+      pathAliasResolver,
+      packageSymbolIndex,
+      structureDiscovery,
+    }),
+  );
+  const structuralHintsByPath = buildStructuralHintsByPath(extractionResults);
+  const unresolvedFileReferences = deduplicateUnresolvedFileReferences(
+    extractionResults.flatMap((result) => result.unresolvedReferences),
+  );
   const fileReferences = deduplicateFileReferences(
-    sourceFiles.flatMap((file) =>
-      extractReferencesForFile({
-        allFilePaths,
-        caseInsensitiveFilePathIndex,
-        file,
-        namespaceSymbolIndex,
-        pathAliasResolver,
-        packageSymbolIndex,
-      }),
-    ),
+    extractionResults.flatMap((result) => result.resolvedReferences),
   );
   const fileIndex = buildFileIndex({
+    structureDiscovery,
     fileReferences,
     keyConfigs: input.scanState.keyConfigs,
     loadedFiles: sourceFiles,
     scanState: input.scanState,
+    structuralHintsByPath,
+    unresolvedFileReferences,
   });
   const layers = buildLayerSummaries({
     fileIndex,
@@ -368,6 +442,7 @@ export async function analyzeLocalProjectReferences(input: {
   const directorySummaries = buildDirectorySummaries({
     fileIndex,
     scanState: input.scanState,
+    structureDiscovery,
   });
   const connections = buildConnections({
     fileReferences,
@@ -380,7 +455,114 @@ export async function analyzeLocalProjectReferences(input: {
     fileIndex,
     fileReferences,
     layers,
+    referenceAnalysis: {
+      scanLimits: buildReferenceScanLimits(input.scanState),
+      structureDiscovery,
+      unresolvedFileReferences,
+    },
   };
+}
+
+function buildStructuralHintsByPath(
+  extractionResults: ReferenceExtractionResult[],
+): Map<string, ExtractedStructuralHint[]> {
+  const hintsByPath = new Map<string, ExtractedStructuralHint[]>();
+
+  for (const extractionResult of extractionResults) {
+    hintsByPath.set(extractionResult.path, extractionResult.structuralHints);
+  }
+
+  return hintsByPath;
+}
+
+function createStructuralHintsForFile(file: LoadedSourceFile): ExtractedStructuralHint[] {
+  const hints: ExtractedStructuralHint[] = [];
+
+  if (file.packageName) {
+    hints.push({
+      confidence: 0.82,
+      kind: 'package',
+      reason: `package 선언 ${file.packageName} 을 확인했습니다.`,
+      value: file.packageName,
+    });
+  }
+
+  if (file.namespaceName) {
+    hints.push({
+      confidence: 0.8,
+      kind: 'namespace',
+      reason: `namespace 선언 ${file.namespaceName} 을 확인했습니다.`,
+      value: file.namespaceName,
+    });
+  }
+
+  if (file.additionalReferences.length > 0) {
+    hints.push({
+      confidence: 0.68,
+      kind: 'template-reference',
+      reason: `추가 참조 ${file.additionalReferences.length}건을 템플릿/부가 문맥에서 추출했습니다.`,
+      value: String(file.additionalReferences.length),
+    });
+  }
+
+  if (file.declarations.length > 1) {
+    hints.push({
+      confidence: 0.64,
+      kind: 'declarations',
+      reason: `상위 선언 ${file.declarations.length}개를 찾았습니다.`,
+      value: file.declarations.join(', '),
+    });
+  }
+
+  return hints;
+}
+
+function deduplicateUnresolvedFileReferences(
+  references: UnresolvedExtractedReference[],
+): ProjectAnalysisUnresolvedFileReference[] {
+  const deduplicated = new Map<string, ProjectAnalysisUnresolvedFileReference>();
+
+  for (const reference of references) {
+    const key = `${reference.from}|${reference.relationship}|${reference.resolutionKind}|${reference.specifier}`;
+    const existing = deduplicated.get(key);
+    if (existing && existing.confidence >= reference.confidence) {
+      continue;
+    }
+
+    deduplicated.set(key, {
+      ...reference,
+      candidatePaths: reference.candidatePaths.slice(0, 8),
+    });
+  }
+
+  return [...deduplicated.values()];
+}
+
+function buildReferenceScanLimits(
+  scanState: ProjectAnalysisScanState,
+): ProjectAnalysisReferenceAnalysis['scanLimits'] {
+  return (
+    [
+      {
+        kind: 'depth',
+        limit: MAX_SCAN_DEPTH,
+        message: '최대 디렉터리 깊이에 도달했습니다.',
+        reached: scanState.reachedDepthLimit,
+      },
+      {
+        kind: 'directory',
+        limit: MAX_DIRECTORY_COUNT,
+        message: '최대 디렉터리 수에 도달했습니다.',
+        reached: scanState.reachedDirectoryLimit,
+      },
+      {
+        kind: 'file',
+        limit: MAX_FILE_COUNT,
+        message: '최대 파일 수에 도달했습니다.',
+        reached: scanState.reachedFileLimit,
+      },
+    ] satisfies ProjectAnalysisReferenceAnalysis['scanLimits']
+  ).filter((scanLimit) => scanLimit.reached);
 }
 
 async function loadSourceFiles(input: {
@@ -491,10 +673,13 @@ function extractReferencesForFile(input: {
   allFilePaths: Set<string>;
   caseInsensitiveFilePathIndex: Map<string, string>;
   file: LoadedSourceFile;
+  knownNamespaces: Set<string>;
+  knownPackageNames: Set<string>;
   namespaceSymbolIndex: Map<string, string>;
   pathAliasResolver: ProjectPathAliasResolver;
   packageSymbolIndex: Map<string, string>;
-}): ExtractedReference[] {
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
+}): ReferenceExtractionResult {
   switch (input.file.language) {
     case 'typescript':
     case 'javascript':
@@ -504,15 +689,18 @@ function extractReferencesForFile(input: {
         allFilePaths: input.allFilePaths,
         file: input.file,
         pathAliasResolver: input.pathAliasResolver,
+        structureDiscovery: input.structureDiscovery,
       });
     case 'java':
       return extractPackageManagedReferences({
         file: input.file,
+        knownPackageNames: input.knownPackageNames,
         packageSymbolIndex: input.packageSymbolIndex,
       });
     case 'kotlin':
       return extractPackageManagedReferences({
         file: input.file,
+        knownPackageNames: input.knownPackageNames,
         packageSymbolIndex: input.packageSymbolIndex,
       });
     case 'php':
@@ -520,6 +708,7 @@ function extractReferencesForFile(input: {
         allFilePaths: input.allFilePaths,
         caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
         file: input.file,
+        knownNamespaces: input.knownNamespaces,
         namespaceSymbolIndex: input.namespaceSymbolIndex,
       });
   }
@@ -529,8 +718,10 @@ function extractJavaScriptLikeReferences(input: {
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
   pathAliasResolver: ProjectPathAliasResolver;
-}): ExtractedReference[] {
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
+}): ReferenceExtractionResult {
   const references: ExtractedReference[] = [];
+  const unresolvedReferences: UnresolvedExtractedReference[] = [];
   const importedSymbolTargets = new Map<string, string>();
   const sourceFile = ts.createSourceFile(
     input.file.path,
@@ -546,42 +737,50 @@ function extractJavaScriptLikeReferences(input: {
       node.moduleSpecifier &&
       ts.isStringLiteralLike(node.moduleSpecifier)
     ) {
-      const resolvedPath = resolveJavaScriptReferencePath({
+      const resolution = resolveJavaScriptReferenceTarget({
         allFilePaths: input.allFilePaths,
         file: input.file,
         pathAliasResolver: input.pathAliasResolver,
         specifier: node.moduleSpecifier.text,
+        structureDiscovery: input.structureDiscovery,
       });
-      pushResolvedReference({
+      pushReferenceResolution({
         file: input.file,
         references,
+        resolution,
         relationship: 'imports',
-        resolvedPath,
         specifier: node.moduleSpecifier.text,
+        unresolvedReferences,
       });
       if (ts.isImportDeclaration(node)) {
-        indexJavaScriptImportBindings(node.importClause, resolvedPath, importedSymbolTargets);
+        indexJavaScriptImportBindings(
+          node.importClause,
+          resolution.resolvedPath,
+          importedSymbolTargets,
+        );
       }
     }
 
     if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
       const expression = node.moduleReference.expression;
       if (expression && ts.isStringLiteralLike(expression)) {
-        const resolvedPath = resolveJavaScriptReferencePath({
+        const resolution = resolveJavaScriptReferenceTarget({
           allFilePaths: input.allFilePaths,
           file: input.file,
           pathAliasResolver: input.pathAliasResolver,
           specifier: expression.text,
+          structureDiscovery: input.structureDiscovery,
         });
-        pushResolvedReference({
+        pushReferenceResolution({
           file: input.file,
           references,
+          resolution,
           relationship: 'requires',
-          resolvedPath,
           specifier: expression.text,
+          unresolvedReferences,
         });
-        if (resolvedPath && resolvedPath !== input.file.path) {
-          importedSymbolTargets.set(node.name.text, resolvedPath);
+        if (resolution.resolvedPath && resolution.resolvedPath !== input.file.path) {
+          importedSymbolTargets.set(node.name.text, resolution.resolvedPath);
         }
       }
     }
@@ -601,6 +800,8 @@ function extractJavaScriptLikeReferences(input: {
           references,
           relationship: 'requires',
           specifier: firstArgument.text,
+          structureDiscovery: input.structureDiscovery,
+          unresolvedReferences,
         });
       }
 
@@ -612,6 +813,8 @@ function extractJavaScriptLikeReferences(input: {
           references,
           relationship: 'dynamic-import',
           specifier: firstArgument.text,
+          structureDiscovery: input.structureDiscovery,
+          unresolvedReferences,
         });
       }
     }
@@ -626,6 +829,8 @@ function extractJavaScriptLikeReferences(input: {
           references,
           relationship: 'imports',
           specifier: literal.text,
+          structureDiscovery: input.structureDiscovery,
+          unresolvedReferences,
         });
       }
     }
@@ -658,21 +863,30 @@ function extractJavaScriptLikeReferences(input: {
       references,
       relationship: additionalReference.relationship,
       specifier: additionalReference.specifier,
+      structureDiscovery: input.structureDiscovery,
+      unresolvedReferences,
     });
   }
 
-  return references;
+  return {
+    path: input.file.path,
+    resolvedReferences: references,
+    structuralHints: createStructuralHintsForFile(input.file),
+    unresolvedReferences,
+  };
 }
 
 function extractVueReferences(input: {
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
   pathAliasResolver: ProjectPathAliasResolver;
-}): ExtractedReference[] {
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
+}): ReferenceExtractionResult {
   return extractJavaScriptLikeReferences({
     allFilePaths: input.allFilePaths,
     file: input.file,
     pathAliasResolver: input.pathAliasResolver,
+    structureDiscovery: input.structureDiscovery,
   });
 }
 
@@ -868,33 +1082,152 @@ function pushJavaScriptReference(input: {
   references: ExtractedReference[];
   relationship: ExtractedReferenceRelationship;
   specifier: string;
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
+  unresolvedReferences: UnresolvedExtractedReference[];
 }): void {
-  const resolvedPath = resolveJavaScriptReferencePath({
+  const resolution = resolveJavaScriptReferenceTarget({
     allFilePaths: input.allFilePaths,
     file: input.file,
     pathAliasResolver: input.pathAliasResolver,
     specifier: input.specifier,
+    structureDiscovery: input.structureDiscovery,
   });
 
-  pushResolvedReference({
+  pushReferenceResolution({
     file: input.file,
     references: input.references,
+    resolution,
     relationship: input.relationship,
-    resolvedPath,
     specifier: input.specifier,
+    unresolvedReferences: input.unresolvedReferences,
   });
 }
 
-function resolveJavaScriptReferencePath(input: {
+function resolveJavaScriptReferenceTarget(input: {
   allFilePaths: Set<string>;
   file: LoadedSourceFile;
   pathAliasResolver: ProjectPathAliasResolver;
   specifier: string;
-}): string | null {
-  return resolveModuleSpecifier({
-    aliasConfig: input.pathAliasResolver.getAliasConfigForFile(input.file.path),
-    allFilePaths: input.allFilePaths,
-    fromPath: input.file.path,
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
+}): ReferenceResolution {
+  const aliasConfig = input.pathAliasResolver.getAliasConfigForFile(input.file.path);
+  const workspacePackageCandidates = resolveDiscoveredWorkspacePackageCandidates({
+    discovery: input.structureDiscovery,
+    specifier: input.specifier,
+  });
+
+  if (input.specifier.startsWith('.')) {
+    const basePath = normalizeRelativePath(join(dirname(input.file.path), input.specifier));
+    const candidatePaths = createResolutionCandidates(basePath);
+
+    return {
+      candidatePaths,
+      reason: `상대 경로 ${input.specifier} 를 해석하지 못했습니다.`,
+      resolutionKind: 'relative-path',
+      resolvedPath: resolveProjectFilePathFromCandidates({
+        allFilePaths: input.allFilePaths,
+        candidatePaths,
+      }),
+    };
+  }
+
+  const aliasCandidates = resolveAliasCandidates(aliasConfig, input.specifier);
+  if (aliasCandidates.length > 0) {
+    return {
+      candidatePaths: aliasCandidates,
+      reason: `alias 규칙은 맞았지만 ${input.specifier} 대상 파일을 찾지 못했습니다.`,
+      resolutionKind: 'alias',
+      resolvedPath: resolveProjectFilePathFromBasePaths({
+        allFilePaths: input.allFilePaths,
+        basePaths: aliasCandidates,
+      }),
+    };
+  }
+
+  if (workspacePackageCandidates.length > 0) {
+    return {
+      candidatePaths: workspacePackageCandidates,
+      reason: `발견된 package root 안에서 ${input.specifier} workspace 경로를 찾지 못했습니다.`,
+      resolutionKind: 'workspace-package',
+      resolvedPath: resolveProjectFilePathFromBasePaths({
+        allFilePaths: input.allFilePaths,
+        basePaths: workspacePackageCandidates,
+      }),
+    };
+  }
+
+  if (input.specifier.startsWith('/')) {
+    const candidatePaths = createResolutionCandidates(
+      normalizeRelativePath(input.specifier.slice(1)),
+    );
+
+    return {
+      candidatePaths,
+      reason: `루트 기준 경로 ${input.specifier} 를 해석하지 못했습니다.`,
+      resolutionKind: 'absolute-path',
+      resolvedPath: resolveProjectFilePathFromCandidates({
+        allFilePaths: input.allFilePaths,
+        candidatePaths,
+      }),
+    };
+  }
+
+  if (input.specifier.startsWith('src/')) {
+    const candidatePaths = createResolutionCandidates(normalizeRelativePath(input.specifier));
+
+    return {
+      candidatePaths,
+      reason: `source root 기준 경로 ${input.specifier} 를 해석하지 못했습니다.`,
+      resolutionKind: 'source-root',
+      resolvedPath: resolveProjectFilePathFromCandidates({
+        allFilePaths: input.allFilePaths,
+        candidatePaths,
+      }),
+    };
+  }
+
+  return {
+    candidatePaths: [],
+    reason: '',
+    resolutionKind: 'external-package',
+    resolvedPath: null,
+  };
+}
+
+function pushReferenceResolution(input: {
+  file: LoadedSourceFile;
+  references: ExtractedReference[];
+  resolution: ReferenceResolution;
+  relationship: ExtractedReferenceRelationship;
+  specifier: string;
+  unresolvedReferences: UnresolvedExtractedReference[];
+}): void {
+  if (input.resolution.resolvedPath) {
+    pushResolvedReference({
+      file: input.file,
+      references: input.references,
+      relationship: input.relationship,
+      resolvedPath: input.resolution.resolvedPath,
+      specifier: input.specifier,
+    });
+    return;
+  }
+
+  if (
+    input.resolution.resolutionKind === 'external-package' ||
+    input.resolution.reason.trim().length === 0
+  ) {
+    return;
+  }
+
+  input.unresolvedReferences.push({
+    candidatePaths: input.resolution.candidatePaths.slice(0, 8),
+    confidence: resolveUnresolvedReferenceConfidence(input.resolution.resolutionKind),
+    from: input.file.path,
+    language: input.file.language,
+    reason: input.resolution.reason,
+    relationship: input.relationship,
+    resolutionKind: input.resolution.resolutionKind,
     specifier: input.specifier,
   });
 }
@@ -1037,9 +1370,11 @@ function getTrimmedNodeText(node: ts.Node, sourceFile: ts.SourceFile): string {
 
 function extractPackageManagedReferences(input: {
   file: LoadedSourceFile;
+  knownPackageNames: Set<string>;
   packageSymbolIndex: Map<string, string>;
-}): ExtractedReference[] {
+}): ReferenceExtractionResult {
   const references: ExtractedReference[] = [];
+  const unresolvedReferences: UnresolvedExtractedReference[] = [];
   const importRegex =
     input.file.language === 'java'
       ? /^\s*import\s+(?:static\s+)?([\w.]+)\s*;/gmu
@@ -1056,6 +1391,20 @@ function extractPackageManagedReferences(input: {
       qualifiedName,
     });
     if (!resolvedPath || resolvedPath === input.file.path) {
+      const packageName = qualifiedName.split('.').slice(0, -1).join('.');
+      const canResolvePackage = packageName.length > 0 && input.knownPackageNames.has(packageName);
+      unresolvedReferences.push({
+        candidatePaths: [],
+        confidence: canResolvePackage ? 0.62 : 0.48,
+        from: input.file.path,
+        language: input.file.language,
+        reason: canResolvePackage
+          ? `패키지는 확인했지만 ${qualifiedName} 심볼을 찾지 못했습니다.`
+          : `패키지 루트를 확인하지 못해 ${qualifiedName} import 를 파일로 연결하지 못했습니다.`,
+        relationship: 'imports',
+        resolutionKind: canResolvePackage ? 'package-symbol' : 'package-root',
+        specifier: qualifiedName,
+      });
       continue;
     }
 
@@ -1067,16 +1416,23 @@ function extractPackageManagedReferences(input: {
     });
   }
 
-  return references;
+  return {
+    path: input.file.path,
+    resolvedReferences: references,
+    structuralHints: createStructuralHintsForFile(input.file),
+    unresolvedReferences,
+  };
 }
 
 function extractPhpReferences(input: {
   allFilePaths: Set<string>;
   caseInsensitiveFilePathIndex: Map<string, string>;
   file: LoadedSourceFile;
+  knownNamespaces: Set<string>;
   namespaceSymbolIndex: Map<string, string>;
-}): ExtractedReference[] {
+}): ReferenceExtractionResult {
   const references: ExtractedReference[] = [];
+  const unresolvedReferences: UnresolvedExtractedReference[] = [];
   const phpUseImports = extractPhpUseImports(input.file.content);
   const phpImportAliases = buildPhpImportAliasMap(phpUseImports);
 
@@ -1086,6 +1442,22 @@ function extractPhpReferences(input: {
       qualifiedName: importPath,
     });
     if (!resolvedPath || resolvedPath === input.file.path) {
+      const hasKnownNamespace = hasKnownNamespacePrefix({
+        knownNamespaces: input.knownNamespaces,
+        qualifiedName: importPath,
+      });
+      unresolvedReferences.push({
+        candidatePaths: [],
+        confidence: hasKnownNamespace ? 0.58 : 0.46,
+        from: input.file.path,
+        language: input.file.language,
+        reason: hasKnownNamespace
+          ? `네임스페이스는 확인했지만 ${importPath} 심볼 해석에 실패했습니다.`
+          : `네임스페이스 루트를 찾지 못해 ${importPath} use 구문을 해석하지 못했습니다.`,
+        relationship: 'uses',
+        resolutionKind: hasKnownNamespace ? 'namespace-symbol' : 'namespace-root',
+        specifier: importPath,
+      });
       continue;
     }
 
@@ -1098,13 +1470,23 @@ function extractPhpReferences(input: {
   }
 
   for (const includeReference of extractPhpIncludeReferences(input.file.content)) {
-    const resolvedPath = resolvePhpIncludeReference({
+    const resolution = resolvePhpIncludeReference({
       allFilePaths: input.allFilePaths,
       caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
       fromPath: input.file.path,
       includeReference,
     });
-    if (!resolvedPath || resolvedPath === input.file.path) {
+    if (!resolution.resolvedPath || resolution.resolvedPath === input.file.path) {
+      unresolvedReferences.push({
+        candidatePaths: resolution.candidatePaths,
+        confidence: 0.62,
+        from: input.file.path,
+        language: input.file.language,
+        reason: resolution.reason,
+        relationship: 'includes',
+        resolutionKind: resolution.resolutionKind,
+        specifier: includeReference.rawSpecifier,
+      });
       continue;
     }
 
@@ -1112,17 +1494,27 @@ function extractPhpReferences(input: {
       from: input.file.path,
       relationship: 'includes',
       specifier: includeReference.rawSpecifier,
-      to: resolvedPath,
+      to: resolution.resolvedPath,
     });
   }
 
   for (const loaderReference of extractPhpFrameworkLoadReferences(input.file.content)) {
-    const resolvedPath = resolvePhpFrameworkLoadReference({
+    const resolution = resolvePhpFrameworkLoadReference({
       allFilePaths: input.allFilePaths,
       caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
       loaderReference,
     });
-    if (!resolvedPath || resolvedPath === input.file.path) {
+    if (!resolution.resolvedPath || resolution.resolvedPath === input.file.path) {
+      unresolvedReferences.push({
+        candidatePaths: resolution.candidatePaths,
+        confidence: 0.56,
+        from: input.file.path,
+        language: input.file.language,
+        reason: resolution.reason,
+        relationship: 'loads',
+        resolutionKind: resolution.resolutionKind,
+        specifier: `${loaderReference.kind}:${loaderReference.path}`,
+      });
       continue;
     }
 
@@ -1130,7 +1522,7 @@ function extractPhpReferences(input: {
       from: input.file.path,
       relationship: 'loads',
       specifier: `${loaderReference.kind}:${loaderReference.path}`,
-      to: resolvedPath,
+      to: resolution.resolvedPath,
     });
   }
 
@@ -1142,6 +1534,7 @@ function extractPhpReferences(input: {
       references,
       relationship: structuralTypeReference.relationship,
       typeCandidate: structuralTypeReference.specifier,
+      unresolvedReferences,
     });
   }
 
@@ -1154,21 +1547,34 @@ function extractPhpReferences(input: {
         references,
         relationship: 'phpdoc',
         typeCandidate: phpDocTypeCandidate,
+        unresolvedReferences,
       });
     }
   }
 
-  return references;
+  return {
+    path: input.file.path,
+    resolvedReferences: references,
+    structuralHints: createStructuralHintsForFile(input.file),
+    unresolvedReferences,
+  };
 }
 
 function buildFileIndex(input: {
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
   fileReferences: ProjectAnalysisFileReference[];
   keyConfigs: Set<string>;
   loadedFiles: LoadedSourceFile[];
   scanState: ProjectAnalysisScanState;
+  structuralHintsByPath: Map<string, ExtractedStructuralHint[]>;
+  unresolvedFileReferences: ProjectAnalysisUnresolvedFileReference[];
 }): ProjectAnalysisFileIndexEntry[] {
   const outgoingReferencesByPath = new Map<string, ProjectAnalysisFileReferenceTarget[]>();
   const incomingCountByPath = new Map<string, number>();
+  const unresolvedReferencesByPath = new Map<
+    string,
+    ProjectAnalysisUnresolvedFileReferenceTarget[]
+  >();
   const loadedFileByPath = new Map(input.loadedFiles.map((file) => [file.path, file] as const));
   const candidatePaths = new Set<string>(input.loadedFiles.map((file) => file.path));
 
@@ -1186,6 +1592,22 @@ function buildFileIndex(input: {
     outgoingReferencesByPath.set(reference.from, currentTargets);
   }
 
+  for (const unresolvedReference of input.unresolvedFileReferences) {
+    candidatePaths.add(unresolvedReference.from);
+
+    const currentTargets = unresolvedReferencesByPath.get(unresolvedReference.from) ?? [];
+    currentTargets.push({
+      candidatePaths: unresolvedReference.candidatePaths,
+      confidence: unresolvedReference.confidence,
+      language: unresolvedReference.language,
+      reason: unresolvedReference.reason,
+      relationship: unresolvedReference.relationship,
+      resolutionKind: unresolvedReference.resolutionKind,
+      specifier: unresolvedReference.specifier,
+    });
+    unresolvedReferencesByPath.set(unresolvedReference.from, currentTargets);
+  }
+
   for (const entrypoint of input.scanState.entrypoints) {
     candidatePaths.add(normalizeRelativePath(entrypoint));
   }
@@ -1198,8 +1620,11 @@ function buildFileIndex(input: {
     .map((path) => {
       const loadedFile = loadedFileByPath.get(path);
       const references = outgoingReferencesByPath.get(path) ?? [];
+      const unresolvedReferences = unresolvedReferencesByPath.get(path) ?? [];
       const incomingCount = incomingCountByPath.get(path) ?? 0;
       const classification = classifyFile({
+        discoveredHints: input.structuralHintsByPath.get(path) ?? [],
+        discovery: input.structureDiscovery,
         keyConfigs: input.keyConfigs,
         language: loadedFile?.language ?? null,
         scanState: input.scanState,
@@ -1210,6 +1635,8 @@ function buildFileIndex(input: {
 
       return {
         category,
+        classification: classification.classification,
+        grouping: classification.grouping,
         layer,
         path,
         references,
@@ -1221,6 +1648,7 @@ function buildFileIndex(input: {
           outgoingCount: references.length,
           role: classification.role,
         }),
+        unresolvedReferences,
       } satisfies ProjectAnalysisFileIndexEntry;
     })
     .sort((left, right) => compareFileIndexEntries(left, right, incomingCountByPath));
@@ -1393,23 +1821,36 @@ function buildLayerSummaries(input: {
 function buildDirectorySummaries(input: {
   fileIndex: ProjectAnalysisFileIndexEntry[];
   scanState: ProjectAnalysisScanState;
+  structureDiscovery: ProjectAnalysisStructureDiscovery;
 }): ProjectAnalysisDirectorySummary[] {
+  const discoveredPaths = new Set<string>([
+    ...input.structureDiscovery.packageRoots.map((packageRoot) => packageRoot.path),
+    ...input.structureDiscovery.sourceRoots.map((sourceRoot) => sourceRoot.path),
+    ...input.structureDiscovery.featureClusters.map((featureCluster) => featureCluster.path),
+  ]);
   const modulePaths = [...input.scanState.modules].map((path) => normalizeRelativePath(path));
   const directoryPaths =
-    modulePaths.length > 0
-      ? modulePaths
-      : [...input.scanState.directories].map((path) => normalizeRelativePath(path));
+    discoveredPaths.size > 0
+      ? [...discoveredPaths]
+      : modulePaths.length > 0
+        ? modulePaths
+        : [...input.scanState.directories].map((path) => normalizeRelativePath(path));
 
   return directoryPaths
-    .map((path) => ({
-      layer: inferLayerName({
-        category: 'source',
-        language: null,
+    .map((path) => {
+      const indexedEntries =
+        path === '.'
+          ? input.fileIndex
+          : input.fileIndex.filter(
+              (entry) => entry.path.startsWith(`${path}/`) || entry.path === path,
+            );
+
+      return {
+        layer: indexedEntries[0]?.grouping?.area ?? null,
         path,
-      }),
-      path,
-      role: describeDirectoryRole(input.fileIndex.filter((entry) => entry.path.startsWith(`${path}/`))),
-    }))
+        role: describeDirectoryRole(indexedEntries),
+      };
+    })
     .sort((left, right) => left.path.localeCompare(right.path))
     .slice(0, DEFAULT_DIRECTORY_SUMMARY_LIMIT);
 }
@@ -1514,46 +1955,6 @@ function describeReferenceReason(
   }
 }
 
-function resolveModuleSpecifier(input: {
-  aliasConfig: PathAliasConfig;
-  allFilePaths: Set<string>;
-  fromPath: string;
-  specifier: string;
-}): string | null {
-  if (input.specifier.startsWith('.')) {
-    return resolveProjectFilePath({
-      allFilePaths: input.allFilePaths,
-      basePath: normalizeRelativePath(join(dirname(input.fromPath), input.specifier)),
-    });
-  }
-
-  for (const aliasCandidate of resolveAliasCandidates(input.aliasConfig, input.specifier)) {
-    const resolvedPath = resolveProjectFilePath({
-      allFilePaths: input.allFilePaths,
-      basePath: aliasCandidate,
-    });
-    if (resolvedPath) {
-      return resolvedPath;
-    }
-  }
-
-  if (input.specifier.startsWith('/')) {
-    return resolveProjectFilePath({
-      allFilePaths: input.allFilePaths,
-      basePath: normalizeRelativePath(input.specifier.slice(1)),
-    });
-  }
-
-  if (input.specifier.startsWith('src/')) {
-    return resolveProjectFilePath({
-      allFilePaths: input.allFilePaths,
-      basePath: normalizeRelativePath(input.specifier),
-    });
-  }
-
-  return null;
-}
-
 function resolveAliasCandidates(aliasConfig: PathAliasConfig, specifier: string): string[] {
   const resolvedCandidates: string[] = [];
 
@@ -1594,7 +1995,34 @@ function resolveProjectFilePath(input: {
   const normalizedBasePath = normalizeRelativePath(input.basePath).replace(/^\.\/+/u, '');
   const candidatePaths = createResolutionCandidates(normalizedBasePath);
 
-  for (const candidatePath of candidatePaths) {
+  return resolveProjectFilePathFromCandidates({
+    allFilePaths: input.allFilePaths,
+    candidatePaths,
+  });
+}
+
+function resolveProjectFilePathFromBasePaths(input: {
+  allFilePaths: Set<string>;
+  basePaths: string[];
+}): string | null {
+  for (const basePath of input.basePaths) {
+    const resolvedPath = resolveProjectFilePath({
+      allFilePaths: input.allFilePaths,
+      basePath,
+    });
+    if (resolvedPath) {
+      return resolvedPath;
+    }
+  }
+
+  return null;
+}
+
+function resolveProjectFilePathFromCandidates(input: {
+  allFilePaths: Set<string>;
+  candidatePaths: string[];
+}): string | null {
+  for (const candidatePath of input.candidatePaths) {
     if (input.allFilePaths.has(candidatePath)) {
       return candidatePath;
     }
@@ -1632,7 +2060,46 @@ function resolveProjectFilePathCaseInsensitive(input: {
   const normalizedBasePath = normalizeRelativePath(input.basePath).replace(/^\.\/+/u, '');
   const candidatePaths = createResolutionCandidates(normalizedBasePath);
 
-  for (const candidatePath of candidatePaths) {
+  return resolveProjectFilePathCaseInsensitiveFromCandidates({
+    allFilePaths: input.allFilePaths,
+    candidatePaths,
+    caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
+  });
+}
+
+function resolveProjectFilePathCaseInsensitiveFromBasePaths(input: {
+  allFilePaths: Set<string>;
+  basePaths: string[];
+  caseInsensitiveFilePathIndex: Map<string, string>;
+}): string | null {
+  for (const basePath of input.basePaths) {
+    const resolvedPath = resolveProjectFilePathCaseInsensitive({
+      allFilePaths: input.allFilePaths,
+      basePath,
+      caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
+    });
+    if (resolvedPath) {
+      return resolvedPath;
+    }
+  }
+
+  return null;
+}
+
+function resolveProjectFilePathCaseInsensitiveFromCandidates(input: {
+  allFilePaths: Set<string>;
+  candidatePaths: string[];
+  caseInsensitiveFilePathIndex: Map<string, string>;
+}): string | null {
+  const directMatch = resolveProjectFilePathFromCandidates({
+    allFilePaths: input.allFilePaths,
+    candidatePaths: input.candidatePaths,
+  });
+  if (directMatch) {
+    return directMatch;
+  }
+
+  for (const candidatePath of input.candidatePaths) {
     const caseInsensitiveMatch = input.caseInsensitiveFilePathIndex.get(
       candidatePath.toLowerCase(),
     );
@@ -1669,6 +2136,35 @@ function createResolutionCandidates(basePath: string): string[] {
   }
 
   return [...candidates];
+}
+
+function resolveUnresolvedReferenceConfidence(resolutionKind: string): number {
+  switch (resolutionKind) {
+    case 'alias':
+    case 'workspace-package':
+      return 0.72;
+    case 'relative-path':
+    case 'absolute-path':
+    case 'source-root':
+    case 'php-include':
+    case 'php-include-constant':
+      return 0.64;
+    case 'php-framework-loader':
+      return 0.56;
+    default:
+      return 0.48;
+  }
+}
+
+function hasKnownNamespacePrefix(input: {
+  knownNamespaces: Set<string>;
+  qualifiedName: string;
+}): boolean {
+  const normalizedQualifiedName = input.qualifiedName.replace(/^\\+/u, '').toLowerCase();
+
+  return [...input.knownNamespaces].some((namespaceName) =>
+    normalizedQualifiedName.startsWith(namespaceName.toLowerCase()),
+  );
 }
 
 function extractPackageName(content: string): string | null {
@@ -2118,6 +2614,7 @@ function pushResolvedPhpTypeReference(input: {
   references: ExtractedReference[];
   relationship: ExtractedReferenceRelationship;
   typeCandidate: string;
+  unresolvedReferences: UnresolvedExtractedReference[];
 }): void {
   const resolvedPath = resolvePhpTypeReference({
     importAliases: input.importAliases,
@@ -2126,6 +2623,16 @@ function pushResolvedPhpTypeReference(input: {
     typeCandidate: input.typeCandidate,
   });
   if (!resolvedPath || resolvedPath === input.file.path) {
+    input.unresolvedReferences.push({
+      candidatePaths: [],
+      confidence: 0.4,
+      from: input.file.path,
+      language: input.file.language,
+      reason: `타입 후보 ${input.typeCandidate} 를 현재 namespace/import 정보만으로 해석하지 못했습니다.`,
+      relationship: input.relationship,
+      resolutionKind: 'php-type',
+      specifier: input.typeCandidate,
+    });
     return;
   }
 
@@ -2142,48 +2649,59 @@ function resolvePhpIncludeReference(input: {
   caseInsensitiveFilePathIndex: Map<string, string>;
   fromPath: string;
   includeReference: PhpIncludeReference;
-}): string | null {
+}): ReferenceResolution {
   if (input.includeReference.rootConstant) {
     const basePath = join(
       PHP_PATH_CONSTANT_BASE_PATHS[input.includeReference.rootConstant],
       input.includeReference.path,
     );
-    return resolveProjectFilePathCaseInsensitive({
-      allFilePaths: input.allFilePaths,
-      basePath,
-      caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
-    });
+    const candidatePaths = createResolutionCandidates(basePath);
+
+    return {
+      candidatePaths,
+      reason: `${input.includeReference.rootConstant} 기반 include 경로를 찾지 못했습니다.`,
+      resolutionKind: 'php-include-constant',
+      resolvedPath: resolveProjectFilePathCaseInsensitiveFromCandidates({
+        allFilePaths: input.allFilePaths,
+        candidatePaths,
+        caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
+      }),
+    };
   }
 
-  return resolveModuleSpecifier({
-    aliasConfig: {
-      rules: [],
-    },
-    allFilePaths: input.allFilePaths,
-    fromPath: input.fromPath,
-    specifier: input.includeReference.path,
-  });
+  const candidatePaths = createResolutionCandidates(
+    normalizeRelativePath(join(dirname(input.fromPath), input.includeReference.path)),
+  );
+
+  return {
+    candidatePaths,
+    reason: `상대 include 경로 ${input.includeReference.rawSpecifier} 를 해석하지 못했습니다.`,
+    resolutionKind: 'php-include',
+    resolvedPath: resolveProjectFilePathCaseInsensitiveFromCandidates({
+      allFilePaths: input.allFilePaths,
+      caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
+      candidatePaths,
+    }),
+  };
 }
 
 function resolvePhpFrameworkLoadReference(input: {
   allFilePaths: Set<string>;
   caseInsensitiveFilePathIndex: Map<string, string>;
   loaderReference: PhpFrameworkLoadReference;
-}): string | null {
+}): ReferenceResolution {
   const basePaths = resolvePhpFrameworkLoadBasePaths(input.loaderReference);
 
-  for (const basePath of basePaths) {
-    const resolvedPath = resolveProjectFilePathCaseInsensitive({
+  return {
+    candidatePaths: basePaths,
+    reason: `${input.loaderReference.kind} loader 후보를 탐색했지만 대상 파일을 찾지 못했습니다.`,
+    resolutionKind: 'php-framework-loader',
+    resolvedPath: resolveProjectFilePathCaseInsensitiveFromBasePaths({
       allFilePaths: input.allFilePaths,
-      basePath,
+      basePaths,
       caseInsensitiveFilePathIndex: input.caseInsensitiveFilePathIndex,
-    });
-    if (resolvedPath) {
-      return resolvedPath;
-    }
-  }
-
-  return null;
+    }),
+  };
 }
 
 function resolvePhpFrameworkLoadBasePaths(loaderReference: PhpFrameworkLoadReference): string[] {
@@ -2334,6 +2852,8 @@ function resolveSupportedSourceLanguage(path: string): SupportedSourceLanguage |
 }
 
 function classifyFile(input: {
+  discoveredHints: ExtractedStructuralHint[];
+  discovery: ProjectAnalysisStructureDiscovery;
   keyConfigs: Set<string>;
   language: SupportedSourceLanguage | null;
   path: string;
@@ -2354,8 +2874,22 @@ function classifyFile(input: {
   const subjectCategory = isTestFile
     ? resolveTestSubjectCategory(path, inferredCategory)
     : inferredCategory;
-  const subjectLayer = inferLayerName({
+  const fallbackLayer = inferLayerName({
     category: subjectCategory,
+    language: input.language,
+    path,
+  });
+  const grouping = resolveFileGrouping({
+    discovery: input.discovery,
+    fallbackLayer,
+    path,
+    subjectCategory,
+  });
+  const subjectLayer = resolveDiscoveredLayerName({
+    category: subjectCategory,
+    discovery: input.discovery,
+    fallbackLayer,
+    grouping,
     language: input.language,
     path,
   });
@@ -2365,10 +2899,22 @@ function classifyFile(input: {
     layer: subjectLayer,
     path,
   });
+  const classification = resolveFileClassificationMeta({
+    discoveredHints: input.discoveredHints,
+    fallbackLayer,
+    grouping,
+    isEntrypoint,
+    isKeyConfig,
+    isTestFile,
+    path,
+    subjectCategory,
+  });
 
   if (!isTestFile) {
     return {
       category: subjectCategory,
+      classification,
+      grouping,
       layer: subjectLayer,
       role: subjectRole,
     };
@@ -2376,9 +2922,234 @@ function classifyFile(input: {
 
   return {
     category: 'test',
+    classification: {
+      category: {
+        confidence: 0.95,
+        reasons: [`테스트 경로 또는 파일명 규칙에서 ${path} 를 테스트로 분류했습니다.`],
+        status: 'confirmed',
+      },
+      layer: classification.layer,
+    },
+    grouping,
     layer: inferTestLayerName(path, input.language),
     role: inferTestRole(path, subjectCategory),
   };
+}
+
+function resolveFileGrouping(input: {
+  discovery: ProjectAnalysisStructureDiscovery;
+  fallbackLayer: string | null;
+  path: string;
+  subjectCategory: string;
+}): ProjectAnalysisFileGrouping {
+  const discoveredSourceRoot = resolveNearestDiscoveredSourceRoot(input.discovery, input.path);
+  const discoveredClusterPath = resolveDiscoveredFeatureClusterPath(input.discovery, input.path);
+  const fallbackGrouping = resolveGroupingFromLayer(input.fallbackLayer);
+
+  if (!discoveredSourceRoot) {
+    return fallbackGrouping;
+  }
+
+  const relativePath = trimPathPrefix(input.path, discoveredSourceRoot.path);
+  const relativeSegments = relativePath.split('/').filter(Boolean);
+  const firstSegment = relativeSegments[0]?.toLowerCase() ?? null;
+  const sourceRootPackageRoot = normalizeRelativePath(discoveredSourceRoot.packageRoot ?? '.');
+  const area =
+    sourceRootPackageRoot !== '.'
+      ? sourceRootPackageRoot
+      : firstSegment && firstSegment !== input.subjectCategory
+        ? normalizeAreaName(firstSegment)
+        : fallbackGrouping.area;
+  const cluster =
+    discoveredClusterPath ??
+    (area && firstSegment && firstSegment !== input.subjectCategory
+      ? joinPathSegments(area, firstSegment)
+      : fallbackGrouping.cluster);
+
+  return {
+    area,
+    cluster,
+  };
+}
+
+function resolveDiscoveredLayerName(input: {
+  category: string;
+  discovery: ProjectAnalysisStructureDiscovery;
+  fallbackLayer: string | null;
+  grouping: ProjectAnalysisFileGrouping;
+  language: SupportedSourceLanguage | null;
+  path: string;
+}): string | null {
+  if (input.category === 'config') {
+    return 'config';
+  }
+
+  if (!input.grouping.area) {
+    return input.fallbackLayer;
+  }
+
+  if (input.category === 'entrypoint') {
+    if (input.grouping.cluster && input.grouping.cluster !== input.grouping.area) {
+      return `${input.grouping.cluster}/entrypoint`;
+    }
+
+    return `${input.grouping.area}/entrypoint`;
+  }
+
+  if (isTestFilePath(input.path)) {
+    if (input.grouping.cluster && input.grouping.cluster !== input.grouping.area) {
+      return `${input.grouping.cluster}/test`;
+    }
+
+    return `${input.grouping.area}/test`;
+  }
+
+  if (input.grouping.cluster && input.grouping.cluster !== input.grouping.area) {
+    return `${input.grouping.cluster}/${input.category}`;
+  }
+
+  if (
+    shouldUseFeatureScopedLayer({
+      areaName: input.grouping.area,
+      language: input.language,
+    })
+  ) {
+    return `${input.grouping.area}/${input.category}`;
+  }
+
+  return input.fallbackLayer ?? input.grouping.area;
+}
+
+function resolveFileClassificationMeta(input: {
+  discoveredHints: ExtractedStructuralHint[];
+  fallbackLayer: string | null;
+  grouping: ProjectAnalysisFileGrouping;
+  isEntrypoint: boolean;
+  isKeyConfig: boolean;
+  isTestFile: boolean;
+  path: string;
+  subjectCategory: string;
+}): ProjectAnalysisFileClassification {
+  if (input.isEntrypoint) {
+    return {
+      category: {
+        confidence: 0.98,
+        reasons: [`진입점 후보 목록에 ${input.path} 가 포함되었습니다.`],
+        status: 'confirmed',
+      },
+      layer: {
+        confidence: 0.86,
+        reasons: ['진입점 후보를 독립 레이어로 유지합니다.'],
+        status: 'confirmed',
+      },
+    };
+  }
+
+  if (input.isKeyConfig) {
+    return {
+      category: {
+        confidence: 0.98,
+        reasons: [`주요 설정 파일 목록에 ${input.path} 가 포함되었습니다.`],
+        status: 'confirmed',
+      },
+      layer: {
+        confidence: 0.92,
+        reasons: ['설정 파일은 config 레이어로 고정합니다.'],
+        status: 'confirmed',
+      },
+    };
+  }
+
+  const categoryStatus =
+    input.subjectCategory === 'source'
+      ? input.grouping.cluster
+        ? 'inferred'
+        : 'fallback'
+      : input.isTestFile
+        ? 'confirmed'
+        : input.grouping.cluster
+          ? 'inferred'
+          : 'confirmed';
+  const categoryReasons = [
+    input.subjectCategory === 'source'
+      ? '명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다.'
+      : `파일명과 경로 규칙에서 ${input.subjectCategory} 역할을 추정했습니다.`,
+    ...input.discoveredHints.slice(0, 2).map((hint) => hint.reason),
+  ];
+  const layerReasons = compactTextList([
+    input.grouping.area ? `발견된 그룹 영역 ${input.grouping.area}` : null,
+    input.grouping.cluster ? `반복 cluster ${input.grouping.cluster}` : null,
+    input.fallbackLayer ? `fallback layer ${input.fallbackLayer}` : null,
+  ]);
+
+  return {
+    category: {
+      confidence:
+        categoryStatus === 'confirmed' ? 0.88 : categoryStatus === 'inferred' ? 0.68 : 0.44,
+      reasons: categoryReasons,
+      status: categoryStatus,
+    },
+    layer: input.grouping.area
+      ? {
+          confidence: input.grouping.cluster ? 0.78 : 0.62,
+          reasons:
+            layerReasons.length > 0 ? layerReasons : ['구조 발견 결과를 레이어에 반영했습니다.'],
+          status: input.grouping.cluster ? 'inferred' : 'fallback',
+        }
+      : null,
+  };
+}
+
+function resolveGroupingFromLayer(layer: string | null): ProjectAnalysisFileGrouping {
+  if (!layer) {
+    return {
+      area: null,
+      cluster: null,
+    };
+  }
+
+  const segments = layer.split('/').filter(Boolean);
+  if (segments.length === 0) {
+    return {
+      area: null,
+      cluster: null,
+    };
+  }
+
+  if (segments.length === 1) {
+    return {
+      area: segments[0] ?? layer,
+      cluster: segments[0] ?? layer,
+    };
+  }
+
+  const cluster = segments.slice(0, -1).join('/');
+  const area = cluster.includes('/')
+    ? (resolveMonorepoAreaContext(cluster)?.areaName ?? cluster.split('/')[0] ?? cluster)
+    : cluster;
+
+  return {
+    area,
+    cluster,
+  };
+}
+
+function trimPathPrefix(path: string, prefix: string): string {
+  const normalizedPath = normalizeRelativePath(path);
+  const normalizedPrefix = normalizeRelativePath(prefix);
+  if (normalizedPrefix === '.' || normalizedPrefix.length === 0) {
+    return normalizedPath;
+  }
+
+  return normalizedPath.slice(normalizedPrefix.length).replace(/^\/+/u, '');
+}
+
+function joinPathSegments(...segments: Array<string | null | undefined>): string {
+  return segments.filter((segment): segment is string => Boolean(segment)).join('/');
+}
+
+function compactTextList(values: Array<string | null>): string[] {
+  return values.filter((value): value is string => typeof value === 'string' && value.length > 0);
 }
 
 function inferFileCategory(input: {

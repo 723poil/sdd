@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "files": [
     ".prettierrc.json",
     "electron.vite.config.ts",
@@ -61,6 +61,7 @@
     "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
     "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
     "src/infrastructure/analysis/project-analysis-scanner.ts",
+    "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
     "src/infrastructure/analysis/project-analysis-summary.ts",
     "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
     "src/infrastructure/analysis/project-analysis.constants.ts",
@@ -198,7 +199,13 @@
     "src/shared",
     "src/shared/app",
     "src/shared/contracts",
-    "src/shared/ipc"
+    "src/shared/ipc",
+    "tests",
+    "tests/fixtures",
+    "tests/fixtures/projects",
+    "tests/fixtures/projects/analysis",
+    "tests/fixtures/sdd",
+    "tests/fixtures/sdd/analysis"
   ],
   "detectedFrameworks": [
     "Electron",
@@ -258,7 +265,7 @@
   ],
   "confidence": 0.95,
   "projectPurpose": "SDD는 개발자가 자신의 로컬 프로젝트를 열어 구조 분석, 참조 맵, 명세 문서, 명세 연동 채팅을 한 화면에서 관리하도록 만든 Electron 데스크톱 앱이다. 이 저장소는 그 앱 구현체와 함께 `docs/codex-spec-workflow/`, `.codex/skills/` 같은 설계 문서와 프로젝트 전용 Codex skill도 같이 관리한다.",
-  "architectureSummary": "주요 경로는 application, config, domain/app-settings/source, domain/project/source, entrypoint, infrastructure, main, renderer, scripts/source, shared 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계를 함께 저장합니다.",
+  "architectureSummary": "주요 경로는 config, domain/domain/source, infrastructure/infrastructure/source, main/main/entrypoint, main/main/source, preload/preload/entrypoint, renderer/renderer/entrypoint, renderer/renderer/source, renderer/renderer/type, scripts/source, shared/shared/source, src/application/app-settings/source, src/application/project/source, src/infrastructure/agent-cli/source, src/infrastructure/analysis/source, src/infrastructure/app-settings/repository, src/infrastructure/app-settings/source, src/infrastructure/fs/source, src/infrastructure/reference-tags/source, src/infrastructure/sdd/repository, src/infrastructure/sdd/source, src/infrastructure/spec-chat/source 중심으로 나뉘어 있으며, 정적 참조 기준 연결 관계을 함께 저장합니다.",
   "documentSummaries": [
     {
       "id": "overview",
@@ -284,80 +291,92 @@
   "documentLayouts": {},
   "layers": [
     {
-      "dependsOn": [
-        "domain/app-settings/source",
-        "domain/project/source",
-        "shared"
-      ],
-      "directories": [],
-      "name": "application",
-      "responsibility": "애플리케이션 유스케이스 관련 코드 31개"
-    },
-    {
       "dependsOn": [],
       "directories": [],
       "name": "config",
       "responsibility": "설정 관련 코드 4개"
     },
     {
-      "dependsOn": [],
-      "directories": [],
-      "name": "domain/app-settings/source",
-      "responsibility": "도메인 app-settings 소스 관련 코드 1개"
-    },
-    {
       "dependsOn": [
-        "shared"
+        "shared/shared/source"
       ],
       "directories": [],
-      "name": "domain/project/source",
-      "responsibility": "도메인 project 소스 관련 코드 6개"
+      "name": "domain/domain/source",
+      "responsibility": "도메인 domain 소스 관련 코드 7개"
     },
     {
       "dependsOn": [
-        "main",
-        "renderer",
-        "shared"
+        "shared/shared/source",
+        "src/application/project/source"
       ],
       "directories": [],
-      "name": "entrypoint",
-      "responsibility": "진입점 관련 코드 7개"
+      "name": "infrastructure/infrastructure/source",
+      "responsibility": "인프라 infrastructure 소스 관련 코드 1개"
     },
     {
       "dependsOn": [
-        "application",
-        "domain/app-settings/source",
-        "domain/project/source",
-        "shared"
+        "main/main/source",
+        "shared/shared/source"
       ],
       "directories": [],
-      "name": "infrastructure",
-      "responsibility": "인프라 연동 관련 코드 41개"
+      "name": "main/main/entrypoint",
+      "responsibility": "메인 main 진입점 관련 코드 1개"
     },
     {
       "dependsOn": [
-        "application",
-        "infrastructure",
-        "shared"
+        "infrastructure/infrastructure/source",
+        "shared/shared/source",
+        "src/application/app-settings/source",
+        "src/application/project/source",
+        "src/infrastructure/agent-cli/source",
+        "src/infrastructure/analysis/source",
+        "src/infrastructure/app-settings/repository",
+        "src/infrastructure/fs/source",
+        "src/infrastructure/reference-tags/source",
+        "src/infrastructure/sdd/repository",
+        "src/infrastructure/spec-chat/source"
       ],
       "directories": [],
-      "name": "main",
-      "responsibility": "메인 프로세스 관련 코드 5개"
+      "name": "main/main/source",
+      "responsibility": "메인 main 소스 관련 코드 5개"
     },
     {
       "dependsOn": [
-        "domain/app-settings/source",
-        "domain/project/source",
-        "entrypoint",
-        "shared"
+        "shared/shared/source"
       ],
       "directories": [],
-      "name": "renderer",
-      "responsibility": "renderer UI 관련 코드 48개"
+      "name": "preload/preload/entrypoint",
+      "responsibility": "preload preload 진입점 관련 코드 1개"
     },
     {
       "dependsOn": [
-        "shared"
+        "renderer/renderer/source"
+      ],
+      "directories": [],
+      "name": "renderer/renderer/entrypoint",
+      "responsibility": "렌더러 renderer 진입점 관련 코드 5개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "renderer/renderer/entrypoint",
+        "shared/shared/source"
+      ],
+      "directories": [],
+      "name": "renderer/renderer/source",
+      "responsibility": "렌더러 renderer 소스 관련 코드 47개"
+    },
+    {
+      "dependsOn": [
+        "shared/shared/source"
+      ],
+      "directories": [],
+      "name": "renderer/renderer/type",
+      "responsibility": "렌더러 renderer 타입 관련 코드 1개"
+    },
+    {
+      "dependsOn": [
+        "shared/shared/source"
       ],
       "directories": [],
       "name": "scripts/source",
@@ -365,143 +384,265 @@
     },
     {
       "dependsOn": [
-        "domain/app-settings/source",
-        "domain/project/source"
+        "domain/domain/source"
       ],
       "directories": [],
-      "name": "shared",
-      "responsibility": "공용 계약 및 유틸리티 9개"
+      "name": "shared/shared/source",
+      "responsibility": "공용 shared 소스 관련 코드 9개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source"
+      ],
+      "directories": [],
+      "name": "src/application/app-settings/source",
+      "responsibility": "소스 application/app-settings 관련 코드 4개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source"
+      ],
+      "directories": [],
+      "name": "src/application/project/source",
+      "responsibility": "소스 application/project 관련 코드 27개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/app-settings/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/agent-cli/source",
+      "responsibility": "소스 infrastructure/agent-cli 관련 코드 2개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/app-settings/source",
+        "src/application/project/source",
+        "src/infrastructure/agent-cli/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/analysis/source",
+      "responsibility": "소스 infrastructure/analysis 관련 코드 16개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/app-settings/source",
+        "src/application/project/source",
+        "src/infrastructure/app-settings/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/app-settings/repository",
+      "responsibility": "소스 infrastructure/app-settings 레포지토리 관련 코드 2개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/infrastructure/fs/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/app-settings/source",
+      "responsibility": "소스 infrastructure/app-settings 관련 코드 1개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/project/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/fs/source",
+      "responsibility": "소스 infrastructure/fs 관련 코드 2개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/app-settings/source",
+        "src/application/project/source",
+        "src/infrastructure/analysis/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/reference-tags/source",
+      "responsibility": "소스 infrastructure/reference-tags 관련 코드 4개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/project/source",
+        "src/infrastructure/fs/source",
+        "src/infrastructure/sdd/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/sdd/repository",
+      "responsibility": "소스 infrastructure/sdd 레포지토리 관련 코드 2개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/infrastructure/fs/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/sdd/source",
+      "responsibility": "소스 infrastructure/sdd 관련 코드 8개"
+    },
+    {
+      "dependsOn": [
+        "domain/domain/source",
+        "shared/shared/source",
+        "src/application/app-settings/source",
+        "src/application/project/source",
+        "src/infrastructure/analysis/source"
+      ],
+      "directories": [],
+      "name": "src/infrastructure/spec-chat/source",
+      "responsibility": "소스 infrastructure/spec-chat 관련 코드 4개"
     }
   ],
   "directorySummaries": [
     {
-      "layer": "src/source",
-      "path": "src",
-      "role": "주요 파일 148개. 소스 136개, 진입점 7개, 레포지토리 4개 중심 경로입니다."
-    },
-    {
-      "layer": "application",
-      "path": "src/application",
-      "role": "주요 파일 31개. 소스 31개 중심 경로입니다."
-    },
-    {
-      "layer": "domain/source",
-      "path": "src/domain",
-      "role": "주요 파일 7개. 소스 7개 중심 경로입니다."
-    },
-    {
-      "layer": "infrastructure",
-      "path": "src/infrastructure",
-      "role": "주요 파일 41개. 소스 37개, 레포지토리 4개 중심 경로입니다."
+      "layer": "main",
+      "path": ".",
+      "role": "주요 파일 156개. 소스 140개, 진입점 7개, 설정 파일 4개 중심 경로입니다."
     },
     {
       "layer": "main",
-      "path": "src/main",
-      "role": "주요 파일 6개. 소스 5개, 진입점 1개 중심 경로입니다."
+      "path": "src",
+      "role": "주요 파일 149개. 소스 137개, 진입점 7개, 레포지토리 4개 중심 경로입니다."
     },
     {
-      "layer": "main 2/source",
-      "path": "src/main 2",
+      "layer": "application",
+      "path": "src/application/app-settings",
+      "role": "주요 파일 4개. 소스 4개 중심 경로입니다."
+    },
+    {
+      "layer": "application",
+      "path": "src/application/project",
+      "role": "주요 파일 27개. 소스 27개 중심 경로입니다."
+    },
+    {
+      "layer": null,
+      "path": "src/contracts",
       "role": "정적 분석에서 주요 디렉터리로 감지했습니다."
     },
     {
-      "layer": "preload",
-      "path": "src/preload",
-      "role": "주요 파일 1개. 진입점 1개 중심 경로입니다."
-    },
-    {
-      "layer": "preload 2/source",
-      "path": "src/preload 2",
+      "layer": null,
+      "path": "src/features/agent-cli-settings",
       "role": "정적 분석에서 주요 디렉터리로 감지했습니다."
     },
     {
-      "layer": "renderer",
-      "path": "src/renderer",
-      "role": "주요 파일 53개. 소스 47개, 진입점 5개, 타입 1개 중심 경로입니다."
-    },
-    {
-      "layer": "renderer 2/source",
-      "path": "src/renderer 2",
+      "layer": null,
+      "path": "src/features/project-bootstrap",
       "role": "정적 분석에서 주요 디렉터리로 감지했습니다."
     },
     {
-      "layer": "shared",
-      "path": "src/shared",
-      "role": "주요 파일 9개. 소스 9개 중심 경로입니다."
+      "layer": "infrastructure",
+      "path": "src/infrastructure/agent-cli",
+      "role": "주요 파일 2개. 소스 2개 중심 경로입니다."
+    },
+    {
+      "layer": "infrastructure",
+      "path": "src/infrastructure/analysis",
+      "role": "주요 파일 16개. 소스 16개 중심 경로입니다."
+    },
+    {
+      "layer": "infrastructure",
+      "path": "src/infrastructure/app-settings",
+      "role": "주요 파일 3개. 레포지토리 2개, 소스 1개 중심 경로입니다."
+    },
+    {
+      "layer": "infrastructure",
+      "path": "src/infrastructure/fs",
+      "role": "주요 파일 2개. 소스 2개 중심 경로입니다."
+    },
+    {
+      "layer": "infrastructure",
+      "path": "src/infrastructure/reference-tags",
+      "role": "주요 파일 4개. 소스 4개 중심 경로입니다."
     }
   ],
   "connections": [
     {
-      "from": "renderer",
+      "from": "renderer/renderer/source",
       "reason": "정적 참조 87건. 예: src/renderer/App.tsx -> src/renderer/app-view.ts, src/renderer/components/AppViewSwitcher.tsx -> src/renderer/app-view.ts, src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts -> src/renderer/features/agent-cli-settings/types.ts",
       "relationship": "정적 참조",
-      "to": "renderer"
+      "to": "renderer/renderer/source"
     },
     {
-      "from": "infrastructure",
-      "reason": "정적 참조 52건. 예: src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts, src/infrastructure/analysis/node-project-analyzer-codex-settings.ts -> src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+      "from": "renderer/renderer/source",
+      "reason": "정적 참조 49건. 예: src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/types.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
       "relationship": "정적 참조",
-      "to": "infrastructure"
+      "to": "domain/domain/source"
     },
     {
-      "from": "infrastructure",
-      "reason": "정적 참조 50건. 예: src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-errors.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/domain/project/project-errors.ts",
+      "from": "src/application/project/source",
+      "reason": "정적 참조 40건. 예: src/application/project/activate-project.use-case.ts -> src/domain/project/project-model.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-errors.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-analysis-model.ts",
       "relationship": "정적 참조",
-      "to": "domain/project/source"
+      "to": "domain/domain/source"
     },
     {
-      "from": "application",
-      "reason": "정적 참조 40건. 예: src/application/app-settings/check-agent-cli-connection.use-case.ts -> src/application/app-settings/app-settings.ports.ts, src/application/app-settings/list-agent-cli-connections.use-case.ts -> src/application/app-settings/app-settings.ports.ts, src/application/app-settings/save-agent-cli-connection.use-case.ts -> src/application/app-settings/app-settings.ports.ts",
+      "from": "src/application/project/source",
+      "reason": "정적 참조 37건. 예: src/application/project/activate-project.use-case.ts -> src/application/project/inspect-project.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/initialize-project-storage.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/project.ports.ts",
       "relationship": "정적 참조",
-      "to": "application"
+      "to": "src/application/project/source"
     },
     {
-      "from": "renderer",
-      "reason": "정적 참조 39건. 예: src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts -> src/domain/project/project-analysis-model.ts, src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts -> src/domain/project/project-model.ts, src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts -> src/domain/project/project-session-model.ts",
+      "from": "src/application/project/source",
+      "reason": "정적 참조 26건. 예: src/application/project/activate-project.use-case.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project-workflow.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project.use-case.ts -> src/shared/contracts/result.ts",
       "relationship": "정적 참조",
-      "to": "domain/project/source"
+      "to": "shared/shared/source"
     },
     {
-      "from": "application",
-      "reason": "정적 참조 38건. 예: src/application/project/activate-project.use-case.ts -> src/domain/project/project-model.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-errors.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-analysis-model.ts",
+      "from": "main/main/source",
+      "reason": "정적 참조 23건. 예: src/main/ipc/project-ipc-registration.ts -> src/application/project/activate-project.use-case.ts, src/main/ipc/project-ipc-registration.ts -> src/application/project/analyze-project.use-case.ts, src/main/ipc/project-ipc-registration.ts -> src/application/project/cancel-project-analysis.use-case.ts",
       "relationship": "정적 참조",
-      "to": "domain/project/source"
+      "to": "src/application/project/source"
     },
     {
-      "from": "application",
-      "reason": "정적 참조 30건. 예: src/application/app-settings/app-settings.ports.ts -> src/shared/contracts/result.ts, src/application/app-settings/check-agent-cli-connection.use-case.ts -> src/shared/contracts/result.ts, src/application/app-settings/list-agent-cli-connections.use-case.ts -> src/shared/contracts/result.ts",
+      "from": "src/infrastructure/analysis/source",
+      "reason": "정적 참조 19건. 예: src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-errors.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
       "relationship": "정적 참조",
-      "to": "shared"
+      "to": "domain/domain/source"
     },
     {
-      "from": "main",
-      "reason": "정적 참조 26건. 예: src/main/ipc/project-ipc-registration.ts -> src/application/project/activate-project.use-case.ts, src/main/ipc/project-ipc-registration.ts -> src/application/project/analyze-project.use-case.ts, src/main/ipc/project-ipc-registration.ts -> src/application/project/cancel-project-analysis.use-case.ts",
+      "from": "src/infrastructure/analysis/source",
+      "reason": "정적 참조 18건. 예: src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-prompt.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-result.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-local-draft.ts",
       "relationship": "정적 참조",
-      "to": "application"
+      "to": "src/infrastructure/analysis/source"
     },
     {
-      "from": "infrastructure",
-      "reason": "정적 참조 25건. 예: src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/shared/contracts/result.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/shared/contracts/result.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/shared/contracts/result.ts",
+      "from": "src/infrastructure/sdd/source",
+      "reason": "정적 참조 16건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/domain/project/project-errors.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-reference-tag-model.ts",
       "relationship": "정적 참조",
-      "to": "shared"
+      "to": "domain/domain/source"
     },
     {
-      "from": "infrastructure",
-      "reason": "정적 참조 16건. 예: src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts -> src/application/app-settings/app-settings.ports.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/application/project/project.ports.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/application/project/project.ports.ts",
+      "from": "shared/shared/source",
+      "reason": "정적 참조 13건. 예: src/shared/ipc/project-ipc-api.ts -> src/domain/project/project-analysis-model.ts, src/shared/ipc/project-ipc-api.ts -> src/domain/project/project-model.ts, src/shared/ipc/project-ipc-api.ts -> src/domain/project/project-reference-tag-model.ts",
       "relationship": "정적 참조",
-      "to": "application"
+      "to": "domain/domain/source"
     },
     {
-      "from": "main",
-      "reason": "정적 참조 12건. 예: src/main/ipc/project-ipc-registration.ts -> src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts, src/main/ipc/project-ipc-registration.ts -> src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts, src/main/ipc/project-ipc-registration.ts -> src/infrastructure/analysis/node-project-analyzer.adapter.ts",
-      "relationship": "정적 참조",
-      "to": "infrastructure"
-    },
-    {
-      "from": "shared",
+      "from": "shared/shared/source",
       "reason": "정적 참조 11건. 예: src/shared/contracts/result.ts -> src/shared/contracts/app-error.ts, src/shared/ipc/project-ipc-api.ts -> src/shared/ipc/project-ipc.ts, src/shared/ipc/project-ipc-api.ts -> src/shared/contracts/result.ts",
       "relationship": "정적 참조",
-      "to": "shared"
+      "to": "shared/shared/source"
+    },
+    {
+      "from": "src/infrastructure/sdd/source",
+      "reason": "정적 참조 10건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/infrastructure/sdd/fs-project-storage-io.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-documents.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "relationship": "정적 참조",
+      "to": "src/infrastructure/sdd/source"
     }
   ],
   "documentLinks": [
@@ -2687,9 +2828,21 @@
     },
     {
       "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis.constants",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis.constants.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
       "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
       "relationship": "imports",
       "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-structure-discovery",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-structure-discovery.ts"
     },
     {
       "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
@@ -2698,10 +2851,28 @@
       "to": "src/infrastructure/analysis/project-analysis-vue-sfc.ts"
     },
     {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "상속: ProjectAnalysisUnresolvedFileReference",
+      "relationship": "extends",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
       "from": "src/infrastructure/analysis/project-analysis-scanner.ts",
       "reason": "정적 import: @/infrastructure/analysis/project-analysis.constants",
       "relationship": "imports",
       "to": "src/infrastructure/analysis/project-analysis.constants.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
     },
     {
       "from": "src/infrastructure/analysis/project-analysis-summary.ts",
@@ -3501,5 +3672,125 @@
       "relationship": "imports",
       "to": "scripts/prepare-dev-mac-app.ts"
     }
-  ]
+  ],
+  "referenceAnalysis": {
+    "scanLimits": [],
+    "structureDiscovery": {
+      "aliasConfigPaths": [
+        "tsconfig.json"
+      ],
+      "featureClusters": [
+        {
+          "confidence": 0.77,
+          "path": "src/application/app-settings",
+          "reason": "같은 경로 축 아래에서 4개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/application/project",
+          "reason": "같은 경로 축 아래에서 27개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.61,
+          "path": "src/contracts",
+          "reason": "같은 경로 축 아래에서 2개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/features/agent-cli-settings",
+          "reason": "같은 경로 축 아래에서 8개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/features/project-bootstrap",
+          "reason": "같은 경로 축 아래에서 37개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.61,
+          "path": "src/infrastructure/agent-cli",
+          "reason": "같은 경로 축 아래에서 2개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/infrastructure/analysis",
+          "reason": "같은 경로 축 아래에서 16개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.69,
+          "path": "src/infrastructure/app-settings",
+          "reason": "같은 경로 축 아래에서 3개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.61,
+          "path": "src/infrastructure/fs",
+          "reason": "같은 경로 축 아래에서 2개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.77,
+          "path": "src/infrastructure/reference-tags",
+          "reason": "같은 경로 축 아래에서 4개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/infrastructure/sdd",
+          "reason": "같은 경로 축 아래에서 10개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.77,
+          "path": "src/infrastructure/spec-chat",
+          "reason": "같은 경로 축 아래에서 4개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/ipc",
+          "reason": "같은 경로 축 아래에서 9개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.9,
+          "path": "src/project",
+          "reason": "같은 경로 축 아래에서 6개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        }
+      ],
+      "notes": [
+        "소스 루트 1개를 기준으로 분류와 참조 해석을 수행합니다.",
+        "alias 설정 파일 1개를 구조 발견에 반영했습니다.",
+        "반복 feature cluster 후보 14개를 찾았습니다."
+      ],
+      "packageRoots": [
+        {
+          "confidence": 0.95,
+          "packageName": "sdd",
+          "path": ".",
+          "reason": "package.json 으로 패키지 루트를 확인했습니다.",
+          "sourceRoots": [
+            "src"
+          ]
+        }
+      ],
+      "sourceRoots": [
+        {
+          "confidence": 0.92,
+          "kind": "config",
+          "packageRoot": ".",
+          "path": "src",
+          "reason": "tsconfig.json 설정을 따라 소스 루트를 확인했습니다."
+        }
+      ]
+    },
+    "unresolvedFileReferences": []
+  }
 }

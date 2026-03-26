@@ -126,6 +126,7 @@ ESLint는 단순 스타일보다 "버그 방지 + 경계 강제"에 집중한다
 - 분석 관련 관계 정보는 중앙 `분석` workspace에서 보여주고, 오른쪽 사이드바는 채팅 역할에만 사용한다.
 - 문서 맵 연결선이나 파일 참조선은 UI가 임의 생성하지 말고 저장된 분석 계약을 렌더링한다.
 - 분석 파일의 수동 reference-tag/assignment 편집은 화면 local state에만 두지 말고 저장 가능한 분석 계약으로 반영한다.
+- 미해결 참조, 추정 분류, 스캔 한도 도달 정보는 숨기지 말고 저장된 분석 계약 기준으로만 짧게 노출한다.
 - 사람이 읽는 분석 Markdown 은 상단 요약, 그룹화된 근거, Mermaid 시각화를 우선하고, 긴 경로 덤프나 반복 섹션은 피한다.
 
 ## 5. 네이밍 컨벤션
@@ -403,6 +404,8 @@ store에 넣지 않는 것:
 - atomic write 기본 적용
 - read 직후 runtime schema validation 수행
 - analyzer 출력과 수동 reference-tag 파일은 별도 저장 단위로 다루고, `file-index.json` 재생성으로 서로 덮어쓰지 않게 한다
+- `context.json` 과 `file-index.json` 의 schemaVersion이 올라가면 read boundary에서 이전 버전 migration 또는 fallback을 같이 제공한다
+- `context.json` 재저장 경로는 `referenceAnalysis` 같은 신규 필드를 떨어뜨리지 않도록 정규화 함수와 write path를 함께 갱신한다
 
 ### 에러 반환 표준
 
@@ -435,6 +438,7 @@ store에 넣지 않는 것:
 - 날짜는 ISO 8601 문자열 사용
 - 파일 저장은 atomic write
 - repository가 읽은 직후 runtime schema validation 수행
+- analysis JSON은 `referenceAnalysis`, `grouping`, `classification`, `unresolvedReferences` 같은 확장 필드를 포함해도 backward-compatible read 경로를 유지한다
 
 ### markdown 규칙
 
@@ -533,6 +537,7 @@ store에 넣지 않는 것:
 - repository는 실제 `.sdd` 샘플 구조를 읽고 쓰는 contract test를 가진다
 - IPC는 payload/response 스키마 contract test를 가진다
 - `.sdd` migration이 생기면 구버전 fixture 테스트를 추가한다
+- 참조 분석 fixture는 최소한 `structure-discovery`, `js-ts-vue`, `java-kotlin`, `php`, `scan-limit`, `legacy-analysis-json` 시나리오를 분리해 유지한다
 
 ## 16. 주석과 문서화 규칙
 

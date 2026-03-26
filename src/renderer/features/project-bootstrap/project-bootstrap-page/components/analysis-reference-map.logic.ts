@@ -128,7 +128,7 @@ export function buildReferenceGraph(
   }
 
   for (const path of referencedPaths) {
-    const clusterName = resolveNodeClusterName(entryByPath.get(path)?.layer);
+    const clusterName = resolveNodeClusterName(entryByPath.get(path));
     const paths = groupedPaths.get(clusterName);
     if (!paths) {
       groupedPaths.set(clusterName, [path]);
@@ -515,14 +515,8 @@ export function createViewportToFitGraph(input: {
 
   return {
     scale,
-    offsetX:
-      frameCenterX -
-      input.stageSize.width / 2 -
-      (bounds.minX + bounds.width / 2) * scale,
-    offsetY:
-      frameCenterY -
-      input.stageSize.height / 2 -
-      (bounds.minY + bounds.height / 2) * scale,
+    offsetX: frameCenterX - input.stageSize.width / 2 - (bounds.minX + bounds.width / 2) * scale,
+    offsetY: frameCenterY - input.stageSize.height / 2 - (bounds.minY + bounds.height / 2) * scale,
   };
 }
 
@@ -580,10 +574,7 @@ export function resolveReferenceMapViewportFrame(input: {
   const overlayMaxWidth = isMobileStage
     ? REFERENCE_MAP_OVERLAY_MAX_WIDTH_MOBILE
     : REFERENCE_MAP_OVERLAY_MAX_WIDTH_DESKTOP;
-  const overlayWidth = Math.min(
-    overlayMaxWidth,
-    Math.max(stageWidth - overlayInset * 2, 0),
-  );
+  const overlayWidth = Math.min(overlayMaxWidth, Math.max(stageWidth - overlayInset * 2, 0));
   const occupiedLeftWidth = Math.min(
     stageWidth,
     overlayInset + overlayWidth + REFERENCE_MAP_VIEWPORT_FRAME_GAP,
@@ -599,8 +590,21 @@ export function resolveReferenceMapViewportFrame(input: {
   };
 }
 
-export function resolveNodeClusterName(layerName: string | null | undefined): string {
-  const normalizedLayerName = layerName?.trim();
+export function resolveNodeClusterName(
+  entryOrLayer: ProjectAnalysisFileIndexEntry | string | null | undefined,
+): string {
+  if (entryOrLayer && typeof entryOrLayer === 'object') {
+    if (entryOrLayer.grouping?.cluster?.trim()) {
+      return entryOrLayer.grouping.cluster.trim();
+    }
+
+    if (entryOrLayer.grouping?.area?.trim()) {
+      return entryOrLayer.grouping.area.trim();
+    }
+  }
+
+  const normalizedLayerName =
+    typeof entryOrLayer === 'string' ? entryOrLayer.trim() : entryOrLayer?.layer?.trim();
   if (!normalizedLayerName) {
     return '미분류';
   }
@@ -788,7 +792,10 @@ function selectReferenceGraphSelection(input: {
   isReduced: boolean;
   selectedPathCount: number;
 } {
-  const totalPathCount = [...input.groupedPaths.values()].reduce((sum, paths) => sum + paths.length, 0);
+  const totalPathCount = [...input.groupedPaths.values()].reduce(
+    (sum, paths) => sum + paths.length,
+    0,
+  );
   const shouldReduce =
     totalPathCount > LARGE_REFERENCE_GRAPH_FILE_THRESHOLD ||
     input.edges.length > LARGE_REFERENCE_GRAPH_EDGE_THRESHOLD;
@@ -953,11 +960,12 @@ function getEdgeImportanceScore(input: {
   incomingCounts: Map<string, number>;
   outgoingCounts: Map<string, number>;
 }): number {
-  const fromCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.from)?.layer);
-  const toCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.to)?.layer);
+  const fromCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.from));
+  const toCluster = resolveNodeClusterName(input.entryByPath.get(input.edge.to));
   const crossClusterBonus = fromCluster === toCluster ? 0 : 20;
   const fromScore =
-    (input.incomingCounts.get(input.edge.from) ?? 0) + (input.outgoingCounts.get(input.edge.from) ?? 0);
+    (input.incomingCounts.get(input.edge.from) ?? 0) +
+    (input.outgoingCounts.get(input.edge.from) ?? 0);
   const toScore =
     (input.incomingCounts.get(input.edge.to) ?? 0) + (input.outgoingCounts.get(input.edge.to) ?? 0);
 
@@ -1495,7 +1503,7 @@ function resolveOrderedClusterNames(
     .map((layer) => resolveNodeClusterName(layer.name))
     .filter((name, index, names) => names.indexOf(name) === index);
   const discoveredNames = [...referencedPaths].map((path) =>
-    resolveNodeClusterName(entryByPath.get(path)?.layer),
+    resolveNodeClusterName(entryByPath.get(path)),
   );
   const discoveredNameSet = new Set(discoveredNames);
   const orderedNames = preferredOrder.filter((name) => discoveredNameSet.has(name));

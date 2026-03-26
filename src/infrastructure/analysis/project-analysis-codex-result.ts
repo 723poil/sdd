@@ -1,5 +1,6 @@
 import { ANALYSIS_CONTEXT_SCHEMA_VERSION } from '@/domain/project/project-model';
 import {
+  createEmptyProjectAnalysisReferenceAnalysis,
   createProjectAnalysisDocument,
   orderProjectAnalysisDocuments,
   PROJECT_ANALYSIS_DOCUMENT_IDS,
@@ -128,6 +129,7 @@ export function parseProjectAnalysisCodexResult(raw: string): Result<ProjectAnal
       connections: payload.context.connections,
       documentLinks: payload.context.documentLinks,
       fileReferences: collectFileReferences(payload.fileIndex),
+      referenceAnalysis: createEmptyProjectAnalysisReferenceAnalysis(),
     },
     documents: orderedDocuments.map((document) =>
       createProjectAnalysisDocument({
@@ -346,7 +348,9 @@ function isParsedFileIndexEntry(
 
 function isParsedFileReferenceTarget(
   value: unknown,
-): value is NonNullable<ParsedCodexProjectAnalysisPayload['fileIndex'][number]['references']>[number] {
+): value is NonNullable<
+  ParsedCodexProjectAnalysisPayload['fileIndex'][number]['references']
+>[number] {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -360,7 +364,9 @@ function isParsedFileReferenceTarget(
   );
 }
 
-function collectFileReferences(fileIndex: ProjectAnalysisFileIndexEntry[]): ProjectAnalysisFileReference[] {
+function collectFileReferences(
+  fileIndex: ProjectAnalysisFileIndexEntry[],
+): ProjectAnalysisFileReference[] {
   const references: ProjectAnalysisFileReference[] = [];
 
   for (const entry of fileIndex) {

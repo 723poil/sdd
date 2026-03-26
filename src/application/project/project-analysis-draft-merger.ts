@@ -70,6 +70,7 @@ export function mergeReferenceAnalysisDraft(input: {
         existingAnalysis.context.projectPurpose.trim().length > 0
           ? existingAnalysis.context.projectPurpose
           : input.referenceDraft.context.projectPurpose,
+      referenceAnalysis: input.referenceDraft.context.referenceAnalysis,
       unknowns: mergeStringLists(
         input.referenceDraft.context.unknowns,
         existingAnalysis.context.unknowns,

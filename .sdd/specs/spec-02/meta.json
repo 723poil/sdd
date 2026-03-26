@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "spec-02",
+  "slug": "spec-02",
+  "title": "새 명세 02",
+  "status": "draft",
+  "createdAt": "2026-03-25T23:47:11.961Z",
+  "updatedAt": "2026-03-25T23:47:11.961Z",
+  "revision": 1,
+  "latestVersion": "v1",
+  "summary": "채팅으로 작성 중인 초안입니다."
+}

@@ -63,6 +63,7 @@
 - 도메인/유스케이스는 항상 port 인터페이스만 안다
 - 문서 맵처럼 프로젝트에 귀속되는 UI 배치 상태는 renderer 임시 state로 끝내지 말고 `.sdd/analysis/context.json`을 통해 저장한다
 - 문서 맵 연결선과 파일별 참조 관계도 분석 산출물로 함께 저장하고, renderer가 임의로 생성하지 않는다
+- 구조 발견 결과, 미해결 참조, 스캔 한도 도달 정보도 분석 산출물에 포함하고 renderer가 별도 규칙으로 추정하지 않는다
 - 수동 reference-tag/assignment는 analyzer 출력과 분리된 별도 분석 파일로 보존하고, `file-index.json` 재생성으로 덮어쓰지 않는다
 - renderer는 수동 태그를 local-only state로 두지 말고 use case/repository 경계를 통해 저장한다
 
@@ -214,11 +215,16 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 권장 단계:
 
 1. 프로젝트 문맥 수집
-2. 연결된 CLI 에이전트 입력 조립
-3. `codex exec` 분석 실행
-4. 구조화 결과 정규화
-5. `.sdd/analysis/*` 문서 저장
-6. 명세 초안 입력 생성
+2. 저장소 스캔
+3. 구조 발견
+4. 언어별 참조 추출
+5. 참조 해석/정규화
+6. 파일 분류와 참조 맵 초안 생성
+7. 연결된 CLI 에이전트 입력 조립
+8. `codex exec` 분석 실행
+9. 구조화 결과 정규화
+10. `.sdd/analysis/*` 문서 저장
+11. 명세 초안 입력 생성
 
 왜 쓰는가:
 

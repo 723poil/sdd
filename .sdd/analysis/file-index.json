@@ -1,10 +1,32 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-03-25T23:18:51.233Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-03-26T00:17:41.350Z",
   "entries": [
     {
       "category": "source",
-      "layer": "main",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 main",
+            "반복 cluster main/main",
+            "fallback layer main"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/source",
       "path": "src/main/ipc/project-ipc-registration.ts",
       "references": [
         {
@@ -184,11 +206,34 @@
         }
       ],
       "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 35건, 들어오는 참조 1건."
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 35건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "repository",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "파일명과 경로 규칙에서 repository 역할을 추정했습니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/repository",
       "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
       "references": [
         {
@@ -263,11 +308,34 @@
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 1건."
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
       "references": [
         {
@@ -332,11 +400,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 12건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
       "references": [
         {
@@ -391,11 +482,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
       "references": [
         {
@@ -450,11 +564,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 10건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-storage-documents.ts",
       "references": [
         {
@@ -504,11 +641,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 2건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
       "references": [
         {
@@ -558,11 +718,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 9건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "repository",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "파일명과 경로 규칙에서 repository 역할을 추정했습니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/repository",
       "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
       "references": [
         {
@@ -607,11 +790,34 @@
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/project-ipc-api.ts",
       "references": [
         {
@@ -656,11 +862,106 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-path-alias-resolver"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis.constants.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis.constants"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-structure-discovery"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-vue-sfc"
+        },
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "extends",
+          "reason": "상속: ProjectAnalysisUnresolvedFileReference"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/reference-tags",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/reference-tags"
+      },
+      "layer": "src/infrastructure/reference-tags/source",
       "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
       "references": [
         {
@@ -705,11 +1006,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-analysis-persistence.ts",
       "references": [
         {
@@ -754,11 +1078,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/spec-chat",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/spec-chat"
+      },
+      "layer": "src/infrastructure/spec-chat/source",
       "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
       "references": [
         {
@@ -803,11 +1150,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
       "references": [
         {
@@ -852,11 +1222,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace.tsx",
       "references": [
         {
@@ -901,11 +1294,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 8건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/project.ports.ts",
       "references": [
         {
@@ -945,11 +1361,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 34건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 34건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/project-ipc.ts",
       "references": [
         {
@@ -989,11 +1428,34 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 3건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/analyze-project-workflow.ts",
       "references": [
         {
@@ -1033,11 +1495,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/send-project-session-message.use-case.ts",
       "references": [
         {
@@ -1077,11 +1562,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "main",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 main",
+            "반복 cluster main/main",
+            "fallback layer main"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/source",
       "path": "src/main/ipc/register-settings-ipc.ts",
       "references": [
         {
@@ -1121,11 +1629,34 @@
         }
       ],
       "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
       "references": [
         {
@@ -1165,11 +1696,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
       "references": [
         {
@@ -1209,11 +1763,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-session-documents.ts",
       "references": [
         {
@@ -1248,11 +1825,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
       "references": [
         {
@@ -1287,11 +1887,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
       "references": [
         {
@@ -1326,11 +1949,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
       "references": [
         {
@@ -1360,11 +2006,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 15건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 15건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
       "references": [
         {
@@ -1394,11 +2063,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 3건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/initialize-project-storage.use-case.ts",
       "references": [
         {
@@ -1428,11 +2120,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 2건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/activate-project.use-case.ts",
       "references": [
         {
@@ -1462,11 +2177,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/create-project-spec.use-case.ts",
       "references": [
         {
@@ -1496,11 +2234,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/generate-project-reference-tags.use-case.ts",
       "references": [
         {
@@ -1530,11 +2291,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/rename-project.use-case.ts",
       "references": [
         {
@@ -1564,11 +2348,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-local-draft.ts",
       "references": [
         {
@@ -1598,45 +2405,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
         },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-path-alias-resolver"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
-        },
-        {
-          "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/infrastructure/analysis/project-analysis-vue-sfc"
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
         }
-      ],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-spec-documents.ts",
       "references": [
         {
@@ -1666,11 +2462,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
       "references": [
         {
@@ -1700,11 +2519,32 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/main/main.ts 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/entrypoint",
       "path": "src/main/main.ts",
       "references": [
         {
@@ -1734,11 +2574,34 @@
         }
       ],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/ensure-project-storage-ready.ts",
       "references": [
         {
@@ -1763,11 +2626,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 8건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 8건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
       "references": [
         {
@@ -1792,11 +2678,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 3건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "repository",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "파일명과 경로 규칙에서 repository 역할을 추정했습니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/app-settings",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/app-settings"
+      },
+      "layer": "src/infrastructure/app-settings/repository",
       "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
       "references": [
         {
@@ -1821,11 +2730,34 @@
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/app-settings",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/app-settings"
+      },
+      "layer": "src/infrastructure/app-settings/source",
       "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
       "references": [
         {
@@ -1850,11 +2782,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
       "references": [
         {
@@ -1879,11 +2834,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
       "references": [
         {
@@ -1908,11 +2886,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "repository",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "파일명과 경로 규칙에서 repository 역할을 추정했습니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/app-settings",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/app-settings"
+      },
+      "layer": "src/infrastructure/app-settings/repository",
       "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
       "references": [
         {
@@ -1937,11 +2938,34 @@
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/settings-ipc-api.ts",
       "references": [
         {
@@ -1966,11 +2990,34 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/create-project-session.use-case.ts",
       "references": [
         {
@@ -1995,11 +3042,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
       "references": [
         {
@@ -2024,11 +3094,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/save-project-reference-tags.use-case.ts",
       "references": [
         {
@@ -2053,11 +3146,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/save-project-spec.use-case.ts",
       "references": [
         {
@@ -2082,11 +3198,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/agent-cli",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/agent-cli"
+      },
+      "layer": "src/infrastructure/agent-cli/source",
       "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
       "references": [
         {
@@ -2111,11 +3250,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
       "references": [
         {
@@ -2140,11 +3302,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/node-project-analyzer-codex-execution.ts",
       "references": [
         {
@@ -2169,11 +3354,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-codex-result.ts",
       "references": [
         {
@@ -2198,11 +3406,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
       "references": [
         {
@@ -2227,11 +3458,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
       "references": [
         {
@@ -2256,11 +3510,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
       "references": [
         {
@@ -2280,11 +3557,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 7건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 7건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/inspect-project.use-case.ts",
       "references": [
         {
@@ -2304,11 +3604,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 3건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/app-settings",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/app-settings"
+      },
+      "layer": "src/application/app-settings/source",
       "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
       "references": [
         {
@@ -2328,11 +3651,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/app-settings",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/app-settings"
+      },
+      "layer": "src/application/app-settings/source",
       "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
       "references": [
         {
@@ -2352,11 +3698,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/app-settings",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/app-settings"
+      },
+      "layer": "src/application/app-settings/source",
       "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
       "references": [
         {
@@ -2376,11 +3745,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/cancel-project-analysis.use-case.ts",
       "references": [
         {
@@ -2400,11 +3792,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/list-project-sessions.use-case.ts",
       "references": [
         {
@@ -2424,11 +3839,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/list-recent-projects.use-case.ts",
       "references": [
         {
@@ -2448,11 +3886,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
       "references": [
         {
@@ -2472,11 +3933,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/read-project-analysis.use-case.ts",
       "references": [
         {
@@ -2496,11 +3980,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/read-project-session-messages.use-case.ts",
       "references": [
         {
@@ -2520,11 +4027,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/read-project-specs.use-case.ts",
       "references": [
         {
@@ -2544,11 +4074,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/remove-recent-project.use-case.ts",
       "references": [
         {
@@ -2568,11 +4121,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/reorder-recent-projects.use-case.ts",
       "references": [
         {
@@ -2592,11 +4168,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-detection.ts",
       "references": [
         {
@@ -2616,11 +4215,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/fs",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/fs"
+      },
+      "layer": "src/infrastructure/fs/source",
       "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
       "references": [
         {
@@ -2640,11 +4262,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/reference-tags",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/reference-tags"
+      },
+      "layer": "src/infrastructure/reference-tags/source",
       "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution.ts",
       "references": [
         {
@@ -2664,11 +4309,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/reference-tags",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/reference-tags"
+      },
+      "layer": "src/infrastructure/reference-tags/source",
       "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-result.ts",
       "references": [
         {
@@ -2688,11 +4356,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
       "path": "src/infrastructure/sdd/fs-project-analysis-backup.ts",
       "references": [
         {
@@ -2712,11 +4403,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/spec-chat",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/spec-chat"
+      },
+      "layer": "src/infrastructure/spec-chat/source",
       "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
       "references": [
         {
@@ -2736,11 +4450,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/App.tsx",
       "references": [
         {
@@ -2760,11 +4497,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts",
       "references": [
         {
@@ -2784,11 +4544,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
       "references": [
         {
@@ -2808,11 +4591,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
       "references": [
         {
@@ -2832,11 +4638,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
       "references": [
         {
@@ -2856,11 +4685,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
       "references": [
         {
@@ -2880,11 +4732,32 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/preload/index.ts 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "preload",
+        "cluster": "preload/preload"
+      },
+      "layer": "preload/preload/entrypoint",
       "path": "src/preload/index.ts",
       "references": [
         {
@@ -2904,11 +4777,34 @@
         }
       ],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-analysis-model.ts",
       "references": [
         {
@@ -2923,11 +4819,34 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 33건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 35건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/app-settings",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/app-settings"
+      },
+      "layer": "src/application/app-settings/source",
       "path": "src/application/app-settings/app-settings.ports.ts",
       "references": [
         {
@@ -2942,11 +4861,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 9건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 9건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/sdd-ipc.ts",
       "references": [
         {
@@ -2961,11 +4903,34 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/settings-ipc.ts",
       "references": [
         {
@@ -2980,11 +4945,32 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/renderer/features/agent-cli-settings/index.ts 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/entrypoint",
       "path": "src/renderer/features/agent-cli-settings/index.ts",
       "references": [
         {
@@ -2999,11 +4985,34 @@
         }
       ],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
       "references": [
         {
@@ -3018,11 +5027,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/analyze-project.use-case.ts",
       "references": [
         {
@@ -3037,11 +5069,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/cancel-project-reference-tag-generation.use-case.ts",
       "references": [
         {
@@ -3056,11 +5111,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/select-project-directory.use-case.ts",
       "references": [
         {
@@ -3075,11 +5153,76 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
+      "path": "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster infrastructure/infrastructure",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "infrastructure/infrastructure"
+      },
+      "layer": "infrastructure/infrastructure/source",
       "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
       "references": [
         {
@@ -3094,11 +5237,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/spec-chat",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/spec-chat"
+      },
+      "layer": "src/infrastructure/spec-chat/source",
       "path": "src/infrastructure/spec-chat/project-spec-chat-codex-prompt.ts",
       "references": [
         {
@@ -3113,11 +5279,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/spec-chat",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/spec-chat"
+      },
+      "layer": "src/infrastructure/spec-chat/source",
       "path": "src/infrastructure/spec-chat/project-spec-chat-codex-result.ts",
       "references": [
         {
@@ -3132,11 +5321,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
       "references": [
         {
@@ -3151,11 +5363,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
       "references": [
         {
@@ -3170,11 +5405,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-progress-tasks.ts",
       "references": [
         {
@@ -3189,11 +5447,32 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/renderer/main.tsx 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/entrypoint",
       "path": "src/renderer/main.tsx",
       "references": [
         {
@@ -3208,11 +5487,34 @@
         }
       ],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/contracts/result.ts",
       "references": [
         {
@@ -3222,11 +5524,34 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 60건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 60건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-errors.ts",
       "references": [
         {
@@ -3236,11 +5561,34 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 26건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 26건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-spec-model.ts",
       "references": [
         {
@@ -3250,11 +5598,34 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 20건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 20건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
       "references": [
         {
@@ -3264,39 +5635,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 5건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 5건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
         }
-      ],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
       "references": [
         {
@@ -3306,11 +5672,108 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
+      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/types.ts",
       "references": [
         {
@@ -3320,11 +5783,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/agent-cli-settings/utils.ts",
       "references": [
         {
@@ -3334,11 +5820,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
       "references": [
         {
@@ -3348,11 +5857,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/renderer-sdd-api.ts",
       "references": [
         {
@@ -3362,11 +5894,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/components/AppViewSwitcher.tsx",
       "references": [
         {
@@ -3376,11 +5931,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
       "references": [
         {
@@ -3390,11 +5968,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
       "references": [
         {
@@ -3404,11 +6005,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
       "references": [
         {
@@ -3418,11 +6042,32 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/renderer/features/project-bootstrap/index.ts 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/entrypoint",
       "path": "src/renderer/features/project-bootstrap/index.ts",
       "references": [
         {
@@ -3432,10 +6077,33 @@
         }
       ],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 scripts",
+            "반복 cluster scripts",
+            "fallback layer scripts/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "scripts",
+        "cluster": "scripts"
+      },
       "layer": "scripts/source",
       "path": "scripts/prepare-dev-mac-app.ts",
       "references": [
@@ -3446,11 +6114,34 @@
         }
       ],
       "role": "scripts 소스",
-      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "application",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/project-analysis-draft-merger.ts",
       "references": [
         {
@@ -3460,11 +6151,34 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
       "references": [
         {
@@ -3474,11 +6188,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis-summary.ts",
       "references": [
         {
@@ -3488,11 +6225,34 @@
         }
       ],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "main",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 main",
+            "반복 cluster main/main",
+            "fallback layer main"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/source",
       "path": "src/main/create-main-window.ts",
       "references": [
         {
@@ -3502,11 +6262,34 @@
         }
       ],
       "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "main",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 main",
+            "반복 cluster main/main",
+            "fallback layer main"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/source",
       "path": "src/main/ipc/register-project-ipc.ts",
       "references": [
         {
@@ -3516,11 +6299,34 @@
         }
       ],
       "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
       "references": [
         {
@@ -3530,11 +6336,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
       "references": [
         {
@@ -3544,11 +6373,34 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
     },
     {
       "category": "type",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "파일명과 경로 규칙에서 type 역할을 추정했습니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/type",
       "path": "src/renderer/global.d.ts",
       "references": [
         {
@@ -3558,10 +6410,33 @@
         }
       ],
       "role": "렌더러 타입",
-      "summary": "렌더러 타입입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+      "summary": "렌더러 타입입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 scripts",
+            "반복 cluster scripts",
+            "fallback layer scripts/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "scripts",
+        "cluster": "scripts"
+      },
       "layer": "scripts/source",
       "path": "scripts/run-dev.ts",
       "references": [
@@ -3572,11 +6447,34 @@
         }
       ],
       "role": "scripts 소스",
-      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
       "references": [
         {
@@ -3586,255 +6484,957 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 없음.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 30건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 30건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/app-settings/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/app-settings/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/app-settings/agent-cli-connection-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 26건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 26건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-session-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 16건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 16건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "domain/project/source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
       "path": "src/domain/project/project-reference-tag-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 15건."
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 15건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/fs",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/fs"
+      },
+      "layer": "src/infrastructure/fs/source",
       "path": "src/infrastructure/fs/write-json-atomically.ts",
       "references": [],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 6건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 6건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/app-view.ts",
       "references": [],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 5건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 5건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/ipc/ipc-bridge.ts",
       "references": [],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 4건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 4건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/app/app-display-name.ts",
       "references": [],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "shared",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 shared",
+            "반복 cluster shared/shared",
+            "fallback layer shared"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "shared",
+        "cluster": "shared/shared"
+      },
+      "layer": "shared/shared/source",
       "path": "src/shared/contracts/app-error.ts",
       "references": [],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건."
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 3건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/agent-cli",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/agent-cli"
+      },
+      "layer": "src/infrastructure/agent-cli/source",
       "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
       "references": [],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
-      "references": [],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
-      "references": [],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
-      "references": [],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
-      "references": [],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
-      "references": [],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건."
-    },
-    {
-      "category": "entrypoint",
-      "layer": "entrypoint",
-      "path": "src/renderer/styles/app.css",
-      "references": [],
-      "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
-      "references": [],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
-      "references": [],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
-      "references": [],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "infrastructure",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
       "path": "src/infrastructure/analysis/project-analysis.constants.ts",
       "references": [],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "infrastructure",
-      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
+      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
       "references": [],
       "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "main",
-      "path": "src/main/apply-mac-app-icon.ts",
-      "references": [],
-      "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
-    },
-    {
-      "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
       "references": [],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
       "references": [],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
     },
     {
       "category": "entrypoint",
-      "layer": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/renderer/styles/app.css 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/entrypoint",
+      "path": "src/renderer/styles/app.css",
+      "references": [],
+      "role": "진입점 후보",
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
+      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
+      "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/analysis",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/analysis"
+      },
+      "layer": "src/infrastructure/analysis/source",
+      "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/reference-tags",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/reference-tags"
+      },
+      "layer": "src/infrastructure/reference-tags/source",
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+      "references": [],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 main",
+            "반복 cluster main/main",
+            "fallback layer main"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "main",
+        "cluster": "main/main"
+      },
+      "layer": "main/main/source",
+      "path": "src/main/apply-mac-app-icon.ts",
+      "references": [],
+      "role": "메인 소스",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "entrypoint",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "진입점 후보 목록에 src/renderer/index.html 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.86,
+          "reasons": [
+            "진입점 후보를 독립 레이어로 유지합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/entrypoint",
       "path": "src/renderer/index.html",
       "references": [],
       "role": "진입점 후보",
-      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다."
+      "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "config",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "주요 설정 파일 목록에 electron.vite.config.ts 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.92,
+          "reasons": [
+            "설정 파일은 config 레이어로 고정합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "config",
+        "cluster": "config"
+      },
       "layer": "config",
       "path": "electron.vite.config.ts",
       "references": [],
       "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "config",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "주요 설정 파일 목록에 eslint.config.mjs 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.92,
+          "reasons": [
+            "설정 파일은 config 레이어로 고정합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "config",
+        "cluster": "config"
+      },
       "layer": "config",
       "path": "eslint.config.mjs",
       "references": [],
       "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "config",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "주요 설정 파일 목록에 package.json 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.92,
+          "reasons": [
+            "설정 파일은 config 레이어로 고정합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "config",
+        "cluster": "config"
+      },
       "layer": "config",
       "path": "package.json",
       "references": [],
       "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "config",
+      "classification": {
+        "category": {
+          "confidence": 0.98,
+          "reasons": [
+            "주요 설정 파일 목록에 tsconfig.json 가 포함되었습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.92,
+          "reasons": [
+            "설정 파일은 config 레이어로 고정합니다."
+          ],
+          "status": "confirmed"
+        }
+      },
+      "grouping": {
+        "area": "config",
+        "cluster": "config"
+      },
       "layer": "config",
       "path": "tsconfig.json",
       "references": [],
       "role": "설정 파일",
-      "summary": "정적 분석에서 확인한 주요 설정 파일입니다."
+      "summary": "정적 분석에서 확인한 주요 설정 파일입니다.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 scripts",
+            "반복 cluster scripts",
+            "fallback layer scripts/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "scripts",
+        "cluster": "scripts"
+      },
       "layer": "scripts/source",
       "path": "scripts/generate-icon-assets.ts",
       "references": [],
       "role": "scripts 소스",
-      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음."
+      "summary": "scripts 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음.",
+      "unresolvedReferences": []
     },
     {
       "category": "source",
-      "layer": "renderer",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-system-color-scheme.ts",
       "references": [],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음."
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 없음.",
+      "unresolvedReferences": []
     }
   ]
 }

@@ -1,4 +1,5 @@
 import type { ProjectAnalysisContext } from '@/domain/project/project-analysis-model';
+import { createEmptyProjectAnalysisReferenceAnalysis } from '@/domain/project/project-analysis-model';
 import { ANALYSIS_CONTEXT_SCHEMA_VERSION } from '@/domain/project/project-model';
 import type { ProjectAnalysisScanState } from '@/infrastructure/analysis/project-analysis-scanner';
 
@@ -24,6 +25,7 @@ export function createProjectAnalysisDetection(
     entrypoints: scanState.entrypoints,
     hasPackageJson: scanState.packageJson !== null,
     reachedDirectoryLimit: scanState.reachedDirectoryLimit,
+    reachedDepthLimit: scanState.reachedDepthLimit,
     reachedFileLimit: scanState.reachedFileLimit,
   });
   const confidence = calculateConfidence({
@@ -55,6 +57,7 @@ export function createProjectAnalysisDetection(
       connections: [],
       documentLinks: [],
       fileReferences: [],
+      referenceAnalysis: createEmptyProjectAnalysisReferenceAnalysis(),
     },
     confidence,
     detectedFrameworks,
@@ -153,6 +156,7 @@ function buildUnknowns(input: {
   entrypoints: Set<string>;
   hasPackageJson: boolean;
   reachedDirectoryLimit: boolean;
+  reachedDepthLimit: boolean;
   reachedFileLimit: boolean;
 }): string[] {
   const unknowns = new Set<string>();
@@ -169,7 +173,7 @@ function buildUnknowns(input: {
     unknowns.add('명확한 진입점을 자동으로 찾지 못했습니다.');
   }
 
-  if (input.reachedDirectoryLimit || input.reachedFileLimit) {
+  if (input.reachedDepthLimit || input.reachedDirectoryLimit || input.reachedFileLimit) {
     unknowns.add('스캔 범위를 제한해 일부 폴더는 분석에서 제외되었습니다.');
   }
 

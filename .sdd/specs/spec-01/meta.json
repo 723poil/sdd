@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "spec-01",
+  "slug": "spec-01",
+  "title": "프로젝트 구조 발견형 참조 분석기 고도화",
+  "status": "draft",
+  "createdAt": "2026-03-25T23:20:32.623Z",
+  "updatedAt": "2026-03-25T23:32:59.304Z",
+  "revision": 2,
+  "latestVersion": "v2",
+  "summary": "고정 패턴 중심의 참조 분석을 구조 발견형 분석기로 개선한다. 현재 지원 언어의 reference coverage와 file index 분류 유연성을 함께 높이는 명세다."
+}

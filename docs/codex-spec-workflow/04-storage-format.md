@@ -115,6 +115,7 @@
 - `connections`
 - `documentLinks`
 - `fileReferences`
+- `referenceAnalysis`
 - `unknowns`
 - `confidence`
 
@@ -125,6 +126,10 @@
 - `documentLayouts`는 문서 맵 카드의 사용자 배치 좌표를 저장하며, 재분석 후에도 유지한다
 - `documentLinks`는 분석 문서 간 연결선을 저장하는 구조화 데이터다
 - `fileReferences`는 파일 인덱스 기반의 파일 간 참조 관계를 저장하는 구조화 데이터다
+- `referenceAnalysis`는 구조 발견 결과, 미해결 참조, 스캔 한도 도달 정보를 함께 저장하는 보조 계약이다
+- `referenceAnalysis.structureDiscovery`는 `packageRoots`, `sourceRoots`, `aliasConfigPaths`, `featureClusters`, `notes`를 가진다
+- `referenceAnalysis.unresolvedFileReferences`는 해석 실패를 버리지 않고 `from`, `specifier`, `resolutionKind`, `reason`, `confidence`, `candidatePaths`로 남긴다
+- `referenceAnalysis.scanLimits`는 `depth`, `directory`, `file` 한도 도달 사실과 limit 값을 기록한다
 
 ### `.sdd/analysis/summary.md`
 
@@ -207,14 +212,25 @@
 - `layer`
 - `category`
 - `summary`
+- `grouping`
+- `classification`
 - `references`
+- `unresolvedReferences`
 
 주의:
 
 - `references`는 해당 파일이 참조하는 다른 인덱스 파일들의 목록이다
 - 각 참조는 `path`, `relationship`, `reason`을 가진다
+- `grouping`은 renderer가 raw layer 문자열을 다시 추측하지 않도록 `area`, `cluster`를 함께 저장한다
+- `classification`은 `category`와 `layer`가 확정인지 추정인지, confidence와 reasons를 함께 가진다
+- `unresolvedReferences`는 해당 파일에서 해석하지 못한 import/use/include/load/type 참조를 별도 배열로 유지한다
 - 이 정보는 중앙 분석 화면에서 파일 간 연결 관계를 보여줄 때 사용한다
 - `file-index.json`은 analyzer 출력의 재생성 대상이고, 수동 reference-tag/assignment는 이 파일과 분리해 유지한다
+
+추가 버전 규칙:
+
+- `context.json` 계약이 `referenceAnalysis`를 포함하도록 바뀌면 `schemaVersion`을 올리고 이전 버전 읽기 migration을 함께 둔다
+- `file-index.json` 계약이 `grouping`, `classification`, `unresolvedReferences`를 포함하도록 바뀌면 이전 버전 읽기 fallback을 함께 둔다
 
 ### `.sdd/analysis/manual-reference-tags.json`
 

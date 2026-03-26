@@ -34,9 +34,7 @@ import {
   resolveReferenceMapViewportFrame,
   resolveRoleGroupDisplayName,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic';
-import {
-  MIN_SELECTED_NODE_FOCUS_SCALE,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants';
+import { MIN_SELECTED_NODE_FOCUS_SCALE } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants';
 import type {
   AnalysisInteractionState,
   AnalysisReferenceMapProps,
@@ -68,6 +66,22 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     () => props.analysis.referenceTags ?? createEmptyProjectReferenceTagDocument(),
     [props.analysis.referenceTags],
   );
+  const fileIndexEntryByPath = useMemo(
+    () => new Map(props.analysis.fileIndex.map((entry) => [entry.path, entry] as const)),
+    [props.analysis.fileIndex],
+  );
+  const unresolvedReferenceCount =
+    props.analysis.context.referenceAnalysis.unresolvedFileReferences.length;
+  const scanLimitCount = props.analysis.context.referenceAnalysis.scanLimits.length;
+  const inferredFileCount = useMemo(
+    () =>
+      props.analysis.fileIndex.filter((entry) => {
+        const categoryStatus = entry.classification?.category.status;
+        const layerStatus = entry.classification?.layer?.status ?? null;
+        return categoryStatus === 'inferred' || layerStatus === 'inferred';
+      }).length,
+    [props.analysis.fileIndex],
+  );
   const areaScopedPaths = useMemo(() => {
     if (activeAreaNames.length === 0) {
       return null;
@@ -76,7 +90,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
     return new Set(
       props.analysis.fileIndex
         .filter((entry) =>
-          activeAreaNameSet.has(resolveClusterAreaName(resolveNodeClusterName(entry.layer))),
+          activeAreaNameSet.has(resolveClusterAreaName(resolveNodeClusterName(entry))),
         )
         .map((entry) => entry.path),
     );
@@ -144,6 +158,10 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
   const selectedNode = useMemo(
     () => visibleGraph.nodes.find((node) => node.path === selectedPath) ?? null,
     [selectedPath, visibleGraph.nodes],
+  );
+  const selectedEntry = useMemo(
+    () => (selectedNode ? (fileIndexEntryByPath.get(selectedNode.path) ?? null) : null),
+    [fileIndexEntryByPath, selectedNode],
   );
   const outgoingEdges = useMemo(
     () => (selectedPath ? visibleGraph.edges.filter((edge) => edge.from === selectedPath) : []),
@@ -325,13 +343,7 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
         stageSize,
         viewport,
       }),
-    [
-      selectedPath,
-      stageSize,
-      viewport,
-      visibleGraph.edges,
-      visibleGraph.nodes,
-    ],
+    [selectedPath, stageSize, viewport, visibleGraph.edges, visibleGraph.nodes],
   );
 
   const returnToHomeViewport = () => {
@@ -597,12 +609,16 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                 <h3 className="analysis-empty-panel__title">
                   {hasActiveFilters
                     ? '선택한 영역과 태그에 맞는 파일이 없습니다.'
-                    : '파일 참조 맵이 아직 없습니다.'}
+                    : unresolvedReferenceCount > 0
+                      ? '해결된 참조선은 없지만 미해결 참조는 있습니다.'
+                      : '파일 참조 맵이 아직 없습니다.'}
                 </h3>
                 <p className="analysis-empty-panel__description">
                   {hasActiveFilters
                     ? '영역 또는 태그 선택을 조정해 다른 파일 관계를 확인해 주세요.'
-                    : '현재 분석 결과에는 별도로 시각화할 파일 참조선이 없습니다.'}
+                    : unresolvedReferenceCount > 0
+                      ? '오른쪽 요약에서 미해결 참조와 스캔 상태를 먼저 확인해 주세요.'
+                      : '현재 분석 결과에는 별도로 시각화할 파일 참조선이 없습니다.'}
                 </p>
               </div>
             </div>
@@ -865,6 +881,12 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                       {visibleGraph.edges.length}개
                     </strong>
                   </span>
+                  <span className="analysis-reference-map__stat">
+                    <span className="analysis-reference-map__summary-label">미해결</span>
+                    <strong className="analysis-reference-map__summary-value">
+                      {unresolvedReferenceCount}건
+                    </strong>
+                  </span>
                 </div>
               </div>
 
@@ -873,6 +895,16 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                   대규모 참조 맵이라 대표 파일 {graph.retainedNodeCount}/{graph.totalNodeCount}
                   개와 참조선 {graph.edges.length}/{graph.totalEdgeCount}건만 우선 표시합니다.
                   영역이나 태그로 좁히면 더 가볍게 확인할 수 있습니다.
+                </p>
+              ) : null}
+
+              {unresolvedReferenceCount > 0 || scanLimitCount > 0 || inferredFileCount > 0 ? (
+                <p className="analysis-reference-map__empty-copy">
+                  {compactDiagnosticsText({
+                    inferredFileCount,
+                    scanLimitCount,
+                    unresolvedReferenceCount,
+                  })}
                 </p>
               ) : null}
 
@@ -984,6 +1016,17 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
                       <span className="analysis-reference-map__meta-chip">
                         들어옴 {selectedNode.incomingCount}개
                       </span>
+                      {selectedEntry?.classification?.category.status &&
+                      selectedEntry.classification.category.status !== 'confirmed' ? (
+                        <span className="analysis-reference-map__meta-chip">
+                          분류 {selectedEntry.classification.category.status}
+                        </span>
+                      ) : null}
+                      {(selectedEntry?.unresolvedReferences?.length ?? 0) > 0 ? (
+                        <span className="analysis-reference-map__meta-chip">
+                          미해결 {selectedEntry?.unresolvedReferences?.length ?? 0}건
+                        </span>
+                      ) : null}
                       {selectedNode.tagLabels.map((tagLabel) => (
                         <span className="analysis-reference-map__meta-chip" key={tagLabel}>
                           태그 {tagLabel}
@@ -1098,4 +1141,26 @@ export function AnalysisReferenceMap(props: AnalysisReferenceMapProps) {
       </div>
     </section>
   );
+}
+
+function compactDiagnosticsText(input: {
+  inferredFileCount: number;
+  scanLimitCount: number;
+  unresolvedReferenceCount: number;
+}): string {
+  const parts: string[] = [];
+
+  if (input.unresolvedReferenceCount > 0) {
+    parts.push(`미해결 참조 ${input.unresolvedReferenceCount}건`);
+  }
+
+  if (input.scanLimitCount > 0) {
+    parts.push(`스캔 한도 도달 ${input.scanLimitCount}건`);
+  }
+
+  if (input.inferredFileCount > 0) {
+    parts.push(`추정 분류 파일 ${input.inferredFileCount}개`);
+  }
+
+  return parts.join(' · ');
 }

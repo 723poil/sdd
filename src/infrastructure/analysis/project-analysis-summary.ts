@@ -54,6 +54,8 @@ function createQuickSummarySection(input: {
         `패키지 매니저: ${input.packageManager ?? '확인하지 못함'}`,
         `정적 분석 대상 파일: ${input.context.files.length}개`,
         `파일 참조 관계: ${input.context.fileReferences.length}건`,
+        `미해결 참조: ${input.context.referenceAnalysis.unresolvedFileReferences.length}건`,
+        `스캔 한도 도달: ${input.context.referenceAnalysis.scanLimits.length}건`,
         `핵심 레이어: ${formatCommaList(importantLayers, '확인 중')}`,
       ]),
       '분석 요약 정보를 아직 정리하지 못했습니다.',
