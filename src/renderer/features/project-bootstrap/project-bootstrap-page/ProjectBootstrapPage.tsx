@@ -74,6 +74,9 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleCancelReferenceTagGeneration = () => {
     workbench.onCancelReferenceTagGeneration();
   };
+  const handleCancelSessionMessage = () => {
+    workbench.onCancelSessionMessage();
+  };
   const handleCancelBottomStatusTask = (task: WorkbenchProgressTask) => {
     if (task.kind === 'analysis') {
       workbench.onCancelAnalysis(task.rootPath ?? undefined);
@@ -82,6 +85,11 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
 
     if (task.kind === 'reference-tags-generate') {
       workbench.onCancelReferenceTagGeneration(task.rootPath ?? undefined);
+      return;
+    }
+
+    if (task.kind === 'message-send') {
+      workbench.onCancelSessionMessage(task.rootPath ?? undefined, task.sessionId ?? undefined);
     }
   };
   const handleSendMessage = () => {
@@ -249,10 +257,13 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               isCreatingSpec={workbench.isCreatingSpec}
               isCreatingSession={workbench.isCreatingSession}
               isSavingChatRuntimeSettings={workbench.isSavingChatRuntimeSettings}
+              canCancelMessage={workbench.canCancelMessage}
+              isCancellingMessage={workbench.isCancellingMessage}
               isSendingMessage={workbench.isSendingMessage}
               onAnalyzeProject={handleAnalyzeProject}
               onAnalyzeReferences={handleAnalyzeReferences}
               onCancelAnalysis={handleCancelAnalysis}
+              onCancelMessage={handleCancelSessionMessage}
               onChangeChatModel={handleChangeChatModel}
               onChangeChatReasoningEffort={handleChangeChatReasoningEffort}
               onChangeDraftMessage={handleChangeDraftMessage}
@@ -261,6 +272,7 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               onToggleSidebar={handleToggleRightSidebar}
               selectedSpec={workbench.selectedSpec}
               selectedSession={workbench.selectedSession}
+              sessionMessageRunStatus={workbench.selectedSessionMessageRunStatus}
               sessionMessages={workbench.sessionMessages}
             />
           ) : (

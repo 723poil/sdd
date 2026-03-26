@@ -8,6 +8,7 @@ import type { ProjectReferenceTagDocument } from '@/domain/project/project-refer
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessageRunStatus,
   ProjectSessionMeta,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
@@ -29,6 +30,7 @@ import type {
   RemoveRecentProjectInput,
   ReadProjectAnalysisInput,
   ReadProjectAnalysisRunStatusInput,
+  ReadProjectSessionMessageRunStatusInput,
   ReadProjectSessionMessagesInput,
   ReadProjectSpecsInput,
   RenameProjectInput,
@@ -38,6 +40,7 @@ import type {
   SaveProjectAnalysisDocumentLayoutsInput,
   SaveProjectReferenceTagsInput,
   SelectProjectDirectoryOutput,
+  CancelProjectSessionMessageInput,
   SendProjectSessionMessageInput,
   SendProjectSessionMessageOutput,
 } from '@/shared/ipc/project-ipc';
@@ -130,9 +133,17 @@ export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): R
       ReadProjectSessionMessagesInput,
       Result<ProjectSessionMessage[]>
     >(invoke, projectIpcChannels.readSessionMessages),
+    readSessionMessageRunStatus: bindIpcInvoke1<
+      ReadProjectSessionMessageRunStatusInput,
+      Result<ProjectSessionMessageRunStatus>
+    >(invoke, projectIpcChannels.readSessionMessageRunStatus),
     sendSessionMessage: bindIpcInvoke1<
       SendProjectSessionMessageInput,
       Result<SendProjectSessionMessageOutput>
     >(invoke, projectIpcChannels.sendSessionMessage),
+    cancelSessionMessage: bindIpcInvoke1<
+      CancelProjectSessionMessageInput,
+      Result<ProjectSessionMessageRunStatus>
+    >(invoke, projectIpcChannels.cancelSessionMessage),
   };
 }

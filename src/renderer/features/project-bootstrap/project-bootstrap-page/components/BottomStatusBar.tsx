@@ -578,7 +578,11 @@ function getCancellableTask(
     return null;
   }
 
-  if (task.kind !== 'analysis' && task.kind !== 'reference-tags-generate') {
+  if (task.kind === 'message-send') {
+    if (typeof task.sessionId !== 'string') {
+      return null;
+    }
+  } else if (task.kind !== 'analysis' && task.kind !== 'reference-tags-generate') {
     return null;
   }
 
@@ -597,6 +601,8 @@ function getCancelTaskButtonLabel(task: WorkbenchProgressTask): string {
   switch (task.kind) {
     case 'analysis':
       return '분석 취소';
+    case 'message-send':
+      return '응답 취소';
     case 'reference-tags-generate':
       return '태그 생성 취소';
     default:

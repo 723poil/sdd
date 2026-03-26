@@ -8,6 +8,7 @@ import type { ProjectInspection } from '@/domain/project/project-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessageRunStatus,
   ProjectSessionMessageRole,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
@@ -37,14 +38,18 @@ interface InfoSidebarProps {
   chatModel: string;
   chatReasoningEffort: AgentCliModelReasoningEffort;
   isCreatingSession: boolean;
+  canCancelMessage: boolean;
+  isCancellingMessage: boolean;
   isSendingMessage: boolean;
   isSavingChatRuntimeSettings: boolean;
+  sessionMessageRunStatus: ProjectSessionMessageRunStatus | null;
   onChangeChatModel: (value: string) => void;
   onChangeChatReasoningEffort: (value: AgentCliModelReasoningEffort) => void;
   onChangeDraftMessage: (value: string) => void;
   onAnalyzeProject: () => void;
   onAnalyzeReferences: () => void;
   onCancelAnalysis: () => void;
+  onCancelMessage: () => void;
   onCreateSpec: () => void;
   onSendMessage: () => void;
   onToggleSidebar: () => void;
@@ -65,18 +70,18 @@ export function InfoSidebar(props: InfoSidebarProps) {
     props.selectedSpec !== null &&
     props.selectedSession !== null &&
     !props.isCreatingSession;
+  const isMessageRequestActive = props.isSendingMessage || props.isCancellingMessage;
   const canSendMessage =
-    canWriteMessage && props.draftMessage.trim().length > 0 && !props.isSendingMessage;
-  const composerStatusMessage = props.isSavingChatRuntimeSettings
-    ? '채팅 설정을 저장 중입니다.'
-    : props.isSendingMessage
-      ? '전송 중입니다.'
+    canWriteMessage && props.draftMessage.trim().length > 0 && !isMessageRequestActive;
+  const composerStatusMessage = props.sessionMessageRunStatus
+    ? getComposerStatusMessage(props.sessionMessageRunStatus)
+    : props.isSavingChatRuntimeSettings
+      ? '채팅 설정을 저장 중입니다.'
       : null;
   const chatLogEndRef = useRef<HTMLDivElement | null>(null);
   const timelineMessages = getTimelineMessages({
-    draftMessage: props.draftMessage,
-    isSendingMessage: props.isSendingMessage,
     sessionMessages: props.sessionMessages,
+    sessionMessageRunStatus: props.sessionMessageRunStatus,
   });
 
   useEffect(() => {
@@ -191,7 +196,9 @@ export function InfoSidebar(props: InfoSidebarProps) {
 
             <div
               className={`info-sidebar-chat-composer ${
-                canWriteMessage ? '' : 'info-sidebar-chat-composer--locked'
+                canWriteMessage && !isMessageRequestActive
+                  ? ''
+                  : 'info-sidebar-chat-composer--locked'
               }`}
             >
               <textarea
@@ -201,10 +208,12 @@ export function InfoSidebar(props: InfoSidebarProps) {
                 }}
                 placeholder={
                   canWriteMessage
-                    ? '명세에 반영할 요구사항이나 질문을 입력하세요.'
+                    ? isMessageRequestActive
+                      ? '응답을 기다리는 동안에는 입력할 수 없습니다.'
+                      : '명세에 반영할 요구사항이나 질문을 입력하세요.'
                     : '명세를 선택하면 채팅할 수 있습니다.'
                 }
-                readOnly={!canWriteMessage}
+                readOnly={!canWriteMessage || isMessageRequestActive}
                 rows={canWriteMessage ? 3 : 1}
                 value={props.draftMessage}
               />
@@ -218,7 +227,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
                   <select
                     aria-label="현재 모델"
                     className="info-sidebar-chat-composer__runtime-select"
-                    disabled={props.isSavingChatRuntimeSettings}
+                    disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
                     onChange={(event) => {
                       props.onChangeChatModel(event.target.value);
                     }}
@@ -233,7 +242,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
                   <select
                     aria-label="현재 추론 강도"
                     className="info-sidebar-chat-composer__runtime-select"
-                    disabled={props.isSavingChatRuntimeSettings}
+                    disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
                     onChange={(event) => {
                       props.onChangeChatReasoningEffort(
                         event.target.value as AgentCliModelReasoningEffort,
@@ -248,28 +257,55 @@ export function InfoSidebar(props: InfoSidebarProps) {
                     ))}
                   </select>
                 </div>
-                <button
-                  aria-label={props.isSendingMessage ? '메시지 전송 중' : '메시지 전송'}
-                  className="primary-button info-sidebar-chat-composer__submit"
-                  disabled={!canSendMessage}
-                  onClick={props.onSendMessage}
-                  type="button"
-                >
-                  <svg
-                    aria-hidden="true"
-                    className="info-sidebar-chat-composer__submit-icon"
-                    fill="none"
-                    viewBox="0 0 20 20"
+                {props.canCancelMessage ? (
+                  <button
+                    aria-label={props.isCancellingMessage ? '요청 취소 중' : '요청 취소'}
+                    className="primary-button info-sidebar-chat-composer__submit info-sidebar-chat-composer__submit--cancel"
+                    disabled={props.isCancellingMessage}
+                    onClick={props.onCancelMessage}
+                    title={props.isCancellingMessage ? '요청 취소 중' : '요청 취소'}
+                    type="button"
                   >
-                    <path
-                      d="M10 15V5M5 10l5-5 5 5"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.9"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      aria-hidden="true"
+                      className="info-sidebar-chat-composer__submit-icon"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M6.5 6.5h7v7h-7Z"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                      />
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    aria-label="메시지 전송"
+                    className="primary-button info-sidebar-chat-composer__submit"
+                    disabled={!canSendMessage}
+                    onClick={props.onSendMessage}
+                    title="메시지 전송"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="info-sidebar-chat-composer__submit-icon"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 15V5M5 10l5-5 5 5"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.9"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           </>
@@ -376,9 +412,8 @@ function getEmptyStateDescription(
 }
 
 function getTimelineMessages(input: {
-  draftMessage: string;
-  isSendingMessage: boolean;
   sessionMessages: ProjectSessionMessage[];
+  sessionMessageRunStatus: ProjectSessionMessageRunStatus | null;
 }): TimelineMessage[] {
   const baseMessages = input.sessionMessages.map((message) => ({
     createdAt: message.createdAt,
@@ -387,21 +422,51 @@ function getTimelineMessages(input: {
     text: message.text,
   }));
 
-  const trimmedDraftMessage = input.draftMessage.trim();
-  if (!input.isSendingMessage || trimmedDraftMessage.length === 0) {
+  if (
+    !input.sessionMessageRunStatus ||
+    (input.sessionMessageRunStatus.status !== 'running' &&
+      input.sessionMessageRunStatus.status !== 'cancelling')
+  ) {
     return baseMessages;
+  }
+
+  const pendingRequestText = input.sessionMessageRunStatus.requestText?.trim() ?? '';
+  if (pendingRequestText.length === 0) {
+    return baseMessages;
+  }
+
+  const lastMessage = baseMessages[baseMessages.length - 1];
+  if (lastMessage?.role === 'user' && lastMessage.text === pendingRequestText) {
+    return baseMessages.map((message, index) =>
+      index === baseMessages.length - 1 ? { ...message, pending: true } : message,
+    );
   }
 
   return [
     ...baseMessages,
     {
-      createdAt: new Date().toISOString(),
+      createdAt: input.sessionMessageRunStatus.startedAt ?? new Date().toISOString(),
       id: 'pending-user-message',
       pending: true,
       role: 'user',
-      text: trimmedDraftMessage,
+      text: pendingRequestText,
     },
   ];
+}
+
+function getComposerStatusMessage(sessionMessageRunStatus: ProjectSessionMessageRunStatus): string | null {
+  switch (sessionMessageRunStatus.status) {
+    case 'running':
+    case 'cancelling':
+      return sessionMessageRunStatus.progressMessage ?? sessionMessageRunStatus.stageMessage;
+    case 'cancelled':
+      return '요청을 취소했습니다.';
+    case 'failed':
+      return sessionMessageRunStatus.lastError ?? '응답을 만들지 못했습니다.';
+    case 'idle':
+    case 'succeeded':
+      return null;
+  }
 }
 
 function formatMessageTimestamp(value: string): string {

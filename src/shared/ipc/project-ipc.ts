@@ -10,6 +10,7 @@ import type { ProjectReferenceTagDocument } from '@/domain/project/project-refer
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessageRunStatus,
   ProjectSessionMeta,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
@@ -33,7 +34,9 @@ export const projectIpcChannels = {
   listSessions: 'project/list-sessions',
   createSession: 'project/create-session',
   readSessionMessages: 'project/read-session-messages',
+  readSessionMessageRunStatus: 'project/read-session-message-run-status',
   sendSessionMessage: 'project/send-session-message',
+  cancelSessionMessage: 'project/cancel-session-message',
   listRecentProjects: 'project/list-recent-projects',
   removeRecentProject: 'project/remove-recent-project',
   activate: 'project/activate',
@@ -121,12 +124,22 @@ export interface ReadProjectSessionMessagesInput {
   sessionId: string;
 }
 
+export interface ReadProjectSessionMessageRunStatusInput {
+  rootPath: string;
+  sessionId: string;
+}
+
 export interface SendProjectSessionMessageInput {
   model: string;
   modelReasoningEffort: AgentCliModelReasoningEffort;
   rootPath: string;
   sessionId: string;
   text: string;
+}
+
+export interface CancelProjectSessionMessageInput {
+  rootPath: string;
+  sessionId: string;
 }
 
 export interface ActivateProjectInput {
@@ -202,7 +215,13 @@ export interface RendererProjectApi {
   readSessionMessages(
     input: ReadProjectSessionMessagesInput,
   ): Promise<Result<ProjectSessionMessage[]>>;
+  readSessionMessageRunStatus(
+    input: ReadProjectSessionMessageRunStatusInput,
+  ): Promise<Result<ProjectSessionMessageRunStatus>>;
   sendSessionMessage(
     input: SendProjectSessionMessageInput,
   ): Promise<Result<SendProjectSessionMessageOutput>>;
+  cancelSessionMessage(
+    input: CancelProjectSessionMessageInput,
+  ): Promise<Result<ProjectSessionMessageRunStatus>>;
 }

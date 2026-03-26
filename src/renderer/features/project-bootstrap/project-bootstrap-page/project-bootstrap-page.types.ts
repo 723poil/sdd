@@ -10,6 +10,7 @@ import type {
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessageRunStatus as ProjectSessionMessageRunStatusModel,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
@@ -59,6 +60,7 @@ export interface WorkbenchProgressTask {
   detail: string;
   projectName: string | null;
   rootPath: string | null;
+  sessionId: string | null;
   status: WorkbenchProgressTaskStatus;
   startedAt: string;
   updatedAt: string;
@@ -84,8 +86,9 @@ export interface ProjectBootstrapWorkbenchState {
   selectedSessionId: string | null;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpecId: SelectedProjectSpecId;
-  sessionMessages: ProjectSessionMessage[];
-  draftMessage: string;
+  sessionMessagesBySessionKey: Record<string, ProjectSessionMessage[]>;
+  draftMessagesBySessionKey: Record<string, string>;
+  sessionMessageRunStatusesBySessionKey: Record<string, ProjectSessionMessageRunStatusModel>;
   recentProjects: RecentProject[];
   editingProjectRootPath: string | null;
   editingProjectNameDraft: string;
@@ -97,7 +100,6 @@ export interface ProjectBootstrapWorkbenchState {
   isSavingSpec: boolean;
   isCreatingSession: boolean;
   isSavingReferenceTags: boolean;
-  isSendingMessage: boolean;
   isSavingChatRuntimeSettings: boolean;
   isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
@@ -116,12 +118,20 @@ export interface ProjectBootstrapWorkbenchViewModel {
   canCancelAnalysis: boolean;
   projectEntries: RecentProject[];
   selectedSession: ProjectSessionSummary | null;
+  selectedSessionMessageRunStatus: ProjectSessionMessageRunStatusModel | null;
   selectedSpec: ProjectSpecDocument | null;
+  sessionMessages: ProjectSessionMessage[];
+  draftMessage: string;
   storageStatus: StatusBadgeModel;
   isAnalyzing: boolean;
   isCancellingAnalysis: boolean;
+  isCancellingMessage: boolean;
   isGeneratingReferenceTags: boolean;
   isCancellingReferenceTags: boolean;
+  isSendingMessage: boolean;
+  canCancelMessage: boolean;
   progressTasks: WorkbenchProgressTask[];
   workbenchClassName: string;
 }
+
+export type ProjectSessionMessageRunStatus = ProjectSessionMessageRunStatusModel;

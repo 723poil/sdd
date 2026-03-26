@@ -1,6 +1,9 @@
 import type { ProjectInspection } from '@/domain/project/project-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
-import type { ProjectSessionSummary } from '@/domain/project/project-session-model';
+import type {
+  ProjectSessionMessageRunStatus,
+  ProjectSessionSummary,
+} from '@/domain/project/project-session-model';
 
 import type { StatusBadgeModel } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 import type { ProjectAnalysisRunStatus } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
@@ -22,6 +25,13 @@ export function resolveSelectedSession(
   selectedSessionId: string | null,
 ): ProjectSessionSummary | null {
   return sessions.find((session) => session.id === selectedSessionId) ?? sessions[0] ?? null;
+}
+
+export function createProjectSessionStateKey(input: {
+  rootPath: string;
+  sessionId: string;
+}): string {
+  return `${input.rootPath}::${input.sessionId}`;
 }
 
 export function resolveSelectedSpec(
@@ -147,4 +157,21 @@ export function getVisibleAnalysisRunStatus(
   }
 
   return analysisRunStatus;
+}
+
+export function getVisibleSessionMessageRunStatus(
+  sessionMessageRunStatus: ProjectSessionMessageRunStatus | null,
+): ProjectSessionMessageRunStatus | null {
+  if (!sessionMessageRunStatus) {
+    return null;
+  }
+
+  if (
+    sessionMessageRunStatus.status === 'idle' ||
+    sessionMessageRunStatus.status === 'succeeded'
+  ) {
+    return null;
+  }
+
+  return sessionMessageRunStatus;
 }

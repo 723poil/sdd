@@ -18,6 +18,7 @@ import type { ProjectReferenceTagDocument } from '@/domain/project/project-refer
 import type {
   ProjectSessionMessage,
   ProjectSessionMessageRole,
+  ProjectSessionMessageRunStatus,
   ProjectSessionMeta,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
@@ -26,6 +27,11 @@ import type { Result } from '@/shared/contracts/result';
 export interface ProjectAnalysisRunControl {
   signal: AbortSignal;
   status: ProjectAnalysisRunStatus;
+}
+
+export interface ProjectSessionMessageRunControl {
+  signal: AbortSignal;
+  status: ProjectSessionMessageRunStatus;
 }
 
 export interface ProjectDialogPort {
@@ -77,6 +83,40 @@ export interface ProjectAnalysisRunStatusPort {
   }): Result<ProjectAnalysisRunStatus>;
 }
 
+export interface ProjectSessionMessageRunStatusPort {
+  readSessionMessageRunStatus(input: {
+    rootPath: string;
+    sessionId: string;
+  }): Result<ProjectSessionMessageRunStatus>;
+  beginSessionMessageRun(input: {
+    rootPath: string;
+    sessionId: string;
+    requestText: string;
+    stageMessage: string;
+    progressMessage?: string | null;
+    startedAt: string;
+    stepIndex: number;
+    stepTotal: number;
+  }): Result<ProjectSessionMessageRunControl>;
+  cancelSessionMessageRun(input: {
+    rootPath: string;
+    sessionId: string;
+  }): Result<ProjectSessionMessageRunStatus>;
+  updateSessionMessageRunStatus(input: {
+    rootPath: string;
+    sessionId: string;
+    status?: ProjectSessionMessageRunStatus['status'];
+    stageMessage?: string;
+    progressMessage?: string | null;
+    requestText?: string | null;
+    stepIndex?: number;
+    stepTotal?: number;
+    updatedAt?: string;
+    completedAt?: string | null;
+    lastError?: string | null;
+  }): Result<ProjectSessionMessageRunStatus>;
+}
+
 export interface ProjectSessionPort {
   listSessions(input: { rootPath: string }): Promise<Result<ProjectSessionSummary[]>>;
   createSession(input: {
@@ -102,6 +142,7 @@ export interface ProjectSpecChatPort {
     modelReasoningEffort: AgentCliModelReasoningEffort;
     projectName: string;
     rootPath: string;
+    signal: AbortSignal;
     sessionMessages: ProjectSessionMessage[];
     spec: ProjectSpecDocument;
   }): Promise<

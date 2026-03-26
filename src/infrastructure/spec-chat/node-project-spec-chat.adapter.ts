@@ -20,6 +20,12 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
 }): ProjectSpecChatPort {
   return {
     async generateReply(input) {
+      if (input.signal.aborted) {
+        return err(
+          createProjectError('PROJECT_SESSION_MESSAGE_CANCELLED', '채팅 요청을 취소했습니다.'),
+        );
+      }
+
       const rootPath = resolve(input.rootPath);
       const runtimeSettingsResult = await resolveCodexRuntimeSettings({
         agentCliSettingsStore: dependencies.agentCliSettingsStore,
@@ -57,6 +63,7 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
               spec: input.spec,
             }),
             rootPath,
+            signal: input.signal,
           });
           if (!executeResult.ok) {
             return executeResult;

@@ -17,12 +17,14 @@ import type { ProjectReferenceTagDocument } from '@/domain/project/project-refer
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessageRunStatus,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
 import type { AppError } from '@/shared/contracts/app-error';
 import { getRendererSddApi } from '@/renderer/renderer-sdd-api';
 
 import {
+  createProjectSessionStateKey,
   describeInitializationState,
   reorderItems,
   resolveSelectedSession,
@@ -40,6 +42,7 @@ import {
   createEmptyProjectWorkspaceSnapshot,
   readAnalysisRunStatus,
   readCodexConnectionSettings,
+  readProjectSessionMessageRunStatus,
   readProjectWorkspaceSnapshot,
   type ProjectWorkspaceSnapshot,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api';
@@ -53,6 +56,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onAnalyzeReferences(): void;
     onCancelAnalysis(rootPath?: string): void;
     onCancelReferenceTagGeneration(rootPath?: string): void;
+    onCancelSessionMessage(rootPath?: string, sessionId?: string): void;
     onChangeDraftMessage(value: string): void;
     onChangeEditingProjectName(value: string): void;
     onCreateSpec(): void;
@@ -104,8 +108,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   >({});
   const [referenceTagGenerationStatusesByRootPath, setReferenceTagGenerationStatusesByRootPath] =
     useState<Record<string, ReferenceTagGenerationStatus>>({});
-  const [sessionMessages, setSessionMessages] = useState<ProjectSessionMessage[]>([]);
-  const [draftMessage, setDraftMessage] = useState('');
+  const [sessionMessagesBySessionKey, setSessionMessagesBySessionKey] = useState<
+    Record<string, ProjectSessionMessage[]>
+  >({});
+  const [draftMessagesBySessionKey, setDraftMessagesBySessionKey] = useState<
+    Record<string, string>
+  >({});
+  const [sessionMessageRunStatusesBySessionKey, setSessionMessageRunStatusesBySessionKey] =
+    useState<Record<string, ProjectSessionMessageRunStatus>>({});
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [editingProjectRootPath, setEditingProjectRootPath] = useState<string | null>(null);
   const [editingProjectNameDraft, setEditingProjectNameDraft] = useState('');
@@ -117,7 +127,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [isSavingSpec, setIsSavingSpec] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSavingReferenceTags, setIsSavingReferenceTags] = useState(false);
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isSavingChatRuntimeSettings, setIsSavingChatRuntimeSettings] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
@@ -130,6 +139,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     Record<string, ReferenceTagGenerationStatus>
   >({});
   const referenceTagGenerationTaskIdsByRootPathRef = useRef<Record<string, string>>({});
+  const sessionMessageRunStatusesBySessionKeyRef = useRef<
+    Record<string, ProjectSessionMessageRunStatus>
+  >({});
+  const sessionMessageTaskIdsBySessionKeyRef = useRef<Record<string, string>>({});
   const progressTasks = useWorkbenchProgressTasks();
   const analysis = transientAnalysis ?? storedAnalysis;
 
@@ -180,6 +193,43 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     referenceTagGenerationTaskIdsByRootPathRef.current[rootPath] = taskId;
+  };
+
+  const setSessionMessageRunStatus = (input: {
+    rootPath: string;
+    sessionId: string;
+    status: ProjectSessionMessageRunStatus | null;
+  }) => {
+    const sessionKey = createProjectSessionStateKey({
+      rootPath: input.rootPath,
+      sessionId: input.sessionId,
+    });
+
+    setSessionMessageRunStatusesBySessionKey((current) => {
+      const nextStatuses = { ...current };
+
+      if (
+        input.status === null ||
+        input.status.status === 'idle' ||
+        input.status.status === 'succeeded'
+      ) {
+        delete nextStatuses[sessionKey];
+      } else {
+        nextStatuses[sessionKey] = input.status;
+      }
+
+      sessionMessageRunStatusesBySessionKeyRef.current = nextStatuses;
+      return nextStatuses;
+    });
+  };
+
+  const setSessionMessageTaskId = (sessionKey: string, taskId: string | null) => {
+    if (taskId === null) {
+      delete sessionMessageTaskIdsBySessionKeyRef.current[sessionKey];
+      return;
+    }
+
+    sessionMessageTaskIdsBySessionKeyRef.current[sessionKey] = taskId;
   };
 
   const startSessionCreateProgressTask = useEffectEvent(
@@ -375,14 +425,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
   useEffect(() => {
     if (!selectedPath || !selectedSession?.id) {
-      setSessionMessages([]);
       return;
     }
+
+    const sessionKey = createProjectSessionStateKey({
+      rootPath: selectedPath,
+      sessionId: selectedSession.id,
+    });
+    let isCancelled = false;
 
     void (async () => {
       const sddApi = getRendererSddApi();
       if (!sddApi) {
-        setSessionMessages([]);
         return;
       }
 
@@ -390,14 +444,68 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         rootPath: selectedPath,
         sessionId: selectedSession.id,
       });
+      if (isCancelled) {
+        return;
+      }
+
       if (!result.ok) {
-        setSessionMessages([]);
         setErrorMessage(result.error.message);
         return;
       }
 
-      setSessionMessages(result.value);
+      setSessionMessagesBySessionKey((current) => ({
+        ...current,
+        [sessionKey]: result.value,
+      }));
     })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedPath, selectedSession?.id]);
+
+  useEffect(() => {
+    if (!selectedPath || !selectedSession?.id) {
+      return;
+    }
+
+    let isCancelled = false;
+    let timeoutId: number | null = null;
+
+    const refreshSessionMessageRunStatus = async (): Promise<void> => {
+      try {
+        const result = await readProjectSessionMessageRunStatus({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+        });
+        if (isCancelled || !result) {
+          return;
+        }
+
+        setSessionMessageRunStatus({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+          status: result,
+        });
+
+        if (result.status === 'running' || result.status === 'cancelling') {
+          timeoutId = window.setTimeout(() => {
+            void refreshSessionMessageRunStatus();
+          }, 1000);
+        }
+      } catch {
+        return;
+      }
+    };
+
+    void refreshSessionMessageRunStatus();
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, [selectedPath, selectedSession?.id]);
 
   useEffect(() => {
@@ -540,7 +648,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setSelectedSpecId(null);
       setSessions([]);
       setSelectedSessionId(null);
-      setSessionMessages([]);
       setErrorMessage(result.error.message);
       setMessage('프로젝트를 열지 못했습니다.');
       return;
@@ -558,8 +665,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setSelectedAnalysisDocumentId(null);
     setSelectedSpecId(null);
     setSelectedSessionId(null);
-    setSessionMessages([]);
-    setDraftMessage('');
     setEditingProjectRootPath(null);
     setEditingProjectNameDraft('');
     setErrorMessage(null);
@@ -816,8 +921,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setActiveWorkspacePage('specs');
       setSelectedSpecId(result.value.spec.meta.id);
       setSelectedSessionId(null);
-      setSessionMessages([]);
-      setDraftMessage('');
       setMessage(`"${result.value.spec.meta.title}" 명세 채팅을 시작할 수 있습니다.`);
 
       await syncProjectWorkspaceSnapshot({
@@ -840,22 +943,62 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const sessionKey = createProjectSessionStateKey({
+      rootPath: selectedPath,
+      sessionId: selectedSession.id,
+    });
+    const currentRunStatus = sessionMessageRunStatusesBySessionKeyRef.current[sessionKey] ?? null;
+    if (
+      currentRunStatus &&
+      (currentRunStatus.status === 'running' || currentRunStatus.status === 'cancelling')
+    ) {
+      return;
+    }
+
+    const currentDraftMessage = draftMessagesBySessionKey[sessionKey] ?? '';
+    const trimmedDraftMessage = currentDraftMessage.trim();
+    if (trimmedDraftMessage.length === 0) {
+      return;
+    }
+
     const sddApi = getRendererSddApi();
     if (!sddApi) {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
       return;
     }
 
+    const startedAt = new Date().toISOString();
     const sendMessageTask = progressTasks.startRequestProgressTask({
       detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 응답을 기다리고 있습니다.`,
+      isCancellable: true,
       kind: 'message-send',
       projectName: inspection?.projectName ?? null,
       rootPath: selectedPath,
+      sessionId: selectedSession.id,
       title: '채팅 메시지 전송',
     });
+    setSessionMessageTaskId(sessionKey, sendMessageTask.id);
+    setSessionMessageRunStatus({
+      rootPath: selectedPath,
+      sessionId: selectedSession.id,
+      status: {
+        rootPath: selectedPath,
+        sessionId: selectedSession.id,
+        status: 'running',
+        stepIndex: 1,
+        stepTotal: 3,
+        stageMessage: '메시지 저장 중',
+        progressMessage: '대화 로그에 질문을 기록하고 있습니다.',
+        requestText: trimmedDraftMessage,
+        startedAt,
+        updatedAt: startedAt,
+        completedAt: null,
+        lastError: null,
+      },
+    });
 
-    setIsSendingMessage(true);
     setErrorMessage(null);
+    setMessage(`"${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 있습니다.`);
 
     try {
       const result = await sddApi.project.sendSessionMessage({
@@ -863,12 +1006,77 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         modelReasoningEffort: codexConnectionSettings.modelReasoningEffort,
         rootPath: selectedPath,
         sessionId: selectedSession.id,
-        text: draftMessage,
+        text: currentDraftMessage,
       });
       if (!result.ok) {
+        const completedAt = new Date().toISOString();
+        if (result.error.code === 'PROJECT_SESSION_MESSAGE_CANCELLED') {
+          const sessionMessagesResult = await sddApi.project.readSessionMessages({
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+          });
+          if (sessionMessagesResult.ok) {
+            setSessionMessagesBySessionKey((current) => ({
+              ...current,
+              [sessionKey]: sessionMessagesResult.value,
+            }));
+          }
+          setDraftMessagesBySessionKey((current) => {
+            const nextDrafts = { ...current };
+            delete nextDrafts[sessionKey];
+            return nextDrafts;
+          });
+          setSessionMessageRunStatus({
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+            status: {
+              rootPath: selectedPath,
+              sessionId: selectedSession.id,
+              status: 'cancelled',
+              stepIndex: 2,
+              stepTotal: 3,
+              stageMessage: '요청 취소됨',
+              progressMessage: '응답 생성을 취소했습니다.',
+              requestText: null,
+              startedAt,
+              updatedAt: completedAt,
+              completedAt,
+              lastError: null,
+            },
+          });
+          progressTasks.updateRequestProgressTask(sendMessageTask, {
+            detail: `"${selectedSpec.meta.title}" 명세 채팅 응답 생성을 취소했습니다.`,
+            errorMessage: null,
+            isCancellable: false,
+            status: 'cancelled',
+          });
+          setErrorMessage(null);
+          setMessage(`"${selectedSpec.meta.title}" 명세 채팅 응답 생성을 취소했습니다.`);
+          return;
+        }
+
+        setSessionMessageRunStatus({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+          status: {
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+            status: 'failed',
+            stepIndex: 1,
+            stepTotal: 3,
+            stageMessage: '메시지 저장 실패',
+            progressMessage: null,
+            requestText: null,
+            startedAt,
+            updatedAt: completedAt,
+            completedAt,
+            lastError: result.error.message,
+          },
+        });
         progressTasks.updateRequestProgressTask(sendMessageTask, {
           detail: result.error.message,
           errorMessage: result.error.message,
+          isCancellable: false,
           status: 'failed',
         });
         setErrorMessage(result.error.message);
@@ -876,34 +1084,45 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      setSessionMessages((current) => [...current, ...result.value.messages]);
+      setSessionMessagesBySessionKey((current) => ({
+        ...current,
+        [sessionKey]: mergeProjectSessionMessages(current[sessionKey] ?? [], result.value.messages),
+      }));
       const updatedSpec = result.value.spec;
       if (updatedSpec) {
         setSpecs((current) => upsertProjectSpec(current, updatedSpec));
       }
-      setSessions((current) =>
-        current
-          .map((session) =>
-            session.id === result.value.session.id
-              ? {
-                  id: result.value.session.id,
-                  specId: result.value.session.specId,
-                  title: result.value.session.title,
-                  updatedAt: result.value.session.updatedAt,
-                  lastMessageAt: result.value.session.lastMessageAt,
-                  lastMessagePreview: result.value.session.lastMessagePreview,
-                  messageCount: result.value.session.messageCount,
-                }
-              : session,
-          )
-          .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
-      );
-      setDraftMessage('');
+      setSessions((current) => upsertProjectSessionSummary(current, result.value.session));
+      setDraftMessagesBySessionKey((current) => {
+        const nextDrafts = { ...current };
+        delete nextDrafts[sessionKey];
+        return nextDrafts;
+      });
 
       if (result.value.assistantErrorMessage) {
+        const completedAt = new Date().toISOString();
+        setSessionMessageRunStatus({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+          status: {
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+            status: 'failed',
+            stepIndex: 3,
+            stepTotal: 3,
+            stageMessage: '응답 생성 실패',
+            progressMessage: null,
+            requestText: null,
+            startedAt,
+            updatedAt: completedAt,
+            completedAt,
+            lastError: result.value.assistantErrorMessage,
+          },
+        });
         progressTasks.updateRequestProgressTask(sendMessageTask, {
           detail: result.value.assistantErrorMessage,
           errorMessage: result.value.assistantErrorMessage,
+          isCancellable: false,
           status: 'failed',
         });
         setErrorMessage(result.value.assistantErrorMessage);
@@ -913,14 +1132,104 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
+      setSessionMessageRunStatus({
+        rootPath: selectedPath,
+        sessionId: selectedSession.id,
+        status: null,
+      });
       setMessage(`"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`);
       progressTasks.updateRequestProgressTask(sendMessageTask, {
         detail: `"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`,
+        isCancellable: false,
         status: 'succeeded',
       });
     } finally {
-      setIsSendingMessage(false);
+      setSessionMessageTaskId(sessionKey, null);
     }
+  }
+
+  async function handleCancelSessionMessage(
+    rootPathOverride?: string,
+    sessionIdOverride?: string,
+  ): Promise<void> {
+    const rootPath = rootPathOverride ?? selectedPathRef.current;
+    const sessionId = sessionIdOverride ?? selectedSession?.id ?? null;
+    if (!rootPath || !sessionId) {
+      return;
+    }
+
+    const sessionKey = createProjectSessionStateKey({
+      rootPath,
+      sessionId,
+    });
+    const currentStatus = sessionMessageRunStatusesBySessionKeyRef.current[sessionKey] ?? null;
+    if (
+      !currentStatus ||
+      (currentStatus.status !== 'running' && currentStatus.status !== 'cancelling') ||
+      currentStatus.status === 'cancelling'
+    ) {
+      return;
+    }
+
+    const sddApi = getRendererSddApi();
+    if (!sddApi || typeof sddApi.project.cancelSessionMessage !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    const cancellingStatus: ProjectSessionMessageRunStatus = {
+      ...currentStatus,
+      status: 'cancelling',
+      stageMessage: '요청 취소 중',
+      progressMessage: '응답 생성을 종료하고 있습니다.',
+      updatedAt: new Date().toISOString(),
+      completedAt: null,
+      lastError: null,
+    };
+    setSessionMessageRunStatus({
+      rootPath,
+      sessionId,
+      status: cancellingStatus,
+    });
+
+    const taskId = sessionMessageTaskIdsBySessionKeyRef.current[sessionKey];
+    if (taskId) {
+      progressTasks.updateRequestProgressTaskById(taskId, {
+        detail: 'Codex 응답 생성을 종료하고 있습니다.',
+        errorMessage: null,
+        isCancellable: false,
+        status: 'cancelling',
+      });
+    }
+
+    const result = await sddApi.project.cancelSessionMessage({
+      rootPath,
+      sessionId,
+    });
+    if (result.ok) {
+      setSessionMessageRunStatus({
+        rootPath,
+        sessionId,
+        status: result.value,
+      });
+      setMessage('채팅 응답 취소를 요청했습니다.');
+      return;
+    }
+
+    setSessionMessageRunStatus({
+      rootPath,
+      sessionId,
+      status: currentStatus,
+    });
+    if (taskId) {
+      progressTasks.updateRequestProgressTaskById(taskId, {
+        detail: currentStatus.progressMessage ?? currentStatus.stageMessage,
+        errorMessage: null,
+        isCancellable: true,
+        status: 'running',
+      });
+    }
+    setErrorMessage(result.error.message);
   }
 
   async function handleSaveSpec(input: {
@@ -1422,8 +1731,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       selectedSpecId,
       sessions,
       selectedSessionId,
-      sessionMessages,
-      draftMessage,
+      sessionMessagesBySessionKey,
+      draftMessagesBySessionKey,
+      sessionMessageRunStatusesBySessionKey,
       recentProjects,
       editingProjectRootPath,
       editingProjectNameDraft,
@@ -1435,7 +1745,6 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       isSavingSpec,
       isCreatingSession,
       isSavingReferenceTags,
-      isSendingMessage,
       isSavingChatRuntimeSettings,
       isLeftSidebarOpen,
       isRightSidebarOpen,
@@ -1458,8 +1767,22 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onCancelReferenceTagGeneration(rootPath?: string) {
         void handleCancelReferenceTagGeneration(rootPath);
       },
+      onCancelSessionMessage(rootPath?: string, sessionId?: string) {
+        void handleCancelSessionMessage(rootPath, sessionId);
+      },
       onChangeDraftMessage(value: string) {
-        setDraftMessage(value);
+        if (!selectedPath || !selectedSession?.id) {
+          return;
+        }
+
+        const sessionKey = createProjectSessionStateKey({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+        });
+        setDraftMessagesBySessionKey((current) => ({
+          ...current,
+          [sessionKey]: value,
+        }));
       },
       onChangeEditingProjectName(value: string) {
         setEditingProjectNameDraft(value);
@@ -1566,6 +1889,47 @@ function upsertProjectSpec(
   return [...mergedSpecs].sort((left, right) =>
     right.meta.updatedAt.localeCompare(left.meta.updatedAt),
   );
+}
+
+function upsertProjectSessionSummary(
+  sessions: ProjectSessionSummary[],
+  nextSession: {
+    id: string;
+    specId: string | null;
+    title: string;
+    updatedAt: string;
+    lastMessageAt: string | null;
+    lastMessagePreview: string | null;
+    messageCount: number;
+  },
+): ProjectSessionSummary[] {
+  const didExist = sessions.some((session) => session.id === nextSession.id);
+  const mergedSessions = didExist
+    ? sessions.map((session) => (session.id === nextSession.id ? { ...nextSession } : session))
+    : [...sessions, { ...nextSession }];
+
+  return [...mergedSessions].sort((left, right) =>
+    right.updatedAt.localeCompare(left.updatedAt),
+  );
+}
+
+function mergeProjectSessionMessages(
+  currentMessages: ProjectSessionMessage[],
+  nextMessages: ProjectSessionMessage[],
+): ProjectSessionMessage[] {
+  const seenMessageIds = new Set(currentMessages.map((message) => message.id));
+  const mergedMessages = [...currentMessages];
+
+  for (const message of nextMessages) {
+    if (seenMessageIds.has(message.id)) {
+      continue;
+    }
+
+    seenMessageIds.add(message.id);
+    mergedMessages.push(message);
+  }
+
+  return [...mergedMessages].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
 }
 
 function formatAppErrorMessage(error: AppError): string {

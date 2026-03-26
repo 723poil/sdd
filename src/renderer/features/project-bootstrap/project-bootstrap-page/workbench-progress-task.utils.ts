@@ -25,6 +25,7 @@ export function createWorkbenchProgressTask(input: {
   now: string;
   projectName?: string | null;
   rootPath?: string | null;
+  sessionId?: string | null;
   title: string;
 }): WorkbenchProgressTask {
   return {
@@ -34,6 +35,7 @@ export function createWorkbenchProgressTask(input: {
     detail: input.detail,
     projectName: input.projectName ?? null,
     rootPath: input.rootPath ?? null,
+    sessionId: input.sessionId ?? null,
     status: 'running',
     startedAt: input.now,
     updatedAt: input.now,
@@ -169,6 +171,7 @@ function toAnalysisProgressTask(input: {
     detail: input.status.progressMessage ?? input.status.stageMessage,
     projectName: input.projectName,
     rootPath: input.status.rootPath,
+    sessionId: null,
     status: input.status.status,
     startedAt: input.status.startedAt ?? input.status.updatedAt ?? new Date(0).toISOString(),
     updatedAt:

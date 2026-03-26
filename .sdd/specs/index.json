@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-03-26T00:17:41.350Z",
+  "generatedAt": "2026-03-26T01:07:26.510Z",
   "specs": [
     {
       "id": "spec-02",
       "slug": "spec-02",
-      "title": "새 명세 02",
+      "title": "명세 상세 페이지 버전 이력·Markdown 미리보기·본문 복사 개선",
       "status": "draft",
-      "latestVersion": "v1",
-      "updatedAt": "2026-03-25T23:47:11.961Z",
-      "summary": "채팅으로 작성 중인 초안입니다."
+      "latestVersion": "v3",
+      "updatedAt": "2026-03-26T01:07:26.510Z",
+      "summary": "새 명세를 버전 없는 작업 초안으로 시작하고, 상세 화면에 버전 이력 관리, Markdown 미리보기, 본문 복사를 추가한다."
     },
     {
       "id": "spec-01",

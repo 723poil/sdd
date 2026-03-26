@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-26T00:17:41.369Z",
+  "generatedAt": "2026-03-26T01:07:26.530Z",
   "sessions": [
     {
       "id": "7cc84e80-d5cc-4c7f-8b8d-36f9485fae85",
       "specId": "spec-02",
       "title": "새 명세 02 채팅",
-      "updatedAt": "2026-03-25T23:49:05.908Z",
-      "lastMessageAt": "2026-03-25T23:49:05.908Z",
-      "lastMessagePreview": "명세 상세 페이지 수정 작업이 필요해. 1. 왜 새 명세를 만들면 해당 처음이 v1로 관리가 돼? 아무내용이 없는데? 거기서 내용 변경이 되어야...",
-      "messageCount": 1
+      "updatedAt": "2026-03-26T01:07:26.515Z",
+      "lastMessageAt": "2026-03-26T01:07:26.515Z",
+      "lastMessagePreview": "본문 복사 기능까지 반영해 명세 제목, 요약, 시나리오, 기능 요구사항, 수용 기준을 업데이트했습니다. 복사는 상세 툴바에서 현재 Markdow...",
+      "messageCount": 5
     },
     {
       "id": "15205149-ec4a-44a1-b066-a032a7dff97e",

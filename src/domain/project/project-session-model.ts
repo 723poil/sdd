@@ -2,8 +2,17 @@ const LEGACY_PROJECT_SESSION_SCHEMA_VERSION = 1;
 export const PROJECT_SESSION_SCHEMA_VERSION = 2;
 export const PROJECT_SESSION_INDEX_SCHEMA_VERSION = 2;
 export const PROJECT_SESSION_MESSAGE_SCHEMA_VERSION = 1;
+export const PROJECT_SESSION_MESSAGE_RUN_STATES = [
+  'idle',
+  'running',
+  'cancelling',
+  'cancelled',
+  'succeeded',
+  'failed',
+] as const;
 
 export type ProjectSessionMessageRole = 'system' | 'user' | 'assistant';
+export type ProjectSessionMessageRunState = (typeof PROJECT_SESSION_MESSAGE_RUN_STATES)[number];
 
 export interface ProjectSessionMeta {
   schemaVersion: typeof PROJECT_SESSION_SCHEMA_VERSION;
@@ -43,6 +52,21 @@ export interface ProjectSessionMessage {
   text: string;
 }
 
+export interface ProjectSessionMessageRunStatus {
+  rootPath: string;
+  sessionId: string;
+  status: ProjectSessionMessageRunState;
+  stepIndex: number;
+  stepTotal: number;
+  stageMessage: string;
+  progressMessage: string | null;
+  requestText: string | null;
+  startedAt: string | null;
+  updatedAt: string | null;
+  completedAt: string | null;
+  lastError: string | null;
+}
+
 export function createProjectSessionMeta(input: {
   id: string;
   now: string;
@@ -77,6 +101,26 @@ export function createProjectSessionMessage(input: {
     createdAt: input.now,
     role: input.role,
     text: input.text,
+  };
+}
+
+export function createIdleProjectSessionMessageRunStatus(input: {
+  rootPath: string;
+  sessionId: string;
+}): ProjectSessionMessageRunStatus {
+  return {
+    rootPath: input.rootPath,
+    sessionId: input.sessionId,
+    status: 'idle',
+    stepIndex: 0,
+    stepTotal: 3,
+    stageMessage: '대기 중',
+    progressMessage: null,
+    requestText: null,
+    startedAt: null,
+    updatedAt: null,
+    completedAt: null,
+    lastError: null,
   };
 }
 

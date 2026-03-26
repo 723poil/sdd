@@ -16,7 +16,14 @@ export async function executeCodexProjectSpecChat(input: {
   outputSchemaPath: string;
   prompt: string;
   rootPath: string;
+  signal: AbortSignal;
 }): Promise<Result<void>> {
+  if (input.signal.aborted) {
+    return err(
+      createProjectError('PROJECT_SESSION_MESSAGE_CANCELLED', '채팅 요청을 취소했습니다.'),
+    );
+  }
+
   return new Promise((resolvePromise) => {
     const commandArgs = [
       '-a',
@@ -46,10 +53,16 @@ export async function executeCodexProjectSpecChat(input: {
 
     let didIdleTimeout = false;
     let didMaxDurationTimeout = false;
+    let didAbort = false;
     let didResolve = false;
     let idleTimeout: NodeJS.Timeout | null = null;
     let stderrTail = '';
     let stdoutTail = '';
+
+    const handleAbort = () => {
+      didAbort = true;
+      childProcess.kill('SIGTERM');
+    };
 
     const refreshIdleTimeout = () => {
       if (idleTimeout) {
@@ -79,8 +92,11 @@ export async function executeCodexProjectSpecChat(input: {
         clearTimeout(idleTimeout);
       }
       clearTimeout(maxDurationTimeout);
+      input.signal.removeEventListener('abort', handleAbort);
       resolvePromise(result);
     };
+
+    input.signal.addEventListener('abort', handleAbort, { once: true });
 
     childProcess.stdout.on('data', (chunk: Buffer | string) => {
       stdoutTail = appendOutputTail(stdoutTail, chunk.toString());
@@ -120,6 +136,13 @@ export async function executeCodexProjectSpecChat(input: {
     });
 
     childProcess.on('close', (code) => {
+      if (didAbort || input.signal.aborted) {
+        resolveOnce(
+          err(createProjectError('PROJECT_SESSION_MESSAGE_CANCELLED', '채팅 요청을 취소했습니다.')),
+        );
+        return;
+      }
+
       if (didIdleTimeout) {
         resolveOnce(
           err(

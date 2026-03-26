@@ -30,6 +30,7 @@ export function useWorkbenchProgressTasks() {
     kind: WorkbenchProgressTaskKind;
     projectName?: string | null;
     rootPath?: string | null;
+    sessionId?: string | null;
     title: string;
   }): WorkbenchProgressTask => {
     const now = new Date().toISOString();
@@ -40,6 +41,7 @@ export function useWorkbenchProgressTasks() {
       now,
       projectName: input.projectName ?? null,
       rootPath: input.rootPath ?? null,
+      sessionId: input.sessionId ?? null,
       title: input.title,
       ...(typeof input.isCancellable === 'boolean' ? { isCancellable: input.isCancellable } : {}),
     });

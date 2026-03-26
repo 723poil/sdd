@@ -1,7 +1,9 @@
 import type { ProjectBootstrapWorkbenchState, ProjectBootstrapWorkbenchViewModel } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
 import {
+  createProjectSessionStateKey,
   getAnalysisStatus,
+  getVisibleSessionMessageRunStatus,
   getVisibleAnalysisRunStatus,
   getStorageStatus,
   resolveSelectedSpec,
@@ -60,6 +62,27 @@ export function createProjectBootstrapWorkbenchViewModel(
       : [],
     state.selectedSessionId,
   );
+  const selectedSessionStateKey =
+    state.selectedPath !== null && selectedSession
+      ? createProjectSessionStateKey({
+          rootPath: state.selectedPath,
+          sessionId: selectedSession.id,
+        })
+      : null;
+  const selectedSessionMessageRunStatus =
+    selectedSessionStateKey !== null
+      ? getVisibleSessionMessageRunStatus(
+          state.sessionMessageRunStatusesBySessionKey[selectedSessionStateKey] ?? null,
+        )
+      : null;
+  const isSendingMessage =
+    selectedSessionMessageRunStatus?.status === 'running' ||
+    selectedSessionMessageRunStatus?.status === 'cancelling';
+  const isCancellingMessage = selectedSessionMessageRunStatus?.status === 'cancelling';
+  const canCancelMessage =
+    selectedSessionMessageRunStatus !== null &&
+    (selectedSessionMessageRunStatus.status === 'running' ||
+      selectedSessionMessageRunStatus.status === 'cancelling');
 
   return {
     activeProgressTask,
@@ -73,12 +96,24 @@ export function createProjectBootstrapWorkbenchViewModel(
     canCancelAnalysis,
     isCancellingReferenceTags,
     isCancellingAnalysis,
+    isCancellingMessage,
     isGeneratingReferenceTags,
     isAnalyzing,
+    isSendingMessage,
+    canCancelMessage,
     projectEntries: state.recentProjects,
     progressTasks,
     selectedSession,
+    selectedSessionMessageRunStatus,
     selectedSpec,
+    sessionMessages:
+      selectedSessionStateKey !== null
+        ? state.sessionMessagesBySessionKey[selectedSessionStateKey] ?? []
+        : [],
+    draftMessage:
+      selectedSessionStateKey !== null
+        ? state.draftMessagesBySessionKey[selectedSessionStateKey] ?? ''
+        : '',
     storageStatus: getStorageStatus(state.inspection),
     workbenchClassName: [
       'workbench',

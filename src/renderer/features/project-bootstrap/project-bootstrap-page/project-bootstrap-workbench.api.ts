@@ -8,7 +8,10 @@ import type {
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection } from '@/domain/project/project-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
-import type { ProjectSessionSummary } from '@/domain/project/project-session-model';
+import type {
+  ProjectSessionMessageRunStatus,
+  ProjectSessionSummary,
+} from '@/domain/project/project-session-model';
 import { err, ok, type Result } from '@/shared/contracts/result';
 import { getRendererSddApi } from '@/renderer/renderer-sdd-api';
 
@@ -81,6 +84,26 @@ export async function readAnalysisRunStatus(rootPath: string): Promise<ProjectAn
 
   const result = await sddApi.project.readAnalysisRunStatus({
     rootPath,
+  });
+  if (!result.ok) {
+    return null;
+  }
+
+  return result.value;
+}
+
+export async function readProjectSessionMessageRunStatus(input: {
+  rootPath: string;
+  sessionId: string;
+}): Promise<ProjectSessionMessageRunStatus | null> {
+  const sddApi = getRendererSddApi();
+  if (!sddApi) {
+    return null;
+  }
+
+  const result = await sddApi.project.readSessionMessageRunStatus({
+    rootPath: input.rootPath,
+    sessionId: input.sessionId,
   });
   if (!result.ok) {
     return null;

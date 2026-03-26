@@ -8,6 +8,7 @@ import { createActivateProjectUseCase } from '@/application/project/activate-pro
 import { createAnalyzeProjectUseCase } from '@/application/project/analyze-project.use-case';
 import { createCancelProjectAnalysisUseCase } from '@/application/project/cancel-project-analysis.use-case';
 import { createCancelProjectReferenceTagGenerationUseCase } from '@/application/project/cancel-project-reference-tag-generation.use-case';
+import { createCancelProjectSessionMessageUseCase } from '@/application/project/cancel-project-session-message.use-case';
 import { createCreateProjectSessionUseCase } from '@/application/project/create-project-session.use-case';
 import { createCreateProjectSpecUseCase } from '@/application/project/create-project-spec.use-case';
 import { createGenerateProjectReferenceTagsUseCase } from '@/application/project/generate-project-reference-tags.use-case';
@@ -17,6 +18,7 @@ import { createListRecentProjectsUseCase } from '@/application/project/list-rece
 import { createListProjectSessionsUseCase } from '@/application/project/list-project-sessions.use-case';
 import { createReadProjectAnalysisRunStatusUseCase } from '@/application/project/read-project-analysis-run-status.use-case';
 import { createReadProjectAnalysisUseCase } from '@/application/project/read-project-analysis.use-case';
+import { createReadProjectSessionMessageRunStatusUseCase } from '@/application/project/read-project-session-message-run-status.use-case';
 import { createReadProjectSessionMessagesUseCase } from '@/application/project/read-project-session-messages.use-case';
 import { createReadProjectSpecsUseCase } from '@/application/project/read-project-specs.use-case';
 import { createRemoveRecentProjectUseCase } from '@/application/project/remove-recent-project.use-case';
@@ -36,6 +38,7 @@ import { createFsRecentProjectsRepository } from '@/infrastructure/app-settings/
 import { createFsProjectSessionRepository } from '@/infrastructure/sdd/fs-project-session.repository';
 import { createFsProjectStorageRepository } from '@/infrastructure/sdd/fs-project-storage.repository';
 import { createNodeProjectReferenceTagGeneratorAdapter } from '@/infrastructure/reference-tags/node-project-reference-tag-generator.adapter';
+import { createInMemoryProjectSessionMessageRunStatusStore } from '@/infrastructure/spec-chat/in-memory-project-session-message-run-status.store';
 import { createNodeProjectSpecChatAdapter } from '@/infrastructure/spec-chat/node-project-spec-chat.adapter';
 
 type Executable0<Output> = {
@@ -67,6 +70,7 @@ function registerInputHandle<Input, Output>(
 function createProjectIpcUseCases() {
   const agentCliSettingsStore = createFsAgentCliSettingsRepository();
   const analysisRunStatusStore = createInMemoryProjectAnalysisRunStatusStore();
+  const sessionMessageRunStatusStore = createInMemoryProjectSessionMessageRunStatusStore();
   const projectDialog = createElectronProjectDialogAdapter();
   const projectAnalyzer = createNodeProjectAnalyzerAdapter({
     agentCliSettingsStore,
@@ -154,6 +158,12 @@ function createProjectIpcUseCases() {
   const readProjectSessionMessages = createReadProjectSessionMessagesUseCase({
     projectSessionStore,
   });
+  const readProjectSessionMessageRunStatus = createReadProjectSessionMessageRunStatusUseCase({
+    sessionMessageRunStatusStore,
+  });
+  const cancelProjectSessionMessage = createCancelProjectSessionMessageUseCase({
+    sessionMessageRunStatusStore,
+  });
   const reorderRecentProjects = createReorderRecentProjectsUseCase({
     recentProjectsStore,
   });
@@ -164,6 +174,7 @@ function createProjectIpcUseCases() {
     projectInspector,
     projectSpecChat,
     projectSessionStore,
+    sessionMessageRunStatusStore,
     projectStorage,
   });
   const analyzeProject = createAnalyzeProjectUseCase({
@@ -187,6 +198,7 @@ function createProjectIpcUseCases() {
     readProjectAnalysis,
     readProjectAnalysisRunStatus,
     readProjectSessionMessages,
+    readProjectSessionMessageRunStatus,
     readProjectSpecs,
     removeRecentProject,
     renameProject,
@@ -194,6 +206,7 @@ function createProjectIpcUseCases() {
     saveProjectAnalysisDocumentLayouts,
     saveProjectReferenceTags,
     saveProjectSpec,
+    cancelProjectSessionMessage,
     selectProjectDirectory,
     sendProjectSessionMessage,
   };
@@ -257,8 +270,18 @@ function registerProjectSessionIpc(
   );
   registerInputHandle(
     target,
+    projectIpcChannels.readSessionMessageRunStatus,
+    useCases.readProjectSessionMessageRunStatus,
+  );
+  registerInputHandle(
+    target,
     projectIpcChannels.sendSessionMessage,
     useCases.sendProjectSessionMessage,
+  );
+  registerInputHandle(
+    target,
+    projectIpcChannels.cancelSessionMessage,
+    useCases.cancelProjectSessionMessage,
   );
 }
 

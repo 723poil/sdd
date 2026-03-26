@@ -360,6 +360,12 @@
   transform: none;
 }
 
+.primary-button.info-sidebar-chat-composer__submit--cancel {
+  border-color: color-mix(in srgb, var(--danger) 18%, var(--button-primary-border));
+  background: color-mix(in srgb, var(--danger-soft) 78%, var(--bg-panel) 22%);
+  color: var(--danger);
+}
+
 .info-sidebar-chat-composer__submit-icon {
   display: block;
   width: 16px;
