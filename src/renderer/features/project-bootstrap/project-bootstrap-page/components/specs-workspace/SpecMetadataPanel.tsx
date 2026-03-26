@@ -6,6 +6,8 @@ import type {
   ProjectSpecRelation,
   ProjectSpecRelationType,
 } from '@/domain/project/project-spec-model';
+import { IconActionButton } from '@/renderer/components/IconActionButton';
+import { SpecActionIcon } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon';
 import {
   describeSpecRelationType,
   describeSpecStatus,
@@ -22,14 +24,24 @@ interface SpecMetadataPanelProps {
     relations: ProjectSpecRelation[];
   }) => Promise<ProjectSpecMetaUpdateResult | null>;
   selectedSpec: ProjectSpecDocument;
+  showHeader?: boolean;
   specs: ProjectSpecDocument[];
+  variant?: 'aside' | 'card';
 }
 
 type MetadataFeedbackTone = 'alert' | 'default';
 
 export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
-  const { canWriteSpecs, isUpdatingSpecMeta, onSelectSpec, onUpdateSpecMeta, selectedSpec, specs } =
-    props;
+  const {
+    canWriteSpecs,
+    isUpdatingSpecMeta,
+    onSelectSpec,
+    onUpdateSpecMeta,
+    selectedSpec,
+    showHeader = true,
+    specs,
+    variant = 'card',
+  } = props;
   const [draftRelationType, setDraftRelationType] =
     useState<ProjectSpecRelationType>('derived-from');
   const [draftTargetSpecId, setDraftTargetSpecId] = useState('');
@@ -53,6 +65,7 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
   const hasMatchingRelation = draftTargetSpecId
     ? relationKeySet.has(`${draftTargetSpecId}::${draftRelationType}`)
     : false;
+  const relationCountLabel = `${selectedSpec.meta.relations.length}개`;
 
   useEffect(() => {
     setDraftTargetSpecId('');
@@ -79,36 +92,6 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
   const updateFeedback = (message: string, tone: MetadataFeedbackTone) => {
     setFeedbackMessage(message);
     setFeedbackTone(tone);
-  };
-
-  const handleToggleArchived = async () => {
-    const nextStatus = selectedSpec.meta.status === 'archived' ? 'draft' : 'archived';
-    const result = await onUpdateSpecMeta({
-      specId: selectedSpec.meta.id,
-      revision: selectedSpec.meta.revision,
-      status: nextStatus,
-      relations: selectedSpec.meta.relations,
-    });
-
-    if (!result) {
-      updateFeedback('메타데이터를 저장하지 못했습니다.', 'alert');
-      return;
-    }
-
-    if (result.kind === 'conflict') {
-      updateFeedback('다른 변경이 먼저 저장되어 다시 확인이 필요합니다.', 'alert');
-      return;
-    }
-
-    if (result.kind === 'no-op') {
-      updateFeedback('변경된 메타데이터가 없습니다.', 'default');
-      return;
-    }
-
-    updateFeedback(
-      nextStatus === 'archived' ? '명세를 보관했습니다.' : '명세를 초안으로 되돌렸습니다.',
-      'default',
-    );
   };
 
   const handleAddRelation = async () => {
@@ -178,32 +161,22 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
   };
 
   return (
-    <section className="spec-metadata-panel">
-      <div className="spec-metadata-panel__header">
-        <div>
-          <span className="analysis-empty-panel__eyebrow">메타데이터</span>
-          <h5>연결 명세</h5>
+    <section
+      className={`spec-metadata-panel ${
+        variant === 'aside' ? 'spec-metadata-panel--aside' : ''
+      }`}
+    >
+      {showHeader ? (
+        <div className="spec-metadata-panel__header">
+          <div className="spec-metadata-panel__title">
+            <span className="analysis-empty-panel__eyebrow">메타데이터</span>
+            <div className="spec-metadata-panel__title-row">
+              <h5>연결 명세</h5>
+              <span className="analysis-document-panel__id">{relationCountLabel}</span>
+            </div>
+          </div>
         </div>
-        <button
-          className="secondary-button"
-          disabled={!canWriteSpecs || isUpdatingSpecMeta}
-          onClick={() => {
-            void handleToggleArchived();
-          }}
-          title={
-            selectedSpec.meta.status === 'archived'
-              ? '보관된 명세를 다시 초안 상태로 전환'
-              : '현재 명세를 보관 상태로 전환'
-          }
-          type="button"
-        >
-          {isUpdatingSpecMeta
-            ? '저장 중'
-            : selectedSpec.meta.status === 'archived'
-              ? '보관 해제'
-              : '보관'}
-        </button>
-      </div>
+      ) : null}
 
       <div className="spec-metadata-panel__editor">
         <select
@@ -237,8 +210,8 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
             </option>
           ))}
         </select>
-        <button
-          className="secondary-button"
+        <IconActionButton
+          className="spec-metadata-panel__editor-action"
           disabled={
             !canWriteSpecs ||
             isUpdatingSpecMeta ||
@@ -246,14 +219,18 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
             relationTargetOptions.length === 0 ||
             hasMatchingRelation
           }
+          icon={<SpecActionIcon name="add" />}
+          label={
+            relationTargetOptions.length === 0
+              ? '연결할 다른 명세가 없습니다.'
+              : hasMatchingRelation
+                ? '이미 같은 연결이 있습니다.'
+                : '현재 명세에 연결 추가'
+          }
           onClick={() => {
             void handleAddRelation();
           }}
-          title={hasMatchingRelation ? '이미 같은 연결이 있습니다.' : '현재 명세에 연결 추가'}
-          type="button"
-        >
-          추가
-        </button>
+        />
       </div>
 
       {feedbackMessage ? (
@@ -301,9 +278,12 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
                   </span>
                 </div>
                 <div className="spec-metadata-relation-card__actions">
-                  <button
-                    className="secondary-button"
+                  <IconActionButton
                     disabled={!targetSpec}
+                    icon={<SpecActionIcon name="open" />}
+                    label={
+                      targetSpec ? `${targetSpec.meta.title} 명세로 이동` : '누락된 명세는 열 수 없습니다.'
+                    }
                     onClick={() => {
                       if (!targetSpec) {
                         return;
@@ -311,20 +291,18 @@ export function SpecMetadataPanel(props: SpecMetadataPanelProps) {
 
                       onSelectSpec(targetSpec.meta.id);
                     }}
-                    type="button"
-                  >
-                    이동
-                  </button>
-                  <button
-                    className="secondary-button secondary-button--danger"
+                    size="small"
+                  />
+                  <IconActionButton
                     disabled={!canWriteSpecs || isUpdatingSpecMeta}
+                    icon={<SpecActionIcon name="delete" />}
+                    label="현재 연결 제거"
                     onClick={() => {
                       void handleRemoveRelation(relation);
                     }}
-                    type="button"
-                  >
-                    제거
-                  </button>
+                    size="small"
+                    tone="danger"
+                  />
                 </div>
               </article>
             );

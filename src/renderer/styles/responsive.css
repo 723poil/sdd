@@ -249,6 +249,17 @@
     padding: 22px 20px;
   }
 
+  .analysis-document-page__toolbar,
+  .analysis-document-page__header {
+    align-items: flex-start;
+  }
+
+  .analysis-document-page__toolbar-meta,
+  .analysis-document-page__toolbar-actions,
+  .spec-document-inline-status {
+    justify-content: flex-start;
+  }
+
   .analysis-document-page__references {
     padding: 20px;
   }

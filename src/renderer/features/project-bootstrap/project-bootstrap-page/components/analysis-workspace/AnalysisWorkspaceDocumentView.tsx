@@ -1,3 +1,4 @@
+import { IconActionButton } from '@/renderer/components/IconActionButton';
 import type { ProjectAnalysisDocument } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 import { MarkdownDocument } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument';
 import { getAnalysisDocumentFileName } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils';
@@ -13,23 +14,24 @@ export function AnalysisWorkspaceDocumentView(props: AnalysisWorkspaceDocumentVi
   return (
     <article className="analysis-document-page">
       <div className="analysis-document-page__toolbar">
-        <button
-          className="secondary-button analysis-document-page__return"
+        <IconActionButton
+          className="analysis-document-page__return-button"
+          icon={
+            <svg aria-hidden="true" viewBox="0 0 20 20">
+              <path
+                d="M11.5 4.5 6 10l5.5 5.5M7 10h7"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          }
+          label="맵으로 돌아가기"
           onClick={onReturnToMap}
-          type="button"
-        >
-          <svg aria-hidden="true" viewBox="0 0 20 20">
-            <path
-              d="M11.5 4.5 6 10l5.5 5.5M7 10h7"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-          <span>맵으로 돌아가기</span>
-        </button>
+          tooltipSide="bottom"
+        />
         <div className="analysis-document-page__toolbar-meta">
           <span className="analysis-document-panel__id">
             {getAnalysisDocumentFileName(selectedDocument.id)}
