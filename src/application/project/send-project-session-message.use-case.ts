@@ -13,9 +13,9 @@ import type {
   ProjectInspectorPort,
   ProjectSpecChatPort,
   ProjectSessionPort,
-  ProjectSessionMessageRunStatusPort,
-  ProjectStoragePort,
+  ProjectSessionMessageStoragePort,
 } from '@/application/project/project.ports';
+import { beginProjectSessionMessageRun } from '@/application/project/project-session-message-run';
 
 export interface SendProjectSessionMessageOutput {
   assistantErrorMessage: string | null;
@@ -38,8 +38,8 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
   projectInspector: ProjectInspectorPort;
   projectSpecChat: ProjectSpecChatPort;
   projectSessionStore: ProjectSessionPort;
-  sessionMessageRunStatusStore: ProjectSessionMessageRunStatusPort;
-  projectStorage: ProjectStoragePort;
+  sessionMessageRunStatusStore: Parameters<typeof beginProjectSessionMessageRun>[0];
+  projectStorage: ProjectSessionMessageStoragePort;
 }): SendProjectSessionMessageUseCase {
   return {
     async execute(input) {
@@ -59,59 +59,26 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       }
 
       const startedAt = new Date().toISOString();
-      const runControlResult = dependencies.sessionMessageRunStatusStore.beginSessionMessageRun({
-        rootPath: input.rootPath,
-        sessionId: input.sessionId,
-        requestText: trimmedText,
-        stageMessage: '메시지 저장 중',
-        progressMessage: '대화 로그에 질문을 기록하고 있습니다.',
-        startedAt,
-        stepIndex: 1,
-        stepTotal: 3,
-      });
+      const runControlResult = beginProjectSessionMessageRun(
+        dependencies.sessionMessageRunStatusStore,
+        {
+          requestText: trimmedText,
+          rootPath: input.rootPath,
+          sessionId: input.sessionId,
+          startedAt,
+        },
+      );
       if (!runControlResult.ok) {
         return runControlResult;
       }
 
       const runControl = runControlResult.value;
-      const updateRunStatus = (patch: {
-        status?: 'running' | 'cancelling' | 'cancelled' | 'succeeded' | 'failed';
-        stageMessage?: string;
-        progressMessage?: string | null;
-        requestText?: string | null;
-        stepIndex?: number;
-        completedAt?: string | null;
-        lastError?: string | null;
-      }) =>
-        dependencies.sessionMessageRunStatusStore.updateSessionMessageRunStatus({
-          rootPath: input.rootPath,
-          sessionId: input.sessionId,
-          ...patch,
-        });
       const failRunStatus = (stageMessage: string, message: string, stepIndex: number) => {
-        updateRunStatus({
-          status: 'failed',
+        runControl.fail({
+          message,
           stageMessage,
-          progressMessage: null,
-          requestText: null,
           stepIndex,
-          completedAt: new Date().toISOString(),
-          lastError: message,
         });
-      };
-      const cancelRunStatus = () => {
-        updateRunStatus({
-          status: 'cancelled',
-          stageMessage: '요청 취소됨',
-          progressMessage: '응답 생성을 취소했습니다.',
-          requestText: null,
-          completedAt: new Date().toISOString(),
-          lastError: null,
-        });
-
-        return err(
-          createProjectError('PROJECT_SESSION_MESSAGE_CANCELLED', '채팅 요청을 취소했습니다.'),
-        );
       };
 
       const result = await dependencies.projectSessionStore.appendSessionMessage({
@@ -142,15 +109,11 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         });
       };
 
-      if (isSessionMessageCancellationRequested(dependencies, input.rootPath, input.sessionId)) {
-        return cancelRunStatus();
+      if (runControl.isCancellationRequested()) {
+        return runControl.cancel();
       }
 
-      updateRunStatus({
-        stageMessage: '응답 생성 중',
-        progressMessage: 'Codex가 명세 초안을 정리하고 있습니다.',
-        stepIndex: 2,
-      });
+      runControl.markReplyGenerationStarted();
 
       if (!userSession.specId) {
         return partialSuccess(
@@ -216,7 +179,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       });
       if (!replyResult.ok) {
         if (replyResult.error.code === 'PROJECT_SESSION_MESSAGE_CANCELLED') {
-          return cancelRunStatus();
+          return runControl.cancel();
         }
 
         return partialSuccess(replyResult.error.message, null, {
@@ -225,15 +188,11 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         });
       }
 
-      if (isSessionMessageCancellationRequested(dependencies, input.rootPath, input.sessionId)) {
-        return cancelRunStatus();
+      if (runControl.isCancellationRequested()) {
+        return runControl.cancel();
       }
 
-      updateRunStatus({
-        stageMessage: '명세 반영 중',
-        progressMessage: '응답과 명세 초안을 저장하고 있습니다.',
-        stepIndex: 3,
-      });
+      runControl.markSpecApplyStarted();
 
       const saveSpecResult = await dependencies.projectStorage.saveProjectSpec({
         markdown: replyResult.value.markdown,
@@ -294,15 +253,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         );
       }
 
-      updateRunStatus({
-        status: 'succeeded',
-        stageMessage: '응답 완료',
-        progressMessage: '명세와 채팅에 응답을 반영했습니다.',
-        requestText: null,
-        stepIndex: 3,
-        completedAt: new Date().toISOString(),
-        lastError: null,
-      });
+      runControl.succeed();
 
       return ok({
         assistantErrorMessage: null,
@@ -312,22 +263,4 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       });
     },
   };
-}
-
-function isSessionMessageCancellationRequested(
-  dependencies: { sessionMessageRunStatusStore: ProjectSessionMessageRunStatusPort },
-  rootPath: string,
-  sessionId: string,
-): boolean {
-  const statusResult = dependencies.sessionMessageRunStatusStore.readSessionMessageRunStatus({
-    rootPath,
-    sessionId,
-  });
-  if (!statusResult.ok) {
-    return false;
-  }
-
-  return (
-    statusResult.value.status === 'cancelling' || statusResult.value.status === 'cancelled'
-  );
 }

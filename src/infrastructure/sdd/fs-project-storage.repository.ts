@@ -45,7 +45,6 @@ import {
   readProjectSpecVersionDocument,
   readProjectSpecVersionHistory,
   readProjectSpecVersionIds,
-  readSpecMetaDocument,
   readProjectSpecDocuments,
   toProjectSpecIndexEntries,
 } from '@/infrastructure/sdd/fs-project-spec-documents';
@@ -75,6 +74,10 @@ import {
   writeJsonAtomically,
   writeTextAtomically,
 } from '@/infrastructure/fs/write-json-atomically';
+import {
+  readRequiredProjectSpecStorageContext,
+  readRequiredProjectStorageContext,
+} from '@/infrastructure/sdd/fs-project-storage-context';
 
 export function createFsProjectStorageRepository(): ProjectStoragePort {
   return {
@@ -135,25 +138,16 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async createProjectSpec(input) {
-      const rootPath = resolve(input.rootPath);
-      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
+      const storageContextResult = await readRequiredProjectStorageContext({
+        missingProjectMessage: 'project.json 이 없어 새 명세를 저장할 수 없습니다.',
+        rootPath: input.rootPath,
+      });
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      const existingProjectMeta = existingProjectMetaResult.value;
-      if (!existingProjectMeta) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 새 명세를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
-
+      const { projectJsonPath, projectMeta: existingProjectMeta, rootPath, specsIndexPath } =
+        storageContextResult.value;
       const existingSpecsResult = await readProjectSpecDocuments({ rootPath });
       if (!existingSpecsResult.ok) {
         return existingSpecsResult;
@@ -204,43 +198,17 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async saveProjectSpec(input) {
-      const rootPath = resolve(input.rootPath);
-      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
-      }
-
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 명세를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
-
-      const existingSpecMetaResult = await readSpecMetaDocument({
-        rootPath,
+      const storageContextResult = await readRequiredProjectSpecStorageContext({
+        missingProjectMessage: 'project.json 이 없어 명세를 저장할 수 없습니다.',
+        missingSpecMessage: '저장할 명세 메타를 찾지 못했습니다.',
+        rootPath: input.rootPath,
         specId: input.specId,
       });
-      if (!existingSpecMetaResult.ok) {
-        return existingSpecMetaResult;
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingSpecMetaResult.value) {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            '저장할 명세 메타를 찾지 못했습니다.',
-            input.specId,
-          ),
-        );
-      }
-
-      const existingSpecMeta = existingSpecMetaResult.value;
+      const { rootPath, specsIndexPath, specMeta: existingSpecMeta } = storageContextResult.value;
       if (existingSpecMeta.revision !== input.revision) {
         return ok({
           kind: 'conflict',
@@ -315,43 +283,17 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async updateProjectSpecMeta(input) {
-      const rootPath = resolve(input.rootPath);
-      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
-      }
-
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 명세 메타데이터를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
-
-      const existingSpecMetaResult = await readSpecMetaDocument({
-        rootPath,
+      const storageContextResult = await readRequiredProjectSpecStorageContext({
+        missingProjectMessage: 'project.json 이 없어 명세 메타데이터를 저장할 수 없습니다.',
+        missingSpecMessage: '저장할 명세 메타를 찾지 못했습니다.',
+        rootPath: input.rootPath,
         specId: input.specId,
       });
-      if (!existingSpecMetaResult.ok) {
-        return existingSpecMetaResult;
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingSpecMetaResult.value) {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            '저장할 명세 메타를 찾지 못했습니다.',
-            input.specId,
-          ),
-        );
-      }
-
-      const existingSpecMeta = existingSpecMetaResult.value;
+      const { rootPath, specMeta: existingSpecMeta, specsIndexPath } = storageContextResult.value;
       if (existingSpecMeta.revision !== input.revision) {
         return ok({
           kind: 'conflict',
@@ -427,43 +369,17 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async applyProjectSpecVersion(input) {
-      const rootPath = resolve(input.rootPath);
-      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
-      }
-
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 이전 버전을 적용할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
-
-      const existingSpecMetaResult = await readSpecMetaDocument({
-        rootPath,
+      const storageContextResult = await readRequiredProjectSpecStorageContext({
+        missingProjectMessage: 'project.json 이 없어 이전 버전을 적용할 수 없습니다.',
+        missingSpecMessage: '적용할 명세 메타를 찾지 못했습니다.',
+        rootPath: input.rootPath,
         specId: input.specId,
       });
-      if (!existingSpecMetaResult.ok) {
-        return existingSpecMetaResult;
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingSpecMetaResult.value) {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            '적용할 명세 메타를 찾지 못했습니다.',
-            input.specId,
-          ),
-        );
-      }
-
-      const existingSpecMeta = existingSpecMetaResult.value;
+      const { rootPath, specMeta: existingSpecMeta, specsIndexPath } = storageContextResult.value;
       if (existingSpecMeta.revision !== input.revision) {
         return ok({
           kind: 'conflict',
@@ -519,43 +435,18 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async deleteProjectSpecVersion(input) {
-      const rootPath = resolve(input.rootPath);
-      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
-      }
-
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 이전 버전을 삭제할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
-
-      const existingSpecMetaResult = await readSpecMetaDocument({
-        rootPath,
+      const storageContextResult = await readRequiredProjectSpecStorageContext({
+        missingProjectMessage: 'project.json 이 없어 이전 버전을 삭제할 수 없습니다.',
+        missingSpecMessage: '삭제할 명세 메타를 찾지 못했습니다.',
+        rootPath: input.rootPath,
         specId: input.specId,
       });
-      if (!existingSpecMetaResult.ok) {
-        return existingSpecMetaResult;
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingSpecMetaResult.value) {
-        return err(
-          createProjectError(
-            'INVALID_PROJECT_STORAGE',
-            '삭제할 명세 메타를 찾지 못했습니다.',
-            input.specId,
-          ),
-        );
-      }
-
-      const existingSpecMeta = existingSpecMetaResult.value;
+      const { rootPath, specMeta: existingSpecMeta, specsIndexPath } =
+        storageContextResult.value;
       if (existingSpecMeta.revision !== input.revision) {
         return ok({
           kind: 'conflict',
@@ -692,32 +583,23 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async writeProjectAnalysis(input) {
-      const rootPath = resolve(input.rootPath);
+      const storageContextResult = await readRequiredProjectStorageContext({
+        missingProjectMessage: 'project.json 이 없어 분석 결과를 저장할 수 없습니다.',
+        rootPath: input.rootPath,
+      });
+      if (!storageContextResult.ok) {
+        return storageContextResult;
+      }
+
+      const { projectJsonPath, projectMeta: existingProjectMeta, rootPath, specsIndexPath } =
+        storageContextResult.value;
       const {
         analysisContextPath,
         analysisDirectoryPath,
         analysisFileIndexPath,
         analysisManualReferenceTagsPath,
         analysisSummaryPath,
-        projectJsonPath,
-        specsIndexPath,
       } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
-      }
-
-      const existingProjectMeta = existingProjectMetaResult.value;
-      if (!existingProjectMeta) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 분석 결과를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
 
       const analysisBackupResult = await createProjectAnalysisBackup({
         analysisDirectoryPath,
@@ -815,23 +697,16 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async saveProjectAnalysisDocumentLayouts(input) {
-      const rootPath = resolve(input.rootPath);
-      const { analysisContextPath, projectJsonPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
+      const storageContextResult = await readRequiredProjectStorageContext({
+        missingProjectMessage: 'project.json 이 없어 문서 카드 위치를 저장할 수 없습니다.',
+        rootPath: input.rootPath,
+      });
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 문서 카드 위치를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
+      const { rootPath } = storageContextResult.value;
+      const { analysisContextPath } = getProjectStoragePaths(rootPath);
 
       if (!(await pathExists(analysisContextPath))) {
         return err(
@@ -855,23 +730,16 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
     },
 
     async saveProjectReferenceTags(input) {
-      const rootPath = resolve(input.rootPath);
-      const { analysisManualReferenceTagsPath, projectJsonPath } = getProjectStoragePaths(rootPath);
-
-      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
-      if (!existingProjectMetaResult.ok) {
-        return existingProjectMetaResult;
+      const storageContextResult = await readRequiredProjectStorageContext({
+        missingProjectMessage: 'project.json 이 없어 참조 태그를 저장할 수 없습니다.',
+        rootPath: input.rootPath,
+      });
+      if (!storageContextResult.ok) {
+        return storageContextResult;
       }
 
-      if (!existingProjectMetaResult.value) {
-        return err(
-          createProjectError(
-            'PROJECT_NOT_INITIALIZED',
-            'project.json 이 없어 참조 태그를 저장할 수 없습니다.',
-            projectJsonPath,
-          ),
-        );
-      }
+      const { rootPath } = storageContextResult.value;
+      const { analysisManualReferenceTagsPath } = getProjectStoragePaths(rootPath);
 
       await ensureJsonFile(
         analysisManualReferenceTagsPath,

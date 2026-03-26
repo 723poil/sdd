@@ -51,7 +51,7 @@ export interface SpecRenderedLink {
   to: string;
 }
 
-interface SpecBoardLink extends WorkspaceBoardLinkLike {}
+type SpecBoardLink = WorkspaceBoardLinkLike;
 
 export function buildSpecBoardNodes(
   specs: ProjectSpecDocument[],
@@ -84,13 +84,14 @@ export function buildSpecBoardNodes(
       width: SPECS_BOARD_LAYOUT_PRESET.cardWidth,
       x:
         relationFocusedPositions?.[spec.meta.id]?.x ??
-        (startX +
-          columnIndex * (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
-          (rowIndex % 2 === 0 ? 0 : SPECS_BOARD_LAYOUT_PRESET.rowOffset)),
+        startX +
+          columnIndex *
+            (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
+          (rowIndex % 2 === 0 ? 0 : SPECS_BOARD_LAYOUT_PRESET.rowOffset),
       y:
         relationFocusedPositions?.[spec.meta.id]?.y ??
-        (startY +
-          rowIndex * (SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap)),
+        startY +
+          rowIndex * (SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap),
     };
   });
 }
@@ -185,7 +186,9 @@ function createRelationFocusedSpecBoardPositions(
     outgoingLinksBySpecId.set(link.from, links);
   }
 
-  const pivotEntry = [...outgoingLinksBySpecId.entries()].find(([, targets]) => targets.length === 2);
+  const pivotEntry = [...outgoingLinksBySpecId.entries()].find(
+    ([, targets]) => targets.length === 2,
+  );
   if (!pivotEntry) {
     return null;
   }
@@ -211,11 +214,13 @@ function createRelationFocusedSpecBoardPositions(
   }
 
   const leftColumnX = -(
-    SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap / 2
+    SPECS_BOARD_LAYOUT_PRESET.cardWidth +
+    SPECS_BOARD_LAYOUT_PRESET.columnGap / 2
   );
   const rightColumnX = SPECS_BOARD_LAYOUT_PRESET.columnGap / 2;
   const topRowY = -SPECS_BOARD_LAYOUT_PRESET.cardHeight / 2;
-  const bottomRowY = topRowY + SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap;
+  const bottomRowY =
+    topRowY + SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap;
   const middleRowY = Math.round((topRowY + bottomRowY) / 2);
   const positions: Record<string, { x: number; y: number }> = {
     [pivotSpec.meta.id]: {

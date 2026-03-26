@@ -1,4 +1,7 @@
-import type { ProjectInspectorPort, ProjectStoragePort } from '@/application/project/project.ports';
+import type {
+  ProjectInspectorPort,
+  ProjectStorageBootstrapPort,
+} from '@/application/project/project.ports';
 import { createProjectError } from '@/domain/project/project-errors';
 import type {
   ProjectInspection,
@@ -16,7 +19,7 @@ export interface EnsureProjectStorageReadyOutput {
 export async function ensureProjectStorageReady(
   dependencies: {
     projectInspector: ProjectInspectorPort;
-    projectStorage: ProjectStoragePort;
+    projectStorage: ProjectStorageBootstrapPort;
   },
   input: {
     notWritableMessage: string;

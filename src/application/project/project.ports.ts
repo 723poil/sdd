@@ -236,6 +236,19 @@ export interface ProjectStoragePort {
   }): Promise<Result<ProjectReferenceTagDocument>>;
 }
 
+export type ProjectStorageBootstrapPort = Pick<ProjectStoragePort, 'readProjectMeta' | 'initializeStorage'>;
+
+export type ProjectInspectionStoragePort = Pick<ProjectStoragePort, 'readProjectMeta'>;
+
+export type ProjectAnalysisStoragePort = ProjectStorageBootstrapPort &
+  Pick<ProjectStoragePort, 'readProjectAnalysis' | 'writeProjectAnalysis'>;
+
+export type ProjectSessionMessageStoragePort = ProjectStorageBootstrapPort &
+  Pick<ProjectStoragePort, 'readProjectSpecs' | 'saveProjectSpec'>;
+
+export type ProjectReferenceTagStoragePort = ProjectStorageBootstrapPort &
+  Pick<ProjectStoragePort, 'readProjectAnalysis' | 'saveProjectReferenceTags'>;
+
 export interface RecentProjectsStorePort {
   listRecentProjects(): Promise<Result<RecentProject[]>>;
   upsertRecentProject(input: { rootPath: string; projectName: string }): Promise<Result<void>>;

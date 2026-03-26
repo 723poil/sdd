@@ -4,14 +4,10 @@ import { dirname, extname, join } from 'node:path';
 import ts from 'typescript';
 
 import type {
-  ProjectAnalysisConnection,
-  ProjectAnalysisDirectorySummary,
   ProjectAnalysisFileClassification,
   ProjectAnalysisFileGrouping,
   ProjectAnalysisFileIndexEntry,
-  ProjectAnalysisFileReference,
   ProjectAnalysisFileReferenceTarget,
-  ProjectAnalysisLayerSummary,
   ProjectAnalysisReferenceAnalysis,
   ProjectAnalysisStructureDiscovery,
   ProjectAnalysisUnresolvedFileReference,
@@ -20,8 +16,6 @@ import type {
 
 import {
   createFileSummary,
-  describeDirectoryRole,
-  describeLayerResponsibility,
   getFileCategoryDisplayName,
   getLanguageDisplayName,
   getLayerAreaDisplayName,
@@ -33,6 +27,12 @@ import {
   type PathAliasConfig,
   type ProjectPathAliasResolver,
 } from '@/infrastructure/analysis/project-analysis-path-alias-resolver';
+import {
+  buildConnections,
+  buildDirectorySummaries,
+  buildLayerSummaries,
+  deduplicateFileReferences,
+} from '@/infrastructure/analysis/project-analysis-local-reference-extractor-summaries';
 import {
   MAX_DIRECTORY_COUNT,
   MAX_FILE_COUNT,
@@ -46,329 +46,40 @@ import {
   resolveNearestDiscoveredSourceRoot,
 } from '@/infrastructure/analysis/project-analysis-structure-discovery';
 import { parseVueSingleFileComponent } from '@/infrastructure/analysis/project-analysis-vue-sfc';
-
-const SUPPORTED_SOURCE_EXTENSIONS = new Map<string, SupportedSourceLanguage>([
-  ['.ts', 'typescript'],
-  ['.tsx', 'typescript'],
-  ['.mts', 'typescript'],
-  ['.cts', 'typescript'],
-  ['.js', 'javascript'],
-  ['.jsx', 'javascript'],
-  ['.mjs', 'javascript'],
-  ['.cjs', 'javascript'],
-  ['.vue', 'vue'],
-  ['.kt', 'kotlin'],
-  ['.kts', 'kotlin'],
-  ['.php', 'php'],
-  ['.java', 'java'],
-]);
-
-const SOURCE_RESOLUTION_EXTENSIONS = [
-  '.ts',
-  '.tsx',
-  '.mts',
-  '.cts',
-  '.js',
-  '.jsx',
-  '.mjs',
-  '.cjs',
-  '.vue',
-  '.kt',
-  '.kts',
-  '.php',
-  '.java',
-  '.json',
-] as const;
-
-const JAVASCRIPT_RUNTIME_EXTENSIONS = new Set(['.js', '.jsx', '.mjs', '.cjs']);
-const MONOREPO_ROOT_DIRECTORIES = new Set(['apps', 'libs', 'modules', 'packages']);
-const ROOT_AREA_NAMES = new Set([
-  'api',
-  'application',
-  'core',
-  'domain',
-  'infrastructure',
-  'main',
-  'preload',
-  'renderer',
-  'shared',
-  'test',
-  'tests',
-  'util',
-  'utils',
-]);
-const LOW_GRANULARITY_AREAS = new Set([
-  'application',
-  'core',
-  'infrastructure',
-  'main',
-  'preload',
-  'renderer',
-  'shared',
-  'util',
-]);
-const TEST_PATH_SEGMENTS = new Set(['test', 'tests', '__test__', '__tests__', '__mocks__']);
-const STRUCTURAL_PATH_SEGMENTS = new Set([
-  'command',
-  'commands',
-  'controller',
-  'controllers',
-  'decorator',
-  'decorators',
-  'domain',
-  'domains',
-  'dto',
-  'dtos',
-  'entity',
-  'entities',
-  'exception',
-  'exceptions',
-  'factory',
-  'factories',
-  'filter',
-  'filters',
-  'guard',
-  'guards',
-  'handler',
-  'handlers',
-  'interceptor',
-  'interceptors',
-  'mapper',
-  'mappers',
-  'middleware',
-  'middlewares',
-  'model',
-  'models',
-  'module',
-  'modules',
-  'pipe',
-  'pipes',
-  'policy',
-  'policies',
-  'query',
-  'queries',
-  'repository',
-  'repositories',
-  'service',
-  'services',
-  'strategy',
-  'strategies',
-  'type',
-  'types',
-  'util',
-  'utils',
-  'validator',
-  'validators',
-]);
-const DEFAULT_FEATURE_SCOPE_LIMIT = 2;
-const DEFAULT_DIRECTORY_SUMMARY_LIMIT = 12;
-const DEFAULT_CONNECTION_LIMIT = 12;
-const PHP_APPLICATION_UNBOUNDED_SCOPE_ROOTS = new Set([
-  'controller',
-  'controllers',
-  'domain',
-  'model',
-  'models',
-  'service',
-  'services',
-]);
-const PHP_PATH_CONSTANT_BASE_PATHS = {
-  APPPATH: 'application',
-  BASEPATH: 'system',
-  FCPATH: '.',
-} as const;
-const PHPDOC_TYPE_TAGS = new Set([
-  'param',
-  'return',
-  'var',
-  'throws',
-  'property',
-  'property-read',
-  'property-write',
-  'mixin',
-  'extends',
-  'implements',
-  'use',
-  'phpstan-param',
-  'phpstan-return',
-  'phpstan-var',
-  'phpstan-throws',
-  'phpstan-property',
-  'phpstan-property-read',
-  'phpstan-property-write',
-  'phpstan-mixin',
-  'phpstan-extends',
-  'phpstan-implements',
-  'phpstan-use',
-  'psalm-param',
-  'psalm-return',
-  'psalm-var',
-  'psalm-throws',
-  'psalm-property',
-  'psalm-property-read',
-  'psalm-property-write',
-  'psalm-mixin',
-  'psalm-extends',
-  'psalm-implements',
-  'psalm-use',
-]);
-const PHPDOC_RESERVED_TYPE_NAMES = new Set([
-  '$this',
-  'array',
-  'array-key',
-  'bool',
-  'boolean',
-  'callable',
-  'callable-array',
-  'callable-string',
-  'class-string',
-  'closed-resource',
-  'double',
-  'false',
-  'float',
-  'from',
-  'int',
-  'integer',
-  'interface-string',
-  'iterable',
-  'key-of',
-  'list',
-  'literal-string',
-  'lowercase-string',
-  'mixed',
-  'negative-int',
-  'never',
-  'non-empty-array',
-  'non-empty-list',
-  'non-empty-string',
-  'non-negative-int',
-  'non-positive-int',
-  'null',
-  'numeric',
-  'numeric-string',
-  'object',
-  'open-resource',
-  'parent',
-  'positive-int',
-  'resource',
-  'scalar',
-  'self',
-  'static',
-  'string',
-  'this',
-  'to',
-  'trait-string',
-  'true',
-  'value-of',
-  'void',
-]);
-
-type ExtractedReferenceRelationship =
-  | 'imports'
-  | 'requires'
-  | 'dynamic-import'
-  | 'includes'
-  | 'loads'
-  | 'uses'
-  | 'phpdoc'
-  | 'extends'
-  | 'implements'
-  | 'instantiates'
-  | 'decorates'
-  | 'module-imports'
-  | 'provides'
-  | 'registers-controller'
-  | 'exports';
-
-interface LoadedSourceFile {
-  additionalReferences: Array<{
-    relationship: ExtractedReferenceRelationship;
-    specifier: string;
-  }>;
-  path: string;
-  language: SupportedSourceLanguage;
-  content: string;
-  baseName: string;
-  packageName: string | null;
-  namespaceName: string | null;
-  declarations: string[];
-  scriptKind: ts.ScriptKind;
-}
-
-interface PhpUseImport {
-  alias: string;
-  kind: 'class' | 'function' | 'const';
-  qualifiedName: string;
-}
-
-type PhpFrameworkLoadKind = 'config' | 'helper' | 'library' | 'model' | 'service';
-
-interface PhpFrameworkLoadReference {
-  kind: PhpFrameworkLoadKind;
-  path: string;
-}
-
-interface PhpIncludeReference {
-  path: string;
-  rawSpecifier: string;
-  rootConstant: keyof typeof PHP_PATH_CONSTANT_BASE_PATHS | null;
-}
-
-interface ExtractedReference {
-  from: string;
-  relationship: ExtractedReferenceRelationship;
-  specifier: string;
-  to: string;
-}
-
-interface UnresolvedExtractedReference extends ProjectAnalysisUnresolvedFileReference {
-  relationship: ExtractedReferenceRelationship;
-}
-
-interface ExtractedStructuralHint {
-  confidence: number;
-  kind: string;
-  reason: string;
-  value: string;
-}
-
-interface ReferenceResolution {
-  candidatePaths: string[];
-  reason: string;
-  resolutionKind: string;
-  resolvedPath: string | null;
-}
-
-interface ReferenceExtractionResult {
-  path: string;
-  resolvedReferences: ExtractedReference[];
-  structuralHints: ExtractedStructuralHint[];
-  unresolvedReferences: UnresolvedExtractedReference[];
-}
-
-interface LayerConnectionAccumulator {
-  count: number;
-  from: string;
-  samples: string[];
-  to: string;
-}
-
-interface FileClassification {
-  category: string;
-  classification: ProjectAnalysisFileClassification;
-  grouping: ProjectAnalysisFileGrouping;
-  layer: string | null;
-  role: string;
-}
-
-export interface LocalProjectReferenceAnalysis {
-  connections: ProjectAnalysisConnection[];
-  directorySummaries: ProjectAnalysisDirectorySummary[];
-  fileIndex: ProjectAnalysisFileIndexEntry[];
-  fileReferences: ProjectAnalysisFileReference[];
-  layers: ProjectAnalysisLayerSummary[];
-  referenceAnalysis: ProjectAnalysisReferenceAnalysis;
-}
+import {
+  DEFAULT_FEATURE_SCOPE_LIMIT,
+  JAVASCRIPT_RUNTIME_EXTENSIONS,
+  LOW_GRANULARITY_AREAS,
+  MONOREPO_ROOT_DIRECTORIES,
+  PHP_APPLICATION_UNBOUNDED_SCOPE_ROOTS,
+  PHP_PATH_CONSTANT_BASE_PATHS,
+  PHPDOC_RESERVED_TYPE_NAMES,
+  PHPDOC_TYPE_TAGS,
+  ROOT_AREA_NAMES,
+  SOURCE_RESOLUTION_EXTENSIONS,
+  STRUCTURAL_PATH_SEGMENTS,
+  SUPPORTED_SOURCE_EXTENSIONS,
+  TEST_PATH_SEGMENTS,
+} from '@/infrastructure/analysis/project-analysis-local-reference-extractor.constants';
+import type {
+  BuildFileIndexInput,
+  ExtractedReference,
+  ExtractedReferenceRelationship,
+  ExtractedStructuralHint,
+  FileClassification,
+  LoadedSourceFile,
+  LocalProjectReferenceAnalysis,
+  PhpFrameworkLoadKind,
+  PhpFrameworkLoadReference,
+  PhpIncludeReference,
+  PhpUseImport,
+  ReferenceExtractionResult,
+  ReferenceResolution,
+  UnresolvedExtractedReference,
+} from '@/infrastructure/analysis/project-analysis-local-reference-extractor.types';
+export type {
+  LocalProjectReferenceAnalysis,
+} from '@/infrastructure/analysis/project-analysis-local-reference-extractor.types';
 
 export async function analyzeLocalProjectReferences(input: {
   rootPath: string;
@@ -1560,15 +1271,7 @@ function extractPhpReferences(input: {
   };
 }
 
-function buildFileIndex(input: {
-  structureDiscovery: ProjectAnalysisStructureDiscovery;
-  fileReferences: ProjectAnalysisFileReference[];
-  keyConfigs: Set<string>;
-  loadedFiles: LoadedSourceFile[];
-  scanState: ProjectAnalysisScanState;
-  structuralHintsByPath: Map<string, ExtractedStructuralHint[]>;
-  unresolvedFileReferences: ProjectAnalysisUnresolvedFileReference[];
-}): ProjectAnalysisFileIndexEntry[] {
+function buildFileIndex(input: BuildFileIndexInput): ProjectAnalysisFileIndexEntry[] {
   const outgoingReferencesByPath = new Map<string, ProjectAnalysisFileReferenceTarget[]>();
   const incomingCountByPath = new Map<string, number>();
   const unresolvedReferencesByPath = new Map<
@@ -1776,183 +1479,6 @@ function getFileIndexSortPriority(input: { category: string; path: string }): nu
   }
 
   return priority;
-}
-
-function buildLayerSummaries(input: {
-  fileIndex: ProjectAnalysisFileIndexEntry[];
-  fileReferences: ProjectAnalysisFileReference[];
-}): ProjectAnalysisLayerSummary[] {
-  const fileCountByLayer = new Map<string, number>();
-  const layerDependencyMap = new Map<string, Set<string>>();
-
-  for (const entry of input.fileIndex) {
-    const layerName = entry.layer ?? '기타';
-    fileCountByLayer.set(layerName, (fileCountByLayer.get(layerName) ?? 0) + 1);
-    if (!layerDependencyMap.has(layerName)) {
-      layerDependencyMap.set(layerName, new Set<string>());
-    }
-  }
-
-  const layerByPath = new Map(
-    input.fileIndex.map((entry) => [entry.path, entry.layer ?? '기타'] as const),
-  );
-
-  for (const reference of input.fileReferences) {
-    const fromLayer = layerByPath.get(reference.from) ?? '기타';
-    const toLayer = layerByPath.get(reference.to) ?? '기타';
-    if (fromLayer === toLayer) {
-      continue;
-    }
-
-    const dependencySet = layerDependencyMap.get(fromLayer);
-    dependencySet?.add(toLayer);
-  }
-
-  return [...fileCountByLayer.entries()]
-    .map(([layerName, fileCount]) => ({
-      dependsOn: [...(layerDependencyMap.get(layerName) ?? new Set<string>())].sort(),
-      directories: [],
-      name: layerName,
-      responsibility: describeLayerResponsibility(layerName, fileCount),
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name));
-}
-
-function buildDirectorySummaries(input: {
-  fileIndex: ProjectAnalysisFileIndexEntry[];
-  scanState: ProjectAnalysisScanState;
-  structureDiscovery: ProjectAnalysisStructureDiscovery;
-}): ProjectAnalysisDirectorySummary[] {
-  const discoveredPaths = new Set<string>([
-    ...input.structureDiscovery.packageRoots.map((packageRoot) => packageRoot.path),
-    ...input.structureDiscovery.sourceRoots.map((sourceRoot) => sourceRoot.path),
-    ...input.structureDiscovery.featureClusters.map((featureCluster) => featureCluster.path),
-  ]);
-  const modulePaths = [...input.scanState.modules].map((path) => normalizeRelativePath(path));
-  const directoryPaths =
-    discoveredPaths.size > 0
-      ? [...discoveredPaths]
-      : modulePaths.length > 0
-        ? modulePaths
-        : [...input.scanState.directories].map((path) => normalizeRelativePath(path));
-
-  return directoryPaths
-    .map((path) => {
-      const indexedEntries =
-        path === '.'
-          ? input.fileIndex
-          : input.fileIndex.filter(
-              (entry) => entry.path.startsWith(`${path}/`) || entry.path === path,
-            );
-
-      return {
-        layer: indexedEntries[0]?.grouping?.area ?? null,
-        path,
-        role: describeDirectoryRole(indexedEntries),
-      };
-    })
-    .sort((left, right) => left.path.localeCompare(right.path))
-    .slice(0, DEFAULT_DIRECTORY_SUMMARY_LIMIT);
-}
-
-function buildConnections(input: {
-  fileReferences: ProjectAnalysisFileReference[];
-  layerByPath: Map<string, string | null>;
-}): ProjectAnalysisConnection[] {
-  const connectionMap = new Map<string, LayerConnectionAccumulator>();
-
-  for (const reference of input.fileReferences) {
-    const fromLayer = input.layerByPath.get(reference.from) ?? '기타';
-    const toLayer = input.layerByPath.get(reference.to) ?? '기타';
-    const key = `${fromLayer}->${toLayer}`;
-    const accumulator = connectionMap.get(key) ?? {
-      count: 0,
-      from: fromLayer,
-      samples: [],
-      to: toLayer,
-    };
-
-    accumulator.count += 1;
-    if (accumulator.samples.length < 3) {
-      accumulator.samples.push(`${reference.from} -> ${reference.to}`);
-    }
-    connectionMap.set(key, accumulator);
-  }
-
-  return [...connectionMap.values()]
-    .sort((left, right) => right.count - left.count || left.from.localeCompare(right.from))
-    .slice(0, DEFAULT_CONNECTION_LIMIT)
-    .map((accumulator) => ({
-      from: accumulator.from,
-      reason:
-        accumulator.samples.length > 0
-          ? `정적 참조 ${accumulator.count}건. 예: ${accumulator.samples.join(', ')}`
-          : `정적 참조 ${accumulator.count}건`,
-      relationship: '정적 참조',
-      to: accumulator.to,
-    }));
-}
-
-function deduplicateFileReferences(
-  references: ExtractedReference[],
-): ProjectAnalysisFileReference[] {
-  const deduplicated = new Map<string, ProjectAnalysisFileReference>();
-
-  for (const reference of references) {
-    const key = `${reference.from}|${reference.to}|${reference.relationship}`;
-    if (deduplicated.has(key)) {
-      continue;
-    }
-
-    deduplicated.set(key, {
-      from: reference.from,
-      reason: describeReferenceReason(reference.relationship, reference.specifier),
-      relationship: reference.relationship,
-      to: reference.to,
-    });
-  }
-
-  return [...deduplicated.values()];
-}
-
-function describeReferenceReason(
-  relationship: ExtractedReferenceRelationship,
-  specifier: string,
-): string {
-  switch (relationship) {
-    case 'decorates':
-      return `데코레이터 사용: ${specifier}`;
-    case 'dynamic-import':
-      return `동적 import: ${specifier}`;
-    case 'extends':
-      return `상속: ${specifier}`;
-    case 'exports':
-      return `모듈 exports: ${specifier}`;
-    case 'implements':
-      return `구현: ${specifier}`;
-    case 'instantiates':
-      return `객체 생성: ${specifier}`;
-    case 'module-imports':
-      return `모듈 imports: ${specifier}`;
-    case 'loads':
-      return `CI 로더: ${specifier}`;
-    case 'provides':
-      return `모듈 providers: ${specifier}`;
-    case 'registers-controller':
-      return `모듈 controllers: ${specifier}`;
-    case 'requires':
-      return `require: ${specifier}`;
-    case 'includes':
-      return `include/require: ${specifier}`;
-    case 'uses':
-      return `PHP use: ${specifier}`;
-    case 'phpdoc':
-      return `PHPDoc 타입: ${specifier}`;
-    case 'imports':
-      return `정적 import: ${specifier}`;
-    default:
-      return `정적 참조: ${specifier}`;
-  }
 }
 
 function resolveAliasCandidates(aliasConfig: PathAliasConfig, specifier: string): string[] {

@@ -285,7 +285,9 @@ void test('repository reads schemaVersion 2 spec meta and falls back to empty re
 
     const metaPath = getSpecMetaPath(rootPath, createResult.value.spec.meta.id);
     const currentMeta = JSON.parse(await readFile(metaPath, 'utf8')) as Record<string, unknown>;
-    const { relations: _relations, ...legacyMeta } = currentMeta;
+    const legacyMeta = Object.fromEntries(
+      Object.entries(currentMeta).filter(([key]) => key !== 'relations'),
+    );
 
     await writeFile(
       metaPath,

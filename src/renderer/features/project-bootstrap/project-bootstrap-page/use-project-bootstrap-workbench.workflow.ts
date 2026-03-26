@@ -6,7 +6,6 @@ import type {
 } from '@/domain/app-settings/agent-cli-connection-model';
 import { createDefaultAgentCliConnectionSettings } from '@/domain/app-settings/agent-cli-connection-model';
 import type {
-  ProjectAnalysis,
   ProjectAnalysisDocumentId,
   ProjectAnalysisDocumentLayoutMap,
   ProjectAnalysisMode,
@@ -30,7 +29,6 @@ import type {
   ProjectSessionMessageRunStatus,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
-import type { AppError } from '@/shared/contracts/app-error';
 import { getRendererSddApi } from '@/renderer/renderer-sdd-api';
 
 import {
@@ -40,6 +38,18 @@ import {
   resolveSelectedSession,
   resolveSelectedSpec,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils';
+import {
+  createCancelledProjectSessionMessageRunStatus,
+  createCancellingProjectSessionMessageRunStatus,
+  createFailedProjectSessionMessageRunStatus,
+  createRunningProjectAnalysisRunStatus,
+  createRunningProjectSessionMessageRunStatus,
+  formatAppErrorMessage,
+  mergeProjectSessionMessages,
+  replaceRecordValue,
+  upsertProjectSessionSummary,
+  upsertProjectSpec,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils';
 import type {
   ProjectBootstrapWorkbenchState,
   ReferenceTagGenerationStatus,
@@ -211,13 +221,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     status: ReferenceTagGenerationStatus | null,
   ) => {
     setReferenceTagGenerationStatusesByRootPath((current) => {
-      const nextStatuses = { ...current };
-
-      if (status === null) {
-        delete nextStatuses[rootPath];
-      } else {
-        nextStatuses[rootPath] = status;
-      }
+      const nextStatuses = replaceRecordValue(current, rootPath, status);
 
       referenceTagGenerationStatusesByRootPathRef.current = nextStatuses;
       return nextStatuses;
@@ -225,12 +229,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   };
 
   const setReferenceTagGenerationTaskId = (rootPath: string, taskId: string | null) => {
-    if (taskId === null) {
-      delete referenceTagGenerationTaskIdsByRootPathRef.current[rootPath];
-      return;
-    }
-
-    referenceTagGenerationTaskIdsByRootPathRef.current[rootPath] = taskId;
+    referenceTagGenerationTaskIdsByRootPathRef.current = replaceRecordValue(
+      referenceTagGenerationTaskIdsByRootPathRef.current,
+      rootPath,
+      taskId,
+    );
   };
 
   const setSessionMessageRunStatus = (input: {
@@ -244,17 +247,15 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     });
 
     setSessionMessageRunStatusesBySessionKey((current) => {
-      const nextStatuses = { ...current };
-
-      if (
+      const shouldRemove =
         input.status === null ||
         input.status.status === 'idle' ||
-        input.status.status === 'succeeded'
-      ) {
-        delete nextStatuses[sessionKey];
-      } else {
-        nextStatuses[sessionKey] = input.status;
-      }
+        input.status.status === 'succeeded';
+      const nextStatuses = replaceRecordValue(
+        current,
+        sessionKey,
+        shouldRemove ? null : input.status,
+      );
 
       sessionMessageRunStatusesBySessionKeyRef.current = nextStatuses;
       return nextStatuses;
@@ -262,12 +263,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   };
 
   const setSessionMessageTaskId = (sessionKey: string, taskId: string | null) => {
-    if (taskId === null) {
-      delete sessionMessageTaskIdsBySessionKeyRef.current[sessionKey];
-      return;
-    }
-
-    sessionMessageTaskIdsBySessionKeyRef.current[sessionKey] = taskId;
+    sessionMessageTaskIdsBySessionKeyRef.current = replaceRecordValue(
+      sessionMessageTaskIdsBySessionKeyRef.current,
+      sessionKey,
+      taskId,
+    );
   };
 
   const startSessionCreateProgressTask = useEffectEvent(
@@ -396,10 +396,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           return;
         }
 
-        setAnalysisRunStatusesByRootPath((current) => ({
-          ...current,
-          [result.rootPath]: result,
-        }));
+        setAnalysisRunStatusesByRootPath((current) =>
+          replaceRecordValue(current, result.rootPath, result),
+        );
 
         if (result.status === 'running' || result.status === 'cancelling') {
           timeoutId = window.setTimeout(() => {
@@ -491,10 +490,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      setSessionMessagesBySessionKey((current) => ({
-        ...current,
-        [sessionKey]: result.value,
-      }));
+      setSessionMessagesBySessionKey((current) =>
+        replaceRecordValue(current, sessionKey, result.value),
+      );
     })();
 
     return () => {
@@ -777,13 +775,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         ? '참조 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.'
         : '전체 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.',
     );
-    setAnalysisRunStatusesByRootPath((current) => {
-      const startedAt = new Date().toISOString();
-      return {
-        ...current,
-        [analysisRootPath]: {
+    setAnalysisRunStatusesByRootPath((current) =>
+      replaceRecordValue(
+        current,
+        analysisRootPath,
+        createRunningProjectAnalysisRunStatus({
           rootPath: analysisRootPath,
-          status: 'running',
+          startedAt: new Date().toISOString(),
           stepIndex: 1,
           stepTotal: mode === 'references' ? 3 : 4,
           stageMessage: mode === 'references' ? '참조 분석 준비 중' : '전체 분석 준비 중',
@@ -791,13 +789,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             mode === 'references'
               ? '참조 분석 요청을 전송했습니다.'
               : '전체 분석 요청을 전송했습니다.',
-          startedAt,
-          updatedAt: startedAt,
-          completedAt: null,
-          lastError: null,
-        },
-      };
-    });
+        }),
+      ),
+    );
 
     try {
       const result = await sddApi.project.analyze({
@@ -807,10 +801,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
       const latestRunStatus = await readAnalysisRunStatus(analysisRootPath);
       if (latestRunStatus) {
-        setAnalysisRunStatusesByRootPath((current) => ({
-          ...current,
-          [analysisRootPath]: latestRunStatus,
-        }));
+        setAnalysisRunStatusesByRootPath((current) =>
+          replaceRecordValue(current, analysisRootPath, latestRunStatus),
+        );
       }
 
       if (!result.ok) {
@@ -840,7 +833,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         rootPath: analysisRootPath,
         transientAnalysis:
           mode === 'references' && !result.value.inspection.isWritable
-            ? toStructuredProjectAnalysis(result.value.analysis)
+            ? result.value.analysis
             : null,
       });
       if (mode === 'references') {
@@ -862,10 +855,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             : '전체 분석을 실행하지 못했습니다.';
       const latestRunStatus = await readAnalysisRunStatus(analysisRootPath);
       if (latestRunStatus) {
-        setAnalysisRunStatusesByRootPath((current) => ({
-          ...current,
-          [analysisRootPath]: latestRunStatus,
-        }));
+        setAnalysisRunStatusesByRootPath((current) =>
+          replaceRecordValue(current, analysisRootPath, latestRunStatus),
+        );
       }
 
       if (selectedPathRef.current === analysisRootPath) {
@@ -906,10 +898,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    setAnalysisRunStatusesByRootPath((current) => ({
-      ...current,
-      [rootPath]: result.value,
-    }));
+    setAnalysisRunStatusesByRootPath((current) =>
+      replaceRecordValue(current, rootPath, result.value),
+    );
     setMessage(
       result.value.status === 'cancelling'
         ? '분석 취소를 요청했습니다.'
@@ -1016,23 +1007,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       title: '채팅 메시지 전송',
     });
     setSessionMessageTaskId(sessionKey, sendMessageTask.id);
+    const runningStatus = createRunningProjectSessionMessageRunStatus({
+      progressMessage: '대화 로그에 질문을 기록하고 있습니다.',
+      requestText: trimmedDraftMessage,
+      rootPath: selectedPath,
+      sessionId: selectedSession.id,
+      startedAt,
+      stageMessage: '메시지 저장 중',
+    });
     setSessionMessageRunStatus({
       rootPath: selectedPath,
       sessionId: selectedSession.id,
-      status: {
-        rootPath: selectedPath,
-        sessionId: selectedSession.id,
-        status: 'running',
-        stepIndex: 1,
-        stepTotal: 3,
-        stageMessage: '메시지 저장 중',
-        progressMessage: '대화 로그에 질문을 기록하고 있습니다.',
-        requestText: trimmedDraftMessage,
-        startedAt,
-        updatedAt: startedAt,
-        completedAt: null,
-        lastError: null,
-      },
+      status: runningStatus,
     });
 
     setErrorMessage(null);
@@ -1054,33 +1040,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             sessionId: selectedSession.id,
           });
           if (sessionMessagesResult.ok) {
-            setSessionMessagesBySessionKey((current) => ({
-              ...current,
-              [sessionKey]: sessionMessagesResult.value,
-            }));
+            setSessionMessagesBySessionKey((current) =>
+              replaceRecordValue(current, sessionKey, sessionMessagesResult.value),
+            );
           }
-          setDraftMessagesBySessionKey((current) => {
-            const nextDrafts = { ...current };
-            delete nextDrafts[sessionKey];
-            return nextDrafts;
-          });
+          setDraftMessagesBySessionKey((current) => replaceRecordValue(current, sessionKey, null));
           setSessionMessageRunStatus({
             rootPath: selectedPath,
             sessionId: selectedSession.id,
-            status: {
-              rootPath: selectedPath,
-              sessionId: selectedSession.id,
-              status: 'cancelled',
-              stepIndex: 2,
-              stepTotal: 3,
-              stageMessage: '요청 취소됨',
-              progressMessage: '응답 생성을 취소했습니다.',
-              requestText: null,
-              startedAt,
-              updatedAt: completedAt,
+            status: createCancelledProjectSessionMessageRunStatus({
               completedAt,
-              lastError: null,
-            },
+              current: runningStatus,
+            }),
           });
           progressTasks.updateRequestProgressTask(sendMessageTask, {
             detail: `"${selectedSpec.meta.title}" 명세 채팅 응답 생성을 취소했습니다.`,
@@ -1096,20 +1067,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         setSessionMessageRunStatus({
           rootPath: selectedPath,
           sessionId: selectedSession.id,
-          status: {
-            rootPath: selectedPath,
-            sessionId: selectedSession.id,
-            status: 'failed',
-            stepIndex: 1,
-            stepTotal: 3,
-            stageMessage: '메시지 저장 실패',
-            progressMessage: null,
-            requestText: null,
-            startedAt,
-            updatedAt: completedAt,
+          status: createFailedProjectSessionMessageRunStatus({
             completedAt,
             lastError: result.error.message,
-          },
+            progressMessage: null,
+            requestText: null,
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+            startedAt,
+            stageMessage: '메시지 저장 실패',
+            stepIndex: 1,
+            stepTotal: 3,
+          }),
         });
         progressTasks.updateRequestProgressTask(sendMessageTask, {
           detail: result.error.message,
@@ -1122,49 +1091,44 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      setSessionMessagesBySessionKey((current) => ({
-        ...current,
-        [sessionKey]: mergeProjectSessionMessages(current[sessionKey] ?? [], result.value.messages),
-      }));
+      setSessionMessagesBySessionKey((current) =>
+        replaceRecordValue(
+          current,
+          sessionKey,
+          mergeProjectSessionMessages(current[sessionKey] ?? [], result.value.messages),
+        ),
+      );
       const specSave = result.value.specSave;
       if (specSave) {
         setSpecs((current) => upsertProjectSpec(current, specSave.spec));
-        setSpecConflictBySpecId((current) => {
-          const next = { ...current };
-          if (specSave.kind === 'conflict') {
-            next[specSave.spec.meta.id] = true;
-          } else {
-            delete next[specSave.spec.meta.id];
-          }
-          return next;
-        });
+        setSpecConflictBySpecId((current) =>
+          replaceRecordValue(
+            current,
+            specSave.spec.meta.id,
+            specSave.kind === 'conflict' ? true : null,
+          ),
+        );
       }
       setSessions((current) => upsertProjectSessionSummary(current, result.value.session));
-      setDraftMessagesBySessionKey((current) => {
-        const nextDrafts = { ...current };
-        delete nextDrafts[sessionKey];
-        return nextDrafts;
-      });
+      setDraftMessagesBySessionKey((current) => replaceRecordValue(current, sessionKey, null));
 
       if (result.value.assistantErrorMessage) {
         const completedAt = new Date().toISOString();
         setSessionMessageRunStatus({
           rootPath: selectedPath,
           sessionId: selectedSession.id,
-          status: {
-            rootPath: selectedPath,
-            sessionId: selectedSession.id,
-            status: 'failed',
-            stepIndex: 3,
-            stepTotal: 3,
-            stageMessage: '응답 생성 실패',
-            progressMessage: null,
-            requestText: null,
-            startedAt,
-            updatedAt: completedAt,
+          status: createFailedProjectSessionMessageRunStatus({
             completedAt,
             lastError: result.value.assistantErrorMessage,
-          },
+            progressMessage: null,
+            requestText: null,
+            rootPath: selectedPath,
+            sessionId: selectedSession.id,
+            startedAt,
+            stageMessage: '응답 생성 실패',
+            stepIndex: 3,
+            stepTotal: 3,
+          }),
         });
         progressTasks.updateRequestProgressTask(sendMessageTask, {
           detail: result.value.assistantErrorMessage,
@@ -1224,15 +1188,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
-    const cancellingStatus: ProjectSessionMessageRunStatus = {
-      ...currentStatus,
-      status: 'cancelling',
-      stageMessage: '요청 취소 중',
-      progressMessage: '응답 생성을 종료하고 있습니다.',
+    const cancellingStatus = createCancellingProjectSessionMessageRunStatus({
+      current: currentStatus,
       updatedAt: new Date().toISOString(),
-      completedAt: null,
-      lastError: null,
-    };
+    });
     setSessionMessageRunStatus({
       rootPath,
       sessionId,
@@ -1323,15 +1282,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
 
       setSpecs((current) => upsertProjectSpec(current, result.value.spec));
-      setSpecConflictBySpecId((current) => {
-        const next = { ...current };
-        if (result.value.kind === 'conflict') {
-          next[result.value.spec.meta.id] = true;
-        } else {
-          delete next[result.value.spec.meta.id];
-        }
-        return next;
-      });
+      setSpecConflictBySpecId((current) =>
+        replaceRecordValue(
+          current,
+          result.value.spec.meta.id,
+          result.value.kind === 'conflict' ? true : null,
+        ),
+      );
 
       if (result.value.kind === 'conflict') {
         setErrorMessage('명세가 다른 변경과 충돌했습니다. 최신 초안을 다시 확인해 주세요.');
@@ -1399,15 +1356,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
 
       setSpecs((current) => upsertProjectSpec(current, result.value.spec));
-      setSpecConflictBySpecId((current) => {
-        const next = { ...current };
-        if (result.value.kind === 'conflict') {
-          next[result.value.spec.meta.id] = true;
-        } else {
-          delete next[result.value.spec.meta.id];
-        }
-        return next;
-      });
+      setSpecConflictBySpecId((current) =>
+        replaceRecordValue(
+          current,
+          result.value.spec.meta.id,
+          result.value.kind === 'conflict' ? true : null,
+        ),
+      );
 
       if (result.value.kind === 'conflict') {
         setErrorMessage('다른 변경이 먼저 저장되어 명세 메타데이터 저장이 충돌했습니다.');
@@ -1505,15 +1460,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     }
 
     setSpecs((current) => upsertProjectSpec(current, result.value.spec));
-    setSpecConflictBySpecId((current) => {
-      const next = { ...current };
-      if (result.value.kind === 'conflict') {
-        next[result.value.spec.meta.id] = true;
-      } else {
-        delete next[result.value.spec.meta.id];
-      }
-      return next;
-    });
+    setSpecConflictBySpecId((current) =>
+      replaceRecordValue(
+        current,
+        result.value.spec.meta.id,
+        result.value.kind === 'conflict' ? true : null,
+      ),
+    );
 
     if (result.value.kind === 'conflict') {
       setErrorMessage('다른 변경이 먼저 저장되어 이전 버전을 적용하지 못했습니다.');
@@ -1558,10 +1511,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     const deleteResult = result.value;
     if (deleteResult.kind === 'conflict') {
       setSpecs((current) => upsertProjectSpec(current, deleteResult.spec));
-      setSpecConflictBySpecId((current) => ({
-        ...current,
-        [deleteResult.spec.meta.id]: true,
-      }));
+      setSpecConflictBySpecId((current) =>
+        replaceRecordValue(current, deleteResult.spec.meta.id, true),
+      );
       setErrorMessage('다른 변경이 먼저 저장되어 버전 삭제가 충돌했습니다.');
       setMessage('버전 삭제 중 충돌이 발생했습니다.');
       return deleteResult;
@@ -2065,10 +2017,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           rootPath: selectedPath,
           sessionId: selectedSession.id,
         });
-        setDraftMessagesBySessionKey((current) => ({
-          ...current,
-          [sessionKey]: value,
-        }));
+        setDraftMessagesBySessionKey((current) => replaceRecordValue(current, sessionKey, value));
       },
       onChangeEditingProjectName(value: string) {
         setEditingProjectNameDraft(value);
@@ -2180,71 +2129,4 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
     },
   };
-}
-
-function toStructuredProjectAnalysis(
-  value: ProjectAnalysis | null,
-): StructuredProjectAnalysis | null {
-  return value;
-}
-
-function upsertProjectSpec(
-  specs: ProjectSpecDocument[],
-  nextSpec: ProjectSpecDocument,
-): ProjectSpecDocument[] {
-  const didExist = specs.some((spec) => spec.meta.id === nextSpec.meta.id);
-  const mergedSpecs = didExist
-    ? specs.map((spec) => (spec.meta.id === nextSpec.meta.id ? nextSpec : spec))
-    : [...specs, nextSpec];
-
-  return [...mergedSpecs].sort((left, right) =>
-    right.meta.updatedAt.localeCompare(left.meta.updatedAt),
-  );
-}
-
-function upsertProjectSessionSummary(
-  sessions: ProjectSessionSummary[],
-  nextSession: {
-    id: string;
-    specId: string | null;
-    title: string;
-    updatedAt: string;
-    lastMessageAt: string | null;
-    lastMessagePreview: string | null;
-    messageCount: number;
-  },
-): ProjectSessionSummary[] {
-  const didExist = sessions.some((session) => session.id === nextSession.id);
-  const mergedSessions = didExist
-    ? sessions.map((session) => (session.id === nextSession.id ? { ...nextSession } : session))
-    : [...sessions, { ...nextSession }];
-
-  return [...mergedSessions].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
-}
-
-function mergeProjectSessionMessages(
-  currentMessages: ProjectSessionMessage[],
-  nextMessages: ProjectSessionMessage[],
-): ProjectSessionMessage[] {
-  const seenMessageIds = new Set(currentMessages.map((message) => message.id));
-  const mergedMessages = [...currentMessages];
-
-  for (const message of nextMessages) {
-    if (seenMessageIds.has(message.id)) {
-      continue;
-    }
-
-    seenMessageIds.add(message.id);
-    mergedMessages.push(message);
-  }
-
-  return [...mergedMessages].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
-}
-
-function formatAppErrorMessage(error: AppError): string {
-  if (!error.details || error.details.trim().length === 0) {
-    return error.message;
-  }
-
-  return `${error.message}\n${error.details.trim()}`;
 }

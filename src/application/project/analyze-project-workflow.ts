@@ -1,11 +1,19 @@
+import {
+  reportAnalysisPersistenceFailed,
+  reportAnalysisPersistenceStarted,
+  reportAnalysisPersistenceSucceeded,
+  reportTransientReferenceAnalysisSucceeded,
+  type AnalysisPersistenceStatusCopy,
+} from '@/application/project/analysis-run-status-reporter';
 import { ensureProjectStorageReady } from '@/application/project/ensure-project-storage-ready';
 import type {
   ProjectAnalysisRunStatusPort,
   ProjectAnalyzerPort,
   ProjectInspectorPort,
-  ProjectStoragePort,
+  ProjectAnalysisStoragePort,
 } from '@/application/project/project.ports';
 import { mergeReferenceAnalysisDraft } from '@/application/project/project-analysis-draft-merger';
+import { readProjectInspection } from '@/application/project/read-project-inspection';
 import { createProjectError } from '@/domain/project/project-errors';
 import type {
   ProjectAnalysis,
@@ -24,7 +32,7 @@ export interface AnalyzeProjectWorkflowDependencies {
   analysisRunStatusStore: ProjectAnalysisRunStatusPort;
   projectAnalyzer: ProjectAnalyzerPort;
   projectInspector: ProjectInspectorPort;
-  projectStorage: ProjectStoragePort;
+  projectStorage: ProjectAnalysisStoragePort;
 }
 
 export interface AnalyzeProjectWorkflowInput {
@@ -121,15 +129,7 @@ async function executeReferenceOnlyAnalysis(
   });
 
   if (!inspection.isWritable) {
-    dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
-      rootPath: input.rootPath,
-      status: 'succeeded',
-      stageMessage: '참조 분석 완료',
-      progressMessage: '쓰기 권한이 없어 결과를 저장하지 않고 현재 화면에만 표시했습니다.',
-      stepIndex: 3,
-      completedAt: new Date().toISOString(),
-      lastError: null,
-    });
+    reportTransientReferenceAnalysisSucceeded(dependencies.analysisRunStatusStore, input.rootPath);
 
     return ok({
       analysis: analysisDraft,
@@ -142,14 +142,11 @@ async function executeReferenceOnlyAnalysis(
     rootPath: input.rootPath,
   });
   if (!storageResult.ok) {
-    dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
+    reportAnalysisPersistenceFailed(dependencies.analysisRunStatusStore, {
+      errorMessage: storageResult.error.message,
+      failureStageMessage: '참조 분석 저장 실패',
       rootPath: input.rootPath,
-      status: 'failed',
-      stageMessage: '참조 분석 저장 실패',
-      progressMessage: null,
       stepIndex: 3,
-      completedAt: new Date().toISOString(),
-      lastError: storageResult.error.message,
     });
     return storageResult;
   }
@@ -172,20 +169,14 @@ async function executeReferenceOnlyAnalysis(
 async function persistAnalysisDraft(input: {
   analysisDraft: ProjectAnalysisDraft;
   analysisRunStatusStore: ProjectAnalysisRunStatusPort;
-  inspection: ProjectInspection;
-  projectStorage: ProjectStoragePort;
+  inspection: AnalyzeProjectOutput['inspection'];
+  projectStorage: ProjectAnalysisStoragePort;
   rootPath: string;
-  failureStageMessage: string;
-  savingProgressMessage: string;
-  savingStageMessage: string;
-  successProgressMessage: string;
-  successStageMessage: string;
-  stepIndex: number;
-}): Promise<Result<AnalyzeProjectOutput>> {
-  input.analysisRunStatusStore.updateAnalysisRunStatus({
+} & AnalysisPersistenceStatusCopy): Promise<Result<AnalyzeProjectOutput>> {
+  reportAnalysisPersistenceStarted(input.analysisRunStatusStore, {
     rootPath: input.rootPath,
-    stageMessage: input.savingStageMessage,
-    progressMessage: input.savingProgressMessage,
+    savingProgressMessage: input.savingProgressMessage,
+    savingStageMessage: input.savingStageMessage,
     stepIndex: input.stepIndex,
   });
 
@@ -194,26 +185,20 @@ async function persistAnalysisDraft(input: {
     analysis: input.analysisDraft,
   });
   if (!writeResult.ok) {
-    input.analysisRunStatusStore.updateAnalysisRunStatus({
+    reportAnalysisPersistenceFailed(input.analysisRunStatusStore, {
+      errorMessage: writeResult.error.message,
+      failureStageMessage: input.failureStageMessage,
       rootPath: input.rootPath,
-      status: 'failed',
-      stageMessage: input.failureStageMessage,
-      progressMessage: null,
       stepIndex: input.stepIndex,
-      completedAt: new Date().toISOString(),
-      lastError: writeResult.error.message,
     });
     return writeResult;
   }
 
-  input.analysisRunStatusStore.updateAnalysisRunStatus({
+  reportAnalysisPersistenceSucceeded(input.analysisRunStatusStore, {
     rootPath: input.rootPath,
-    status: 'succeeded',
-    stageMessage: input.successStageMessage,
-    progressMessage: input.successProgressMessage,
     stepIndex: input.stepIndex,
-    completedAt: new Date().toISOString(),
-    lastError: null,
+    successProgressMessage: input.successProgressMessage,
+    successStageMessage: input.successStageMessage,
   });
 
   return ok({
@@ -223,37 +208,6 @@ async function persistAnalysisDraft(input: {
       initializationState: 'ready',
       projectMeta: writeResult.value.projectMeta,
     },
-  });
-}
-
-async function readProjectInspection(
-  dependencies: {
-    projectInspector: ProjectInspectorPort;
-    projectStorage: ProjectStoragePort;
-  },
-  input: {
-    rootPath: string;
-  },
-): Promise<Result<ProjectInspection>> {
-  const directoryResult = await dependencies.projectInspector.inspectDirectory({
-    rootPath: input.rootPath,
-  });
-  if (!directoryResult.ok) {
-    return directoryResult;
-  }
-
-  const projectMetaResult = await dependencies.projectStorage.readProjectMeta({
-    rootPath: directoryResult.value.rootPath,
-  });
-  if (!projectMetaResult.ok) {
-    return projectMetaResult;
-  }
-
-  return ok({
-    ...directoryResult.value,
-    hasSddDirectory: projectMetaResult.value ? true : directoryResult.value.hasSddDirectory,
-    initializationState: projectMetaResult.value ? 'ready' : 'missing',
-    projectMeta: projectMetaResult.value,
   });
 }
 
