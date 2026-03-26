@@ -442,9 +442,10 @@ store에 넣지 않는 것:
 
 ### markdown 규칙
 
-- 명세는 version 파일로만 저장
+- 명세의 현재 작업 초안은 `meta.json.draftMarkdown` 기준으로 읽는다
+- 저장 버전은 `versions/` 아래 immutable 파일로만 남긴다
 - 기존 버전 수정 금지
-- 최신 버전 pointer는 `meta.json`이 관리
+- 최신 버전 pointer와 현재 기준 버전 pointer는 `meta.json`이 관리
 
 ### JSONL 규칙
 
@@ -466,7 +467,7 @@ store에 넣지 않는 것:
 
 권장 쓰기 순서:
 
-1. 새 version 파일 생성
+1. 필요하면 새 version 파일 생성
 2. patch 상태 파일 갱신
 3. chat 이벤트 append
 4. 마지막에 `meta.json`과 `index.json` pointer 갱신
@@ -476,7 +477,7 @@ store에 넣지 않는 것:
 - `meta.json`을 최종 commit pointer처럼 취급한다
 - 앞 단계 파일이 있어도 `meta.json`이 갱신되지 않았으면 반영 실패로 본다
 - 재시도는 idempotent command 기준으로 수행한다
-- 복구 기준 파일은 항상 `meta.json.latestVersion`
+- 복구 기준 파일은 항상 `meta.json` 전체 상태다
 - `specs/index.json`은 파생 인덱스이므로 source of truth로 취급하지 않는다
 
 즉, 중간 파일이 일부 남아도 최종 기준은 pointer 파일이 결정한다.

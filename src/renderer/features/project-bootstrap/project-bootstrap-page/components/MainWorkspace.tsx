@@ -5,7 +5,14 @@ import type {
   ProjectAnalysisDocumentLayoutMap,
 } from '@/domain/project/project-analysis-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionHistoryEntry,
+} from '@/domain/project/project-spec-model';
 
 import { AnalysisReferenceMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap';
 import { AnalysisWorkspace } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace';
@@ -25,6 +32,7 @@ interface MainWorkspaceProps {
   analysis: StructuredProjectAnalysis | null;
   analysisSessionKey: string;
   canManageReferenceTags: boolean;
+  canWriteSpecs: boolean;
   specs: ProjectSpecDocument[];
   isCancellingReferenceTags: boolean;
   isGeneratingReferenceTags: boolean;
@@ -42,10 +50,30 @@ interface MainWorkspaceProps {
     revision: number;
     specId: string;
     title: string;
-  }) => Promise<boolean>;
+  }) => Promise<ProjectSpecSaveResult | null>;
+  onReadSpecVersionHistory: (input: {
+    specId: string;
+  }) => Promise<ProjectSpecVersionHistoryEntry[] | null>;
+  onReadSpecVersionDiff: (input: {
+    currentMarkdown?: string | null;
+    currentTitle?: string | null;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecVersionDiff | null>;
+  onApplySpecVersion: (input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecApplyVersionResult | null>;
+  onDeleteSpecVersion: (input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecDeleteVersionResult | null>;
   onSaveReferenceTags: (referenceTags: ProjectReferenceTagDocument) => Promise<boolean>;
   onSelectSpec: (specId: string) => void;
   onSelectWorkspacePage: (page: WorkspacePageId) => void;
+  specConflictBySpecId: Record<string, boolean>;
 }
 
 export function MainWorkspace(props: MainWorkspaceProps) {
@@ -95,11 +123,17 @@ export function MainWorkspace(props: MainWorkspaceProps) {
         >
           <SpecsWorkspace
             isActive={props.activeWorkspacePage === 'specs'}
+            canWriteSpecs={props.canWriteSpecs}
+            onApplySpecVersion={props.onApplySpecVersion}
+            onDeleteSpecVersion={props.onDeleteSpecVersion}
+            onReadSpecVersionDiff={props.onReadSpecVersionDiff}
+            onReadSpecVersionHistory={props.onReadSpecVersionHistory}
             onSelectSpec={props.onSelectSpec}
             onSaveSpec={props.onSaveSpec}
             onViewModeChange={setSpecsViewMode}
             isSavingSpec={props.isSavingSpec}
             selectedSpecId={props.selectedSpecId}
+            specConflictBySpecId={props.specConflictBySpecId}
             specs={props.specs}
             viewMode={specsViewMode}
           />

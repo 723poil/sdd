@@ -1,8 +1,8 @@
-import { mkdir } from 'node:fs/promises';
+import { mkdir, unlink } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
 import type { ProjectStoragePort } from '@/application/project/project.ports';
-import { ANALYSIS_FILE_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
+import { ANALYSIS_FILE_INDEX_SCHEMA_VERSION, SPEC_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
 import { type ProjectAnalysisContext } from '@/domain/project/project-analysis-model';
 import {
   createEmptyProjectReferenceTagDocument,
@@ -10,15 +10,14 @@ import {
   sanitizeProjectReferenceTagDocument,
 } from '@/domain/project/project-reference-tag-model';
 import {
+  createProjectSpecDocument,
   createNextProjectSpecMeta,
   createNextProjectSpecVersionId,
   createDefaultProjectSpecSlug,
   createDefaultProjectSpecTitle,
-  extractProjectSpecSummary,
   createInitialProjectSpecMarkdown,
   createProjectSpecMeta,
-  normalizeProjectSpecMarkdown,
-  normalizeProjectSpecTitle,
+  normalizeProjectSpecDraft,
 } from '@/domain/project/project-spec-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import {
@@ -36,6 +35,10 @@ import {
   readProjectMetaDocument,
 } from '@/infrastructure/sdd/fs-project-storage-documents';
 import {
+  readProjectSpecVersionDiffDocument,
+  readProjectSpecVersionDocument,
+  readProjectSpecVersionHistory,
+  readProjectSpecVersionIds,
   readSpecMetaDocument,
   readProjectSpecDocuments,
   toProjectSpecIndexEntries,
@@ -150,28 +153,21 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       const sequenceNumber = existingSpecsResult.value.length + 1;
       const title = input.title?.trim() || createDefaultProjectSpecTitle({ sequenceNumber });
       const slug = createDefaultProjectSpecSlug({ sequenceNumber });
-      const latestVersion = 'v1';
+      const specMarkdown = createInitialProjectSpecMarkdown({
+        title,
+      });
       const specMeta = createProjectSpecMeta({
         id: slug,
         slug,
         title,
         now,
-        latestVersion,
+        draftMarkdown: specMarkdown,
+        latestVersion: null,
+        currentVersion: null,
         summary: '채팅으로 작성 중인 초안입니다.',
-      });
-      const specMarkdown = createInitialProjectSpecMarkdown({
-        title,
       });
 
       await writeJsonAtomically(getSpecMetaPath(rootPath, slug), specMeta);
-      await writeTextAtomically(
-        getSpecVersionPath({
-          rootPath,
-          specId: slug,
-          latestVersion,
-        }),
-        specMarkdown,
-      );
 
       const nextProjectMeta = createNextProjectMetaAfterSpecCreation({
         current: existingProjectMeta,
@@ -186,17 +182,14 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       }
 
       await writeJsonAtomically(specsIndexPath, {
-        schemaVersion: 1,
+        schemaVersion: SPEC_INDEX_SCHEMA_VERSION,
         generatedAt: now,
         specs: toProjectSpecIndexEntries(nextSpecsResult.value),
       });
 
       return ok({
         projectMeta: nextProjectMeta,
-        spec: {
-          meta: specMeta,
-          markdown: specMarkdown,
-        },
+        spec: createProjectSpecDocument(specMeta),
       });
     },
 
@@ -239,37 +232,56 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
 
       const existingSpecMeta = existingSpecMetaResult.value;
       if (existingSpecMeta.revision !== input.revision) {
-        return err(
-          createProjectError(
-            'PROJECT_WRITE_CONFLICT',
-            '명세가 다른 변경과 충돌했습니다. 다시 불러온 뒤 저장해 주세요.',
-          ),
-        );
+        return ok({
+          kind: 'conflict',
+          latestRevision: existingSpecMeta.revision,
+          latestVersionId: existingSpecMeta.latestVersion,
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
       }
 
       const now = new Date().toISOString();
-      const normalizedTitle = normalizeProjectSpecTitle(input.title);
-      const normalizedMarkdown = normalizeProjectSpecMarkdown({
-        markdown: input.markdown,
-        title: normalizedTitle,
+      const normalizedCurrentDraft = normalizeProjectSpecDraft({
+        markdown: existingSpecMeta.draftMarkdown,
+        title: existingSpecMeta.title,
+        summary: existingSpecMeta.summary,
       });
-      const summary = input.summary?.trim() || extractProjectSpecSummary(normalizedMarkdown);
+      const normalizedNextDraft = normalizeProjectSpecDraft({
+        markdown: input.markdown,
+        title: input.title,
+        ...(typeof input.summary !== 'undefined' ? { summary: input.summary } : {}),
+      });
+
+      if (
+        normalizedCurrentDraft.title === normalizedNextDraft.title &&
+        normalizedCurrentDraft.markdown === normalizedNextDraft.markdown
+      ) {
+        return ok({
+          kind: 'no-op',
+          spec: createProjectSpecDocument(existingSpecMeta),
+          versionId: existingSpecMeta.currentVersion,
+        });
+      }
+
+      const previousVersionId = existingSpecMeta.currentVersion;
       const latestVersion = createNextProjectSpecVersionId(existingSpecMeta.latestVersion);
       const nextSpecMeta = createNextProjectSpecMeta({
         current: existingSpecMeta,
+        currentVersion: latestVersion,
+        draftMarkdown: normalizedNextDraft.markdown,
         latestVersion,
         now,
-        summary,
-        title: normalizedTitle,
+        summary: normalizedNextDraft.summary,
+        title: normalizedNextDraft.title,
       });
 
       await writeTextAtomically(
         getSpecVersionPath({
-          latestVersion,
           rootPath,
           specId: input.specId,
+          versionId: latestVersion,
         }),
-        normalizedMarkdown,
+        normalizedNextDraft.markdown,
       );
       await writeJsonAtomically(getSpecMetaPath(rootPath, input.specId), nextSpecMeta);
 
@@ -279,14 +291,244 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       }
 
       await writeJsonAtomically(specsIndexPath, {
-        schemaVersion: 1,
+        schemaVersion: SPEC_INDEX_SCHEMA_VERSION,
         generatedAt: now,
         specs: toProjectSpecIndexEntries(nextSpecsResult.value),
       });
 
       return ok({
-        meta: nextSpecMeta,
-        markdown: normalizedMarkdown,
+        kind: 'saved',
+        previousVersionId,
+        spec: createProjectSpecDocument(nextSpecMeta),
+        versionId: latestVersion,
+      });
+    },
+
+    async readProjectSpecVersionHistory(input) {
+      return readProjectSpecVersionHistory({
+        rootPath: resolve(input.rootPath),
+        specId: input.specId,
+      });
+    },
+
+    async readProjectSpecVersion(input) {
+      return readProjectSpecVersionDocument({
+        rootPath: resolve(input.rootPath),
+        specId: input.specId,
+        versionId: input.versionId,
+      });
+    },
+
+    async readProjectSpecVersionDiff(input) {
+      return readProjectSpecVersionDiffDocument({
+        rootPath: resolve(input.rootPath),
+        specId: input.specId,
+        versionId: input.versionId,
+        ...(typeof input.currentMarkdown !== 'undefined'
+          ? { currentMarkdown: input.currentMarkdown }
+          : {}),
+        ...(typeof input.currentTitle !== 'undefined'
+          ? { currentTitle: input.currentTitle }
+          : {}),
+      });
+    },
+
+    async applyProjectSpecVersion(input) {
+      const rootPath = resolve(input.rootPath);
+      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return err(
+          createProjectError(
+            'PROJECT_NOT_INITIALIZED',
+            'project.json 이 없어 이전 버전을 적용할 수 없습니다.',
+            projectJsonPath,
+          ),
+        );
+      }
+
+      const existingSpecMetaResult = await readSpecMetaDocument({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!existingSpecMetaResult.ok) {
+        return existingSpecMetaResult;
+      }
+
+      if (!existingSpecMetaResult.value) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '적용할 명세 메타를 찾지 못했습니다.',
+            input.specId,
+          ),
+        );
+      }
+
+      const existingSpecMeta = existingSpecMetaResult.value;
+      if (existingSpecMeta.revision !== input.revision) {
+        return ok({
+          kind: 'conflict',
+          appliedVersionId: input.versionId,
+          latestRevision: existingSpecMeta.revision,
+          latestVersionId: existingSpecMeta.latestVersion,
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
+      }
+
+      const versionDocumentResult = await readProjectSpecVersionDocument({
+        rootPath,
+        specId: input.specId,
+        versionId: input.versionId,
+      });
+      if (!versionDocumentResult.ok) {
+        return versionDocumentResult;
+      }
+
+      if (existingSpecMeta.currentVersion === input.versionId) {
+        return ok({
+          kind: 'no-op',
+          appliedVersionId: input.versionId,
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
+      }
+
+      const normalizedDraft = normalizeProjectSpecDraft({
+        markdown: versionDocumentResult.value.markdown,
+        title: versionDocumentResult.value.title,
+      });
+      const nextSpecMeta = createNextProjectSpecMeta({
+        current: existingSpecMeta,
+        currentVersion: input.versionId,
+        draftMarkdown: normalizedDraft.markdown,
+        latestVersion: existingSpecMeta.latestVersion,
+        now: new Date().toISOString(),
+        summary: normalizedDraft.summary,
+        title: normalizedDraft.title,
+      });
+
+      await writeJsonAtomically(getSpecMetaPath(rootPath, input.specId), nextSpecMeta);
+      await rebuildProjectSpecIndex({
+        rootPath,
+        specsIndexPath,
+      });
+
+      return ok({
+        kind: 'applied',
+        appliedVersionId: input.versionId,
+        spec: createProjectSpecDocument(nextSpecMeta),
+      });
+    },
+
+    async deleteProjectSpecVersion(input) {
+      const rootPath = resolve(input.rootPath);
+      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return err(
+          createProjectError(
+            'PROJECT_NOT_INITIALIZED',
+            'project.json 이 없어 이전 버전을 삭제할 수 없습니다.',
+            projectJsonPath,
+          ),
+        );
+      }
+
+      const existingSpecMetaResult = await readSpecMetaDocument({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!existingSpecMetaResult.ok) {
+        return existingSpecMetaResult;
+      }
+
+      if (!existingSpecMetaResult.value) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '삭제할 명세 메타를 찾지 못했습니다.',
+            input.specId,
+          ),
+        );
+      }
+
+      const existingSpecMeta = existingSpecMetaResult.value;
+      if (existingSpecMeta.revision !== input.revision) {
+        return ok({
+          kind: 'conflict',
+          deletedVersionId: input.versionId,
+          latestRevision: existingSpecMeta.revision,
+          latestVersionId: existingSpecMeta.latestVersion,
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
+      }
+
+      const versionIdsResult = await readProjectSpecVersionIds({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!versionIdsResult.ok) {
+        return versionIdsResult;
+      }
+
+      if (!versionIdsResult.value.includes(input.versionId)) {
+        return err(
+          createProjectError('INVALID_PROJECT_STORAGE', '삭제할 버전 파일을 찾지 못했습니다.'),
+        );
+      }
+
+      if (versionIdsResult.value.length <= 1) {
+        return err(
+          createProjectError('INVALID_PROJECT_STORAGE', '유일한 저장 버전은 삭제할 수 없습니다.'),
+        );
+      }
+
+      if (
+        existingSpecMeta.latestVersion === input.versionId ||
+        existingSpecMeta.currentVersion === input.versionId
+      ) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '현재 기준 버전이나 최신 저장 버전은 삭제할 수 없습니다.',
+          ),
+        );
+      }
+
+      await unlink(
+        getSpecVersionPath({
+          rootPath,
+          specId: input.specId,
+          versionId: input.versionId,
+        }),
+      );
+      await rebuildProjectSpecIndex({
+        rootPath,
+        specsIndexPath,
+      });
+
+      const historyResult = await readProjectSpecVersionHistory({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!historyResult.ok) {
+        return historyResult;
+      }
+
+      return ok({
+        kind: 'deleted',
+        deletedVersionId: input.versionId,
+        history: historyResult.value,
       });
     },
 
@@ -427,7 +669,7 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         const existingSpecsResult = await readProjectSpecDocuments({ rootPath });
         if (existingSpecsResult.ok) {
           await writeJsonAtomically(specsIndexPath, {
-            schemaVersion: 1,
+            schemaVersion: SPEC_INDEX_SCHEMA_VERSION,
             generatedAt: now,
             specs: toProjectSpecIndexEntries(existingSpecsResult.value),
           });
@@ -590,4 +832,22 @@ function describeUnknownError(error: unknown): string {
   }
 
   return String(error);
+}
+
+async function rebuildProjectSpecIndex(input: {
+  rootPath: string;
+  specsIndexPath: string;
+}): Promise<void> {
+  const specsResult = await readProjectSpecDocuments({
+    rootPath: input.rootPath,
+  });
+  if (!specsResult.ok) {
+    throw new Error(specsResult.error.message);
+  }
+
+  await writeJsonAtomically(input.specsIndexPath, {
+    schemaVersion: SPEC_INDEX_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    specs: toProjectSpecIndexEntries(specsResult.value),
+  });
 }

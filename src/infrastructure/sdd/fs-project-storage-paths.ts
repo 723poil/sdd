@@ -58,6 +58,10 @@ export function getSpecMetaPath(rootPath: string, specId: string): string {
   return join(getSpecDirectoryPath(rootPath, specId), 'meta.json');
 }
 
+export function getSpecDraftPath(rootPath: string, specId: string): string {
+  return join(getSpecDirectoryPath(rootPath, specId), 'draft.md');
+}
+
 export function getSpecVersionsDirectoryPath(rootPath: string, specId: string): string {
   return join(getSpecDirectoryPath(rootPath, specId), 'versions');
 }
@@ -65,10 +69,10 @@ export function getSpecVersionsDirectoryPath(rootPath: string, specId: string): 
 export function getSpecVersionPath(input: {
   rootPath: string;
   specId: string;
-  latestVersion: string;
+  versionId: string;
 }): string {
   return join(
     getSpecVersionsDirectoryPath(input.rootPath, input.specId),
-    `${input.latestVersion}.md`,
+    `${input.versionId}.md`,
   );
 }

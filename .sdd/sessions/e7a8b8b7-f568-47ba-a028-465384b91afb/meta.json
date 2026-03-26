@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "e7a8b8b7-f568-47ba-a028-465384b91afb",
+  "specId": "spec-03",
+  "title": "새 명세 03 채팅",
+  "createdAt": "2026-03-26T01:53:10.163Z",
+  "updatedAt": "2026-03-26T01:54:22.116Z",
+  "revision": 2,
+  "lastMessageAt": "2026-03-26T01:54:22.116Z",
+  "lastMessagePreview": "명세 관리에 대해서 기능 고도화를 할거야. 이미 작업이 끝난 명세에 대해서는 아카이브 표시를 할 수 있도록 기능을 추가해줄거고. 어떤 새 명세를...",
+  "messageCount": 1
+}

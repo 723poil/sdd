@@ -276,6 +276,12 @@
   font-weight: 500;
 }
 
+.secondary-button--danger {
+  border-color: color-mix(in srgb, #d92d20 22%, var(--button-secondary-border));
+  background: color-mix(in srgb, #d92d20 8%, var(--button-secondary-bg));
+  color: #a32218;
+}
+
 .primary-button:hover,
 .secondary-button:hover {
   transform: translateY(-1px);

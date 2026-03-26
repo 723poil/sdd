@@ -1,4 +1,4 @@
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type { ProjectSpecSaveResult } from '@/domain/project/project-spec-model';
 import type { Result } from '@/shared/contracts/result';
 
 import { ensureProjectStorageReady } from '@/application/project/ensure-project-storage-ready';
@@ -14,7 +14,7 @@ export interface SaveProjectSpecUseCase {
     revision: number;
     title: string;
     markdown: string;
-  }): Promise<Result<ProjectSpecDocument>>;
+  }): Promise<Result<ProjectSpecSaveResult>>;
 }
 
 export function createSaveProjectSpecUseCase(dependencies: {

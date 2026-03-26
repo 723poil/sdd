@@ -1,6 +1,7 @@
 import type { SPEC_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
 
-export const PROJECT_SPEC_SCHEMA_VERSION = 1;
+export const LEGACY_PROJECT_SPEC_SCHEMA_VERSION = 1;
+export const PROJECT_SPEC_SCHEMA_VERSION = 2;
 const DEFAULT_PROJECT_SPEC_TITLE = '새 명세';
 const PROJECT_SPEC_SUMMARY_MAX_LENGTH = 180;
 
@@ -21,8 +22,8 @@ export const PROJECT_SPEC_TEMPLATE_SECTION_TITLES = [
   '오픈 질문',
 ] as const;
 
-export interface ProjectSpecMeta {
-  schemaVersion: typeof PROJECT_SPEC_SCHEMA_VERSION;
+export interface LegacyProjectSpecMeta {
+  schemaVersion: typeof LEGACY_PROJECT_SPEC_SCHEMA_VERSION;
   id: string;
   slug: string;
   title: string;
@@ -34,12 +35,28 @@ export interface ProjectSpecMeta {
   summary: string | null;
 }
 
+export interface ProjectSpecMeta {
+  schemaVersion: typeof PROJECT_SPEC_SCHEMA_VERSION;
+  id: string;
+  slug: string;
+  title: string;
+  status: ProjectSpecStatus;
+  createdAt: string;
+  updatedAt: string;
+  revision: number;
+  latestVersion: string | null;
+  currentVersion: string | null;
+  draftMarkdown: string;
+  summary: string | null;
+}
+
 export interface ProjectSpecSummary {
   id: string;
   slug: string;
   title: string;
   status: ProjectSpecStatus;
-  latestVersion: string;
+  latestVersion: string | null;
+  currentVersion: string | null;
   updatedAt: string;
   summary: string | null;
 }
@@ -55,25 +72,147 @@ export interface ProjectSpecIndex {
   specs: ProjectSpecSummary[];
 }
 
-export function createProjectSpecMeta(input: {
-  id: string;
-  slug: string;
-  title: string;
-  now: string;
-  latestVersion: string;
+export interface ProjectSpecSaveSavedResult {
+  kind: 'saved';
+  previousVersionId: string | null;
+  spec: ProjectSpecDocument;
+  versionId: string;
+}
+
+export interface ProjectSpecSaveNoOpResult {
+  kind: 'no-op';
+  spec: ProjectSpecDocument;
+  versionId: string | null;
+}
+
+export interface ProjectSpecSaveConflictResult {
+  kind: 'conflict';
+  latestRevision: number;
+  latestVersionId: string | null;
+  spec: ProjectSpecDocument;
+}
+
+export type ProjectSpecSaveResult =
+  | ProjectSpecSaveSavedResult
+  | ProjectSpecSaveNoOpResult
+  | ProjectSpecSaveConflictResult;
+
+export interface ProjectSpecVersionHistoryEntry {
+  canApply: boolean;
+  canDelete: boolean;
+  createdAt: string;
+  isCurrent: boolean;
+  isLatest: boolean;
   summary: string | null;
+  title: string;
+  versionId: string;
+}
+
+export interface ProjectSpecVersionDocument {
+  createdAt: string;
+  isCurrent: boolean;
+  isLatest: boolean;
+  markdown: string;
+  summary: string | null;
+  title: string;
+  versionId: string;
+}
+
+export interface ProjectSpecVersionDiffLine {
+  currentLineNumber: number | null;
+  type: 'added' | 'context' | 'removed';
+  value: string;
+  versionLineNumber: number | null;
+}
+
+export interface ProjectSpecVersionDiff {
+  current: {
+    markdown: string;
+    title: string;
+    versionId: string | null;
+  };
+  hasChanges: boolean;
+  lines: ProjectSpecVersionDiffLine[];
+  summary: {
+    addedLineCount: number;
+    removedLineCount: number;
+  };
+  version: ProjectSpecVersionDocument;
+}
+
+export interface ProjectSpecApplyVersionAppliedResult {
+  appliedVersionId: string;
+  kind: 'applied';
+  spec: ProjectSpecDocument;
+}
+
+export interface ProjectSpecApplyVersionNoOpResult {
+  appliedVersionId: string;
+  kind: 'no-op';
+  spec: ProjectSpecDocument;
+}
+
+export interface ProjectSpecApplyVersionConflictResult {
+  appliedVersionId: string;
+  kind: 'conflict';
+  latestRevision: number;
+  latestVersionId: string | null;
+  spec: ProjectSpecDocument;
+}
+
+export type ProjectSpecApplyVersionResult =
+  | ProjectSpecApplyVersionAppliedResult
+  | ProjectSpecApplyVersionNoOpResult
+  | ProjectSpecApplyVersionConflictResult;
+
+export interface ProjectSpecDeleteVersionDeletedResult {
+  deletedVersionId: string;
+  history: ProjectSpecVersionHistoryEntry[];
+  kind: 'deleted';
+}
+
+export interface ProjectSpecDeleteVersionConflictResult {
+  deletedVersionId: string;
+  kind: 'conflict';
+  latestRevision: number;
+  latestVersionId: string | null;
+  spec: ProjectSpecDocument;
+}
+
+export type ProjectSpecDeleteVersionResult =
+  | ProjectSpecDeleteVersionDeletedResult
+  | ProjectSpecDeleteVersionConflictResult;
+
+export function createProjectSpecMeta(input: {
+  currentVersion?: string | null;
+  draftMarkdown: string;
+  id: string;
+  latestVersion?: string | null;
+  now: string;
+  slug: string;
+  summary: string | null;
+  title: string;
 }): ProjectSpecMeta {
   return {
     schemaVersion: PROJECT_SPEC_SCHEMA_VERSION,
     id: input.id,
     slug: input.slug,
-    title: input.title,
+    title: normalizeProjectSpecTitle(input.title),
     status: 'draft',
     createdAt: input.now,
     updatedAt: input.now,
     revision: 1,
-    latestVersion: input.latestVersion,
+    latestVersion: input.latestVersion ?? null,
+    currentVersion: input.currentVersion ?? null,
+    draftMarkdown: input.draftMarkdown,
     summary: input.summary,
+  };
+}
+
+export function createProjectSpecDocument(meta: ProjectSpecMeta): ProjectSpecDocument {
+  return {
+    meta,
+    markdown: meta.draftMarkdown,
   };
 }
 
@@ -183,11 +322,52 @@ export function normalizeProjectSpecMarkdown(input: { markdown: string; title: s
   return contentLines.join('\n');
 }
 
+export function normalizeProjectSpecDraft(input: {
+  markdown: string;
+  summary?: string | null;
+  title: string;
+}): {
+  markdown: string;
+  summary: string | null;
+  title: string;
+} {
+  const title = normalizeProjectSpecTitle(input.title);
+  const markdown = normalizeProjectSpecMarkdown({
+    markdown: input.markdown,
+    title,
+  });
+
+  return {
+    title,
+    markdown,
+    summary: input.summary?.trim() || extractProjectSpecSummary(markdown),
+  };
+}
+
 export function replaceProjectSpecTitleHeading(input: {
   markdown: string;
   title: string;
 }): string {
   return normalizeProjectSpecMarkdown(input);
+}
+
+export function extractProjectSpecTitle(markdown: string): string | null {
+  const normalizedMarkdown = markdown.replaceAll('\r\n', '\n');
+
+  for (const line of normalizedMarkdown.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) {
+      continue;
+    }
+
+    if (!trimmed.startsWith('# ')) {
+      return null;
+    }
+
+    return normalizeProjectSpecTitle(trimmed.slice(2));
+  }
+
+  return null;
 }
 
 export function extractProjectSpecSummary(markdown: string): string | null {
@@ -217,15 +397,19 @@ export function extractProjectSpecSummary(markdown: string): string | null {
   return null;
 }
 
-export function createNextProjectSpecVersionId(currentVersion: string): string {
+export function createNextProjectSpecVersionId(currentVersion: string | null): string {
+  if (currentVersion === null) {
+    return 'v1';
+  }
+
   const matched = /^v(\d+)$/u.exec(currentVersion.trim());
   if (!matched) {
-    return 'v2';
+    return 'v1';
   }
 
   const currentNumber = Number(matched[1]);
   if (!Number.isFinite(currentNumber) || currentNumber < 1) {
-    return 'v2';
+    return 'v1';
   }
 
   return `v${currentNumber + 1}`;
@@ -233,15 +417,19 @@ export function createNextProjectSpecVersionId(currentVersion: string): string {
 
 export function createNextProjectSpecMeta(input: {
   current: ProjectSpecMeta;
-  title: string;
-  latestVersion: string;
+  currentVersion: string | null;
+  draftMarkdown: string;
+  latestVersion: string | null;
   now: string;
   summary: string | null;
+  title: string;
 }): ProjectSpecMeta {
   return {
     ...input.current,
     title: normalizeProjectSpecTitle(input.title),
     latestVersion: input.latestVersion,
+    currentVersion: input.currentVersion,
+    draftMarkdown: input.draftMarkdown,
     updatedAt: input.now,
     revision: input.current.revision + 1,
     summary: input.summary,
@@ -250,6 +438,27 @@ export function createNextProjectSpecMeta(input: {
 
 export function isProjectSpecStatus(value: unknown): value is ProjectSpecStatus {
   return typeof value === 'string' && PROJECT_SPEC_STATUSES.includes(value as ProjectSpecStatus);
+}
+
+export function isLegacyProjectSpecMeta(value: unknown): value is LegacyProjectSpecMeta {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    candidate.schemaVersion === LEGACY_PROJECT_SPEC_SCHEMA_VERSION &&
+    typeof candidate.id === 'string' &&
+    typeof candidate.slug === 'string' &&
+    typeof candidate.title === 'string' &&
+    isProjectSpecStatus(candidate.status) &&
+    typeof candidate.createdAt === 'string' &&
+    typeof candidate.updatedAt === 'string' &&
+    typeof candidate.revision === 'number' &&
+    typeof candidate.latestVersion === 'string' &&
+    (typeof candidate.summary === 'string' || candidate.summary === null)
+  );
 }
 
 export function isProjectSpecMeta(value: unknown): value is ProjectSpecMeta {
@@ -268,7 +477,9 @@ export function isProjectSpecMeta(value: unknown): value is ProjectSpecMeta {
     typeof candidate.createdAt === 'string' &&
     typeof candidate.updatedAt === 'string' &&
     typeof candidate.revision === 'number' &&
-    typeof candidate.latestVersion === 'string' &&
+    (typeof candidate.latestVersion === 'string' || candidate.latestVersion === null) &&
+    (typeof candidate.currentVersion === 'string' || candidate.currentVersion === null) &&
+    typeof candidate.draftMarkdown === 'string' &&
     (typeof candidate.summary === 'string' || candidate.summary === null)
   );
 }
@@ -280,7 +491,139 @@ export function toProjectSpecSummary(meta: ProjectSpecMeta): ProjectSpecSummary 
     title: meta.title,
     status: meta.status,
     latestVersion: meta.latestVersion,
+    currentVersion: meta.currentVersion,
     updatedAt: meta.updatedAt,
     summary: meta.summary,
   };
+}
+
+export function createProjectSpecVersionDiff(input: {
+  currentMarkdown: string;
+  currentTitle: string;
+  currentVersionId: string | null;
+  version: ProjectSpecVersionDocument;
+}): ProjectSpecVersionDiff {
+  const current = normalizeProjectSpecDraft({
+    markdown: input.currentMarkdown,
+    title: input.currentTitle,
+  });
+  const version = normalizeProjectSpecDraft({
+    markdown: input.version.markdown,
+    title: input.version.title,
+  });
+  const lines = createLineDiff({
+    currentLines: current.markdown.split('\n'),
+    versionLines: version.markdown.split('\n'),
+  });
+  const addedLineCount = lines.filter((line) => line.type === 'added').length;
+  const removedLineCount = lines.filter((line) => line.type === 'removed').length;
+
+  return {
+    current: {
+      title: current.title,
+      markdown: current.markdown,
+      versionId: input.currentVersionId,
+    },
+    version: {
+      ...input.version,
+      title: version.title,
+      markdown: version.markdown,
+      summary: version.summary,
+    },
+    lines,
+    hasChanges: addedLineCount > 0 || removedLineCount > 0,
+    summary: {
+      addedLineCount,
+      removedLineCount,
+    },
+  };
+}
+
+function createLineDiff(input: {
+  currentLines: string[];
+  versionLines: string[];
+}): ProjectSpecVersionDiffLine[] {
+  const currentLength = input.currentLines.length;
+  const versionLength = input.versionLines.length;
+  const table = Array.from({ length: versionLength + 1 }, () =>
+    Array.from({ length: currentLength + 1 }, () => 0),
+  );
+
+  for (let versionIndex = versionLength - 1; versionIndex >= 0; versionIndex -= 1) {
+    for (let currentIndex = currentLength - 1; currentIndex >= 0; currentIndex -= 1) {
+      if (input.versionLines[versionIndex] === input.currentLines[currentIndex]) {
+        table[versionIndex]![currentIndex] = table[versionIndex + 1]![currentIndex + 1]! + 1;
+      } else {
+        table[versionIndex]![currentIndex] = Math.max(
+          table[versionIndex + 1]![currentIndex] ?? 0,
+          table[versionIndex]![currentIndex + 1] ?? 0,
+        );
+      }
+    }
+  }
+
+  const lines: ProjectSpecVersionDiffLine[] = [];
+  let versionIndex = 0;
+  let currentIndex = 0;
+
+  while (versionIndex < versionLength && currentIndex < currentLength) {
+    const versionLine = input.versionLines[versionIndex];
+    const currentLine = input.currentLines[currentIndex];
+
+    if (versionLine === currentLine) {
+      lines.push({
+        type: 'context',
+        value: versionLine ?? '',
+        versionLineNumber: versionIndex + 1,
+        currentLineNumber: currentIndex + 1,
+      });
+      versionIndex += 1;
+      currentIndex += 1;
+      continue;
+    }
+
+    const nextVersionScore = table[versionIndex + 1]?.[currentIndex] ?? 0;
+    const nextCurrentScore = table[versionIndex]?.[currentIndex + 1] ?? 0;
+
+    if (nextVersionScore >= nextCurrentScore) {
+      lines.push({
+        type: 'removed',
+        value: versionLine ?? '',
+        versionLineNumber: versionIndex + 1,
+        currentLineNumber: null,
+      });
+      versionIndex += 1;
+      continue;
+    }
+
+    lines.push({
+      type: 'added',
+      value: currentLine ?? '',
+      versionLineNumber: null,
+      currentLineNumber: currentIndex + 1,
+    });
+    currentIndex += 1;
+  }
+
+  while (versionIndex < versionLength) {
+    lines.push({
+      type: 'removed',
+      value: input.versionLines[versionIndex] ?? '',
+      versionLineNumber: versionIndex + 1,
+      currentLineNumber: null,
+    });
+    versionIndex += 1;
+  }
+
+  while (currentIndex < currentLength) {
+    lines.push({
+      type: 'added',
+      value: input.currentLines[currentIndex] ?? '',
+      versionLineNumber: null,
+      currentLineNumber: currentIndex + 1,
+    });
+    currentIndex += 1;
+  }
+
+  return lines;
 }

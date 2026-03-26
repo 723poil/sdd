@@ -356,9 +356,9 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 
 권장 방식:
 
-- 현재 문서를 덮어쓰지 않음
+- 현재 작업 초안은 `meta.json` 기준으로 유지하고, 저장 버전 파일은 덮어쓰지 않음
 - `versions/v1.md`, `v2.md` 식으로 누적
-- `meta.json`이 최신 버전을 가리킴
+- `meta.json`이 현재 초안과 최신 저장 버전 pointer를 함께 가리킴
 
 왜 쓰는가:
 
@@ -368,7 +368,9 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 
 추가 규칙:
 
-- `meta.json.latestVersion`은 현재 기준 버전을 가리키는 pointer 역할만 한다
+- 새 명세는 먼저 버전 없는 작업 초안으로 시작할 수 있어야 한다
+- `meta.json.latestVersion`은 가장 최근에 생성된 저장 버전을 가리킨다
+- `meta.json.currentVersion`은 현재 작업 초안의 기준 버전을 가리킬 수 있다
 - 기존 버전 파일은 수정하지 않는다
 
 ### 11) Append-only Log Pattern

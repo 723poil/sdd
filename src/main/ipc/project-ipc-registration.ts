@@ -9,8 +9,10 @@ import { createAnalyzeProjectUseCase } from '@/application/project/analyze-proje
 import { createCancelProjectAnalysisUseCase } from '@/application/project/cancel-project-analysis.use-case';
 import { createCancelProjectReferenceTagGenerationUseCase } from '@/application/project/cancel-project-reference-tag-generation.use-case';
 import { createCancelProjectSessionMessageUseCase } from '@/application/project/cancel-project-session-message.use-case';
+import { createApplyProjectSpecVersionUseCase } from '@/application/project/apply-project-spec-version.use-case';
 import { createCreateProjectSessionUseCase } from '@/application/project/create-project-session.use-case';
 import { createCreateProjectSpecUseCase } from '@/application/project/create-project-spec.use-case';
+import { createDeleteProjectSpecVersionUseCase } from '@/application/project/delete-project-spec-version.use-case';
 import { createGenerateProjectReferenceTagsUseCase } from '@/application/project/generate-project-reference-tags.use-case';
 import { createInitializeProjectStorageUseCase } from '@/application/project/initialize-project-storage.use-case';
 import { createInspectProjectUseCase } from '@/application/project/inspect-project.use-case';
@@ -21,6 +23,9 @@ import { createReadProjectAnalysisUseCase } from '@/application/project/read-pro
 import { createReadProjectSessionMessageRunStatusUseCase } from '@/application/project/read-project-session-message-run-status.use-case';
 import { createReadProjectSessionMessagesUseCase } from '@/application/project/read-project-session-messages.use-case';
 import { createReadProjectSpecsUseCase } from '@/application/project/read-project-specs.use-case';
+import { createReadProjectSpecVersionDiffUseCase } from '@/application/project/read-project-spec-version-diff.use-case';
+import { createReadProjectSpecVersionHistoryUseCase } from '@/application/project/read-project-spec-version-history.use-case';
+import { createReadProjectSpecVersionUseCase } from '@/application/project/read-project-spec-version.use-case';
 import { createRemoveRecentProjectUseCase } from '@/application/project/remove-recent-project.use-case';
 import { createRenameProjectUseCase } from '@/application/project/rename-project.use-case';
 import { createReorderRecentProjectsUseCase } from '@/application/project/reorder-recent-projects.use-case';
@@ -116,6 +121,15 @@ function createProjectIpcUseCases() {
   const readProjectSpecs = createReadProjectSpecsUseCase({
     projectStorage,
   });
+  const readProjectSpecVersionHistory = createReadProjectSpecVersionHistoryUseCase({
+    projectStorage,
+  });
+  const readProjectSpecVersion = createReadProjectSpecVersionUseCase({
+    projectStorage,
+  });
+  const readProjectSpecVersionDiff = createReadProjectSpecVersionDiffUseCase({
+    projectStorage,
+  });
   const readProjectAnalysisRunStatus = createReadProjectAnalysisRunStatusUseCase({
     analysisRunStatusStore,
   });
@@ -155,6 +169,14 @@ function createProjectIpcUseCases() {
     projectInspector,
     projectStorage,
   });
+  const applyProjectSpecVersion = createApplyProjectSpecVersionUseCase({
+    projectInspector,
+    projectStorage,
+  });
+  const deleteProjectSpecVersion = createDeleteProjectSpecVersionUseCase({
+    projectInspector,
+    projectStorage,
+  });
   const readProjectSessionMessages = createReadProjectSessionMessagesUseCase({
     projectSessionStore,
   });
@@ -191,18 +213,23 @@ function createProjectIpcUseCases() {
     cancelProjectReferenceTagGeneration,
     createProjectSession,
     createProjectSpec,
+    deleteProjectSpecVersion,
     generateProjectReferenceTags,
     inspectProject,
     listProjectSessions,
     listRecentProjects,
     readProjectAnalysis,
     readProjectAnalysisRunStatus,
+    readProjectSpecVersion,
+    readProjectSpecVersionDiff,
+    readProjectSpecVersionHistory,
     readProjectSessionMessages,
     readProjectSessionMessageRunStatus,
     readProjectSpecs,
     removeRecentProject,
     renameProject,
     reorderRecentProjects,
+    applyProjectSpecVersion,
     saveProjectAnalysisDocumentLayouts,
     saveProjectReferenceTags,
     saveProjectSpec,
@@ -250,6 +277,23 @@ function registerProjectSpecIpc(target: IpcMainHandleTarget, useCases: ProjectIp
   registerInputHandle(target, projectIpcChannels.readSpecs, useCases.readProjectSpecs);
   registerInputHandle(target, projectIpcChannels.createSpec, useCases.createProjectSpec);
   registerInputHandle(target, projectIpcChannels.saveSpec, useCases.saveProjectSpec);
+  registerInputHandle(
+    target,
+    projectIpcChannels.readSpecVersionHistory,
+    useCases.readProjectSpecVersionHistory,
+  );
+  registerInputHandle(target, projectIpcChannels.readSpecVersion, useCases.readProjectSpecVersion);
+  registerInputHandle(
+    target,
+    projectIpcChannels.readSpecVersionDiff,
+    useCases.readProjectSpecVersionDiff,
+  );
+  registerInputHandle(target, projectIpcChannels.applySpecVersion, useCases.applyProjectSpecVersion);
+  registerInputHandle(
+    target,
+    projectIpcChannels.deleteSpecVersion,
+    useCases.deleteProjectSpecVersion,
+  );
   registerInputHandle(
     target,
     projectIpcChannels.readAnalysisRunStatus,

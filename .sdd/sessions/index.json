@@ -1,7 +1,106 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-26T01:07:26.530Z",
+  "generatedAt": "2026-03-26T01:54:22.131Z",
   "sessions": [
+    {
+      "id": "e7a8b8b7-f568-47ba-a028-465384b91afb",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:54:22.116Z",
+      "lastMessageAt": "2026-03-26T01:54:22.116Z",
+      "lastMessagePreview": "명세 관리에 대해서 기능 고도화를 할거야. 이미 작업이 끝난 명세에 대해서는 아카이브 표시를 할 수 있도록 기능을 추가해줄거고. 어떤 새 명세를...",
+      "messageCount": 1
+    },
+    {
+      "id": "6ec2d95c-1676-4e3d-b071-ad7ae5ade395",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.156Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "6f60dce9-93dc-4f48-bde2-7c710719e81e",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.146Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "b533085d-3be4-457d-b91c-57b89a92b1cd",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.137Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "d66b6f56-1a0f-40f3-8f98-d6a3079ebfa4",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.128Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "da2c8d61-da7d-4ae2-9768-0fdc6a69d256",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.117Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3c259406-6008-4f4d-9a4e-3e058fe5728a",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.107Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "68b47a1c-bee0-4f1e-bd8e-03ae1fa58ac2",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.097Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "819b288c-1630-4cfe-b392-03e3040fd346",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.084Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "10015557-80c8-430b-8c90-e9ea85d92072",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.055Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "e731ec3e-0689-41fd-aa9f-6373d9137a16",
+      "specId": "spec-03",
+      "title": "새 명세 03 채팅",
+      "updatedAt": "2026-03-26T01:53:10.019Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
     {
       "id": "7cc84e80-d5cc-4c7f-8b8d-36f9485fae85",
       "specId": "spec-02",

@@ -15,7 +15,7 @@ export function createProjectSpecChatPrompt(input: {
   const projectName = escapeXml(input.projectName);
   const specTitle = escapeXml(input.spec.meta.title);
   const specStatus = escapeXml(describeSpecStatus(input.spec.meta.status));
-  const specVersion = escapeXml(input.spec.meta.latestVersion);
+  const specVersion = escapeXml(input.spec.meta.currentVersion ?? 'draft');
   const specSummary = escapeXml(input.spec.meta.summary ?? '요약 없음');
   const specMarkdown = escapeXml(input.spec.markdown);
   const conversationHistory = renderConversationHistory(

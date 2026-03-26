@@ -29,6 +29,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "tests/**/*.ts",
     "scripts/**/*.ts",
     "electron.vite.config.ts",
     "eslint.config.mjs"

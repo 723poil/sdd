@@ -13,7 +13,15 @@ import type {
   ProjectAnalysisRunState,
   ProjectAnalysisRunStatus,
 } from '@/domain/project/project-analysis-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionDocument,
+  ProjectSpecVersionHistoryEntry,
+} from '@/domain/project/project-spec-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type {
   ProjectSessionMessage,
@@ -174,7 +182,35 @@ export interface ProjectStoragePort {
     title: string;
     markdown: string;
     summary?: string | null;
-  }): Promise<Result<ProjectSpecDocument>>;
+  }): Promise<Result<ProjectSpecSaveResult>>;
+  readProjectSpecVersionHistory(input: {
+    rootPath: string;
+    specId: string;
+  }): Promise<Result<ProjectSpecVersionHistoryEntry[]>>;
+  readProjectSpecVersion(input: {
+    rootPath: string;
+    specId: string;
+    versionId: string;
+  }): Promise<Result<ProjectSpecVersionDocument>>;
+  readProjectSpecVersionDiff(input: {
+    currentMarkdown?: string | null;
+    currentTitle?: string | null;
+    rootPath: string;
+    specId: string;
+    versionId: string;
+  }): Promise<Result<ProjectSpecVersionDiff>>;
+  applyProjectSpecVersion(input: {
+    rootPath: string;
+    revision: number;
+    specId: string;
+    versionId: string;
+  }): Promise<Result<ProjectSpecApplyVersionResult>>;
+  deleteProjectSpecVersion(input: {
+    rootPath: string;
+    revision: number;
+    specId: string;
+    versionId: string;
+  }): Promise<Result<ProjectSpecDeleteVersionResult>>;
   initializeStorage(input: { rootPath: string }): Promise<Result<ProjectStorageInitialization>>;
   writeProjectAnalysis(input: {
     rootPath: string;

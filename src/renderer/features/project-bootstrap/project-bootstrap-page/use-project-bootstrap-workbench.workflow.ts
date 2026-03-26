@@ -14,7 +14,14 @@ import type {
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionHistoryEntry,
+} from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMessageRunStatus,
@@ -79,7 +86,26 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       revision: number;
       specId: string;
       title: string;
-    }): Promise<boolean>;
+    }): Promise<ProjectSpecSaveResult | null>;
+    onReadSpecVersionHistory(input: {
+      specId: string;
+    }): Promise<ProjectSpecVersionHistoryEntry[] | null>;
+    onReadSpecVersionDiff(input: {
+      currentMarkdown?: string | null;
+      currentTitle?: string | null;
+      specId: string;
+      versionId: string;
+    }): Promise<ProjectSpecVersionDiff | null>;
+    onApplySpecVersion(input: {
+      revision: number;
+      specId: string;
+      versionId: string;
+    }): Promise<ProjectSpecApplyVersionResult | null>;
+    onDeleteSpecVersion(input: {
+      revision: number;
+      specId: string;
+      versionId: string;
+    }): Promise<ProjectSpecDeleteVersionResult | null>;
     onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument): Promise<boolean>;
     onSelectSpec(specId: string): void;
     onSelectWorkspacePage(page: WorkspacePageId): void;
@@ -103,6 +129,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [selectedAnalysisDocumentId, setSelectedAnalysisDocumentId] =
     useState<SelectedProjectAnalysisDocumentId>(null);
   const [selectedSpecId, setSelectedSpecId] = useState<string | null>(null);
+  const [specConflictBySpecId, setSpecConflictBySpecId] = useState<Record<string, boolean>>({});
   const [analysisRunStatusesByRootPath, setAnalysisRunStatusesByRootPath] = useState<
     Record<string, ProjectAnalysisRunStatus>
   >({});
@@ -166,6 +193,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     applyProjectWorkspaceSnapshot({
       snapshot: createEmptyProjectWorkspaceSnapshot(),
     });
+    setSpecConflictBySpecId({});
   };
 
   const setReferenceTagGenerationStatus = (
@@ -1088,9 +1116,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         ...current,
         [sessionKey]: mergeProjectSessionMessages(current[sessionKey] ?? [], result.value.messages),
       }));
-      const updatedSpec = result.value.spec;
-      if (updatedSpec) {
-        setSpecs((current) => upsertProjectSpec(current, updatedSpec));
+      const specSave = result.value.specSave;
+      if (specSave) {
+        setSpecs((current) => upsertProjectSpec(current, specSave.spec));
+        setSpecConflictBySpecId((current) => {
+          const next = { ...current };
+          if (specSave.kind === 'conflict') {
+            next[specSave.spec.meta.id] = true;
+          } else {
+            delete next[specSave.spec.meta.id];
+          }
+          return next;
+        });
       }
       setSessions((current) => upsertProjectSessionSummary(current, result.value.session));
       setDraftMessagesBySessionKey((current) => {
@@ -1237,16 +1274,16 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     revision: number;
     specId: string;
     title: string;
-  }): Promise<boolean> {
+  }): Promise<ProjectSpecSaveResult | null> {
     const rootPath = selectedPathRef.current;
     const sddApi = getRendererSddApi();
     if (!rootPath || !sddApi || typeof sddApi.project.saveSpec !== 'function') {
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
-      return false;
+      return null;
     }
 
     const saveSpecTask = progressTasks.startRequestProgressTask({
-      detail: '명세 제목과 본문을 새 버전으로 저장하고 있습니다.',
+      detail: '명세 제목과 본문 변경을 저장하고 있습니다.',
       kind: 'spec-save',
       projectName: inspection?.projectName ?? null,
       rootPath,
@@ -1272,19 +1309,195 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         });
         setErrorMessage(result.error.message);
         setMessage('명세를 저장하지 못했습니다.');
-        return false;
+        return null;
       }
 
-      setSpecs((current) => upsertProjectSpec(current, result.value));
-      setMessage(`"${result.value.meta.title}" 명세를 저장했습니다.`);
+      setSpecs((current) => upsertProjectSpec(current, result.value.spec));
+      setSpecConflictBySpecId((current) => {
+        const next = { ...current };
+        if (result.value.kind === 'conflict') {
+          next[result.value.spec.meta.id] = true;
+        } else {
+          delete next[result.value.spec.meta.id];
+        }
+        return next;
+      });
+
+      if (result.value.kind === 'conflict') {
+        setErrorMessage('명세가 다른 변경과 충돌했습니다. 최신 초안을 다시 확인해 주세요.');
+        setMessage('명세 저장 중 충돌이 발생했습니다.');
+        progressTasks.updateRequestProgressTask(saveSpecTask, {
+          detail: '명세 저장 중 충돌이 발생했습니다.',
+          errorMessage: '최신 초안을 다시 확인해 주세요.',
+          status: 'failed',
+        });
+        return result.value;
+      }
+
+      if (result.value.kind === 'no-op') {
+        setMessage(`"${result.value.spec.meta.title}" 명세는 변경된 내용이 없어 그대로 유지했습니다.`);
+        progressTasks.updateRequestProgressTask(saveSpecTask, {
+          detail: `"${result.value.spec.meta.title}" 명세는 변경 없음으로 처리했습니다.`,
+          status: 'succeeded',
+        });
+        return result.value;
+      }
+
+      setMessage(`"${result.value.spec.meta.title}" 명세를 ${result.value.versionId}로 저장했습니다.`);
       progressTasks.updateRequestProgressTask(saveSpecTask, {
-        detail: `"${result.value.meta.title}" 명세를 새 버전으로 저장했습니다.`,
+        detail: `"${result.value.spec.meta.title}" 명세를 ${result.value.versionId}로 저장했습니다.`,
         status: 'succeeded',
       });
-      return true;
+      return result.value;
     } finally {
       setIsSavingSpec(false);
     }
+  }
+
+  async function handleReadSpecVersionHistory(input: {
+    specId: string;
+  }): Promise<ProjectSpecVersionHistoryEntry[] | null> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getRendererSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.readSpecVersionHistory !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return null;
+    }
+
+    const result = await sddApi.project.readSpecVersionHistory({
+      rootPath,
+      specId: input.specId,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      return null;
+    }
+
+    return result.value;
+  }
+
+  async function handleReadSpecVersionDiff(input: {
+    currentMarkdown?: string | null;
+    currentTitle?: string | null;
+    specId: string;
+    versionId: string;
+  }): Promise<ProjectSpecVersionDiff | null> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getRendererSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.readSpecVersionDiff !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return null;
+    }
+
+    const result = await sddApi.project.readSpecVersionDiff({
+      rootPath,
+      specId: input.specId,
+      versionId: input.versionId,
+      ...(typeof input.currentMarkdown !== 'undefined'
+        ? { currentMarkdown: input.currentMarkdown }
+        : {}),
+      ...(typeof input.currentTitle !== 'undefined'
+        ? { currentTitle: input.currentTitle }
+        : {}),
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      return null;
+    }
+
+    return result.value;
+  }
+
+  async function handleApplySpecVersion(input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }): Promise<ProjectSpecApplyVersionResult | null> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getRendererSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.applySpecVersion !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return null;
+    }
+
+    setErrorMessage(null);
+    const result = await sddApi.project.applySpecVersion({
+      rootPath,
+      revision: input.revision,
+      specId: input.specId,
+      versionId: input.versionId,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      setMessage('이전 버전을 적용하지 못했습니다.');
+      return null;
+    }
+
+    setSpecs((current) => upsertProjectSpec(current, result.value.spec));
+    setSpecConflictBySpecId((current) => {
+      const next = { ...current };
+      if (result.value.kind === 'conflict') {
+        next[result.value.spec.meta.id] = true;
+      } else {
+        delete next[result.value.spec.meta.id];
+      }
+      return next;
+    });
+
+    if (result.value.kind === 'conflict') {
+      setErrorMessage('다른 변경이 먼저 저장되어 이전 버전을 적용하지 못했습니다.');
+      setMessage('이전 버전 적용 중 충돌이 발생했습니다.');
+      return result.value;
+    }
+
+    if (result.value.kind === 'no-op') {
+      setMessage(`"${result.value.spec.meta.title}" 명세는 이미 ${input.versionId} 기준입니다.`);
+      return result.value;
+    }
+
+    setMessage(`"${result.value.spec.meta.title}" 명세에 ${input.versionId} 내용을 적용했습니다.`);
+    return result.value;
+  }
+
+  async function handleDeleteSpecVersion(input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }): Promise<ProjectSpecDeleteVersionResult | null> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getRendererSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.deleteSpecVersion !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return null;
+    }
+
+    setErrorMessage(null);
+    const result = await sddApi.project.deleteSpecVersion({
+      rootPath,
+      revision: input.revision,
+      specId: input.specId,
+      versionId: input.versionId,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.error.message);
+      setMessage('이전 버전을 삭제하지 못했습니다.');
+      return null;
+    }
+
+    const deleteResult = result.value;
+    if (deleteResult.kind === 'conflict') {
+      setSpecs((current) => upsertProjectSpec(current, deleteResult.spec));
+      setSpecConflictBySpecId((current) => ({
+        ...current,
+        [deleteResult.spec.meta.id]: true,
+      }));
+      setErrorMessage('다른 변경이 먼저 저장되어 버전 삭제가 충돌했습니다.');
+      setMessage('버전 삭제 중 충돌이 발생했습니다.');
+      return deleteResult;
+    }
+
+    setMessage(`${input.versionId} 버전을 삭제했습니다.`);
+    return deleteResult;
   }
 
   async function handleSaveAnalysisDocumentLayouts(
@@ -1729,6 +1942,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       selectedProgressTaskId: progressTasks.selectedProgressTaskId,
       selectedAnalysisDocumentId,
       selectedSpecId,
+      specConflictBySpecId,
       sessions,
       selectedSessionId,
       sessionMessagesBySessionKey,
@@ -1837,6 +2051,23 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
       onSaveSpec(input: { markdown: string; revision: number; specId: string; title: string }) {
         return handleSaveSpec(input);
+      },
+      onReadSpecVersionHistory(input: { specId: string }) {
+        return handleReadSpecVersionHistory(input);
+      },
+      onReadSpecVersionDiff(input: {
+        currentMarkdown?: string | null;
+        currentTitle?: string | null;
+        specId: string;
+        versionId: string;
+      }) {
+        return handleReadSpecVersionDiff(input);
+      },
+      onApplySpecVersion(input: { revision: number; specId: string; versionId: string }) {
+        return handleApplySpecVersion(input);
+      },
+      onDeleteSpecVersion(input: { revision: number; specId: string; versionId: string }) {
+        return handleDeleteSpecVersion(input);
       },
       onSaveReferenceTags(referenceTags: ProjectReferenceTagDocument) {
         return handleSaveReferenceTags(referenceTags);

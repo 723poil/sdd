@@ -86,6 +86,7 @@ export interface ProjectBootstrapWorkbenchState {
   selectedSessionId: string | null;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpecId: SelectedProjectSpecId;
+  specConflictBySpecId: Record<string, boolean>;
   sessionMessagesBySessionKey: Record<string, ProjectSessionMessage[]>;
   draftMessagesBySessionKey: Record<string, string>;
   sessionMessageRunStatusesBySessionKey: Record<string, ProjectSessionMessageRunStatusModel>;

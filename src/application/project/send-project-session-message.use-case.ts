@@ -1,5 +1,5 @@
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type { ProjectSpecSaveResult } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMeta,
@@ -20,7 +20,7 @@ import type {
 export interface SendProjectSessionMessageOutput {
   assistantErrorMessage: string | null;
   messages: ProjectSessionMessage[];
-  spec: ProjectSpecDocument | null;
+  specSave: ProjectSpecSaveResult | null;
   session: ProjectSessionMeta;
 }
 
@@ -129,7 +129,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       const userSession = result.value.session;
       const partialSuccess = (
         assistantErrorMessage: string,
-        spec: ProjectSpecDocument | null = null,
+        specSave: ProjectSpecSaveResult | null = null,
         options: { stageMessage: string; stepIndex: number },
       ) => {
         failRunStatus(options.stageMessage, assistantErrorMessage, options.stepIndex);
@@ -137,7 +137,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         return ok({
           assistantErrorMessage,
           messages: [userMessage],
-          spec,
+          specSave,
           session: userSession,
         });
       };
@@ -254,6 +254,17 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
         );
       }
 
+      if (saveSpecResult.value.kind === 'conflict') {
+        return partialSuccess(
+          '메시지는 저장했지만 명세 초안 저장 중 다른 변경과 충돌했습니다. 최신 초안을 다시 확인해 주세요.',
+          saveSpecResult.value,
+          {
+            stageMessage: '명세 반영 충돌',
+            stepIndex: 3,
+          },
+        );
+      }
+
       const assistantText = replyResult.value.reply.trim();
       if (assistantText.length === 0) {
         return partialSuccess(
@@ -296,7 +307,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       return ok({
         assistantErrorMessage: null,
         messages: [userMessage, assistantAppendResult.value.message],
-        spec: saveSpecResult.value,
+        specSave: saveSpecResult.value,
         session: assistantAppendResult.value.session,
       });
     },

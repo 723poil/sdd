@@ -1,6 +1,13 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionHistoryEntry,
+} from '@/domain/project/project-spec-model';
 import {
   DOCUMENT_MAP_VIEWPORT_PRESET,
   SPECS_BOARD_LAYOUT_PRESET,
@@ -13,6 +20,7 @@ import {
 import { SpecsWorkspaceDocumentView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView';
 import {
   describeSpecStatus,
+  describeSpecVersionBadge,
   formatSpecDayLabel,
   getSpecSummary,
   resolveSelectedSpec,
@@ -23,16 +31,37 @@ import {
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size';
 
 interface SpecsWorkspaceProps {
+  canWriteSpecs: boolean;
   isActive: boolean;
   isSavingSpec: boolean;
+  onApplySpecVersion: (input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecApplyVersionResult | null>;
+  onDeleteSpecVersion: (input: {
+    revision: number;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecDeleteVersionResult | null>;
+  onReadSpecVersionDiff: (input: {
+    currentMarkdown?: string | null;
+    currentTitle?: string | null;
+    specId: string;
+    versionId: string;
+  }) => Promise<ProjectSpecVersionDiff | null>;
+  onReadSpecVersionHistory: (input: {
+    specId: string;
+  }) => Promise<ProjectSpecVersionHistoryEntry[] | null>;
   onViewModeChange: (viewMode: SpecsWorkspaceViewMode) => void;
   onSaveSpec: (input: {
     markdown: string;
     revision: number;
     specId: string;
     title: string;
-  }) => Promise<boolean>;
+  }) => Promise<ProjectSpecSaveResult | null>;
   selectedSpecId: string | null;
+  specConflictBySpecId: Record<string, boolean>;
   specs: ProjectSpecDocument[];
   onSelectSpec: (specId: string) => void;
   viewMode: SpecsWorkspaceViewMode;
@@ -41,6 +70,7 @@ interface SpecsWorkspaceProps {
 export type SpecsWorkspaceViewMode = 'map' | 'document';
 
 interface SpecBoardNode {
+  hasConflict: boolean;
   height: number;
   id: string;
   slug: string;
@@ -83,10 +113,16 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const {
     isActive,
     isSavingSpec,
+    canWriteSpecs,
+    onApplySpecVersion,
+    onDeleteSpecVersion,
+    onReadSpecVersionDiff,
+    onReadSpecVersionHistory,
     onSaveSpec,
     onSelectSpec,
     onViewModeChange,
     selectedSpecId,
+    specConflictBySpecId,
     specs,
     viewMode,
   } = props;
@@ -98,7 +134,10 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const [isPanning, setIsPanning] = useState(false);
   const [stageSize, setStageSize] = useState<SpecsStageSize>(EMPTY_WORKSPACE_STAGE_SIZE);
   const [viewport, setViewport] = useState<SpecsViewport>(INITIAL_VIEWPORT);
-  const boardNodes = useMemo(() => buildSpecBoardNodes(specs), [specs]);
+  const boardNodes = useMemo(
+    () => buildSpecBoardNodes(specs, specConflictBySpecId),
+    [specConflictBySpecId, specs],
+  );
   const worldStyle = useMemo<CSSProperties>(
     () => ({
       transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
@@ -259,11 +298,17 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     return (
       <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
         <SpecsWorkspaceDocumentView
+          canWriteSpecs={canWriteSpecs}
           isSavingSpec={isSavingSpec}
+          onApplySpecVersion={onApplySpecVersion}
+          onDeleteSpecVersion={onDeleteSpecVersion}
+          onReadSpecVersionDiff={onReadSpecVersionDiff}
+          onReadSpecVersionHistory={onReadSpecVersionHistory}
           onSaveSpec={onSaveSpec}
           onReturnToMap={() => {
             onViewModeChange('map');
           }}
+          hasConflict={Boolean(specConflictBySpecId[selectedSpec.meta.id])}
           selectedSpec={selectedSpec}
         />
       </section>
@@ -412,6 +457,9 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
                   <div className="specs-map__meta">
                     <span className="specs-map__meta-chip">{node.status}</span>
                     <span className="specs-map__meta-chip">{node.version}</span>
+                    {node.hasConflict ? (
+                      <span className="specs-map__meta-chip specs-map__meta-chip--alert">충돌</span>
+                    ) : null}
                     <span className="specs-map__meta-chip">{node.updatedAtLabel}</span>
                   </div>
                   <span className="analysis-map__node-summary">{node.summary}</span>
@@ -425,7 +473,10 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   );
 }
 
-function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
+function buildSpecBoardNodes(
+  specs: ProjectSpecDocument[],
+  specConflictBySpecId: Record<string, boolean>,
+): SpecBoardNode[] {
   const columnCount = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(specs.length))));
   const totalWidth =
     columnCount * SPECS_BOARD_LAYOUT_PRESET.cardWidth +
@@ -438,13 +489,14 @@ function buildSpecBoardNodes(specs: ProjectSpecDocument[]): SpecBoardNode[] {
     const rowIndex = Math.floor(index / columnCount);
 
     return {
+      hasConflict: Boolean(specConflictBySpecId[spec.meta.id]),
       id: spec.meta.id,
       slug: spec.meta.slug,
       status: describeSpecStatus(spec.meta.status),
       summary: getSpecSummary(spec),
       title: spec.meta.title,
       updatedAtLabel: formatSpecDayLabel(spec.meta.updatedAt),
-      version: spec.meta.latestVersion,
+      version: describeSpecVersionBadge(spec),
       width: SPECS_BOARD_LAYOUT_PRESET.cardWidth,
       height: SPECS_BOARD_LAYOUT_PRESET.cardHeight,
       x:

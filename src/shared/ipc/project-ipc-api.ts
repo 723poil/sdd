@@ -5,7 +5,15 @@ import type {
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionDocument,
+  ProjectSpecVersionHistoryEntry,
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+} from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMessageRunStatus,
@@ -41,6 +49,11 @@ import type {
   SaveProjectReferenceTagsInput,
   SelectProjectDirectoryOutput,
   CancelProjectSessionMessageInput,
+  ApplyProjectSpecVersionInput,
+  DeleteProjectSpecVersionInput,
+  ReadProjectSpecVersionDiffInput,
+  ReadProjectSpecVersionHistoryInput,
+  ReadProjectSpecVersionInput,
   SendProjectSessionMessageInput,
   SendProjectSessionMessageOutput,
 } from '@/shared/ipc/project-ipc';
@@ -105,10 +118,30 @@ export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): R
       invoke,
       projectIpcChannels.createSpec,
     ),
-    saveSpec: bindIpcInvoke1<SaveProjectSpecInput, Result<ProjectSpecDocument>>(
+    saveSpec: bindIpcInvoke1<SaveProjectSpecInput, Result<ProjectSpecSaveResult>>(
       invoke,
       projectIpcChannels.saveSpec,
     ),
+    readSpecVersionHistory: bindIpcInvoke1<
+      ReadProjectSpecVersionHistoryInput,
+      Result<ProjectSpecVersionHistoryEntry[]>
+    >(invoke, projectIpcChannels.readSpecVersionHistory),
+    readSpecVersion: bindIpcInvoke1<
+      ReadProjectSpecVersionInput,
+      Result<ProjectSpecVersionDocument>
+    >(invoke, projectIpcChannels.readSpecVersion),
+    readSpecVersionDiff: bindIpcInvoke1<
+      ReadProjectSpecVersionDiffInput,
+      Result<ProjectSpecVersionDiff>
+    >(invoke, projectIpcChannels.readSpecVersionDiff),
+    applySpecVersion: bindIpcInvoke1<
+      ApplyProjectSpecVersionInput,
+      Result<ProjectSpecApplyVersionResult>
+    >(invoke, projectIpcChannels.applySpecVersion),
+    deleteSpecVersion: bindIpcInvoke1<
+      DeleteProjectSpecVersionInput,
+      Result<ProjectSpecDeleteVersionResult>
+    >(invoke, projectIpcChannels.deleteSpecVersion),
     readAnalysisRunStatus: bindIpcInvoke1<
       ReadProjectAnalysisRunStatusInput,
       Result<ProjectAnalysisRunStatus>

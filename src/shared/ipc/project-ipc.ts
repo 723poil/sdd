@@ -7,7 +7,15 @@ import type {
 } from '@/domain/project/project-analysis-model';
 import type { ProjectInspection, RecentProject } from '@/domain/project/project-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecApplyVersionResult,
+  ProjectSpecDeleteVersionResult,
+  ProjectSpecDocument,
+  ProjectSpecSaveResult,
+  ProjectSpecVersionDiff,
+  ProjectSpecVersionDocument,
+  ProjectSpecVersionHistoryEntry,
+} from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
   ProjectSessionMessageRunStatus,
@@ -28,6 +36,11 @@ export const projectIpcChannels = {
   readSpecs: 'project/read-specs',
   createSpec: 'project/create-spec',
   saveSpec: 'project/save-spec',
+  readSpecVersionHistory: 'project/read-spec-version-history',
+  readSpecVersion: 'project/read-spec-version',
+  readSpecVersionDiff: 'project/read-spec-version-diff',
+  applySpecVersion: 'project/apply-spec-version',
+  deleteSpecVersion: 'project/delete-spec-version',
   readAnalysisRunStatus: 'project/read-analysis-run-status',
   analyze: 'project/analyze',
   cancelAnalysis: 'project/cancel-analysis',
@@ -105,6 +118,39 @@ export interface SaveProjectSpecInput {
   markdown: string;
 }
 
+export interface ReadProjectSpecVersionHistoryInput {
+  rootPath: string;
+  specId: string;
+}
+
+export interface ReadProjectSpecVersionInput {
+  rootPath: string;
+  specId: string;
+  versionId: string;
+}
+
+export interface ReadProjectSpecVersionDiffInput {
+  currentMarkdown?: string | null;
+  currentTitle?: string | null;
+  rootPath: string;
+  specId: string;
+  versionId: string;
+}
+
+export interface ApplyProjectSpecVersionInput {
+  rootPath: string;
+  revision: number;
+  specId: string;
+  versionId: string;
+}
+
+export interface DeleteProjectSpecVersionInput {
+  rootPath: string;
+  revision: number;
+  specId: string;
+  versionId: string;
+}
+
 export interface ReadProjectAnalysisRunStatusInput {
   rootPath: string;
 }
@@ -172,7 +218,7 @@ export interface RenameProjectOutput {
 export interface SendProjectSessionMessageOutput {
   assistantErrorMessage: string | null;
   messages: ProjectSessionMessage[];
-  spec: ProjectSpecDocument | null;
+  specSave: ProjectSpecSaveResult | null;
   session: ProjectSessionMeta;
 }
 
@@ -204,7 +250,20 @@ export interface RendererProjectApi {
   ): Promise<Result<void>>;
   readSpecs(input: ReadProjectSpecsInput): Promise<Result<ProjectSpecDocument[]>>;
   createSpec(input: CreateProjectSpecInput): Promise<Result<CreateProjectSpecOutput>>;
-  saveSpec(input: SaveProjectSpecInput): Promise<Result<ProjectSpecDocument>>;
+  saveSpec(input: SaveProjectSpecInput): Promise<Result<ProjectSpecSaveResult>>;
+  readSpecVersionHistory(
+    input: ReadProjectSpecVersionHistoryInput,
+  ): Promise<Result<ProjectSpecVersionHistoryEntry[]>>;
+  readSpecVersion(input: ReadProjectSpecVersionInput): Promise<Result<ProjectSpecVersionDocument>>;
+  readSpecVersionDiff(
+    input: ReadProjectSpecVersionDiffInput,
+  ): Promise<Result<ProjectSpecVersionDiff>>;
+  applySpecVersion(
+    input: ApplyProjectSpecVersionInput,
+  ): Promise<Result<ProjectSpecApplyVersionResult>>;
+  deleteSpecVersion(
+    input: DeleteProjectSpecVersionInput,
+  ): Promise<Result<ProjectSpecDeleteVersionResult>>;
   readAnalysisRunStatus(
     input: ReadProjectAnalysisRunStatusInput,
   ): Promise<Result<ProjectAnalysisRunStatus>>;

@@ -277,6 +277,7 @@
   - `title`
   - `status`
   - `latestVersion`
+  - `currentVersion`
   - `updatedAt`
 
 주의:
@@ -362,6 +363,8 @@
 - `title`
 - `status`
 - `latestVersion`
+- `currentVersion`
+- `draftMarkdown`
 - `revision`
 - `createdAt`
 - `updatedAt`
@@ -369,9 +372,12 @@
 
 주의:
 
-- 새 명세를 채팅으로 시작할 때도 먼저 `meta.json` 과 `versions/v1.md` 초안이 생성된다
+- 새 명세 생성 직후에는 `latestVersion = null` 인 작업 초안 상태를 먼저 저장한다
+- 작업 초안의 현재 본문은 `meta.json.draftMarkdown` 에 둔다
 - 이후 채팅과 patch 는 이 명세 단위로 연결된다
-- 직접 편집 저장과 채팅 기반 초안 갱신 모두 `latestVersion` 을 새 버전으로 올리고 `revision` 을 증가시킨다
+- 첫 실질 저장 또는 첫 채팅 반영이 `v1` 이다
+- 직접 편집 저장과 채팅 기반 초안 갱신 모두 실질 변경이 있을 때만 `versions/` 에 새 버전을 추가하고 `revision` 을 증가시킨다
+- 이전 버전 적용은 `draftMarkdown` 과 `currentVersion` 만 바꾸고 기존 버전 파일은 덮어쓰지 않는다
 
 ### `.sdd/specs/<spec-slug>/versions/v1.md`
 
@@ -398,6 +404,8 @@
 주의:
 
 - Markdown 첫 줄 `# 제목` 과 `meta.json.title` 은 일치시킨다
+- `meta.json.currentVersion` 은 현재 작업 초안이 어떤 저장 버전을 기준으로 삼는지 가리킬 수 있다
+- `meta.json.latestVersion` 은 가장 최근에 생성된 저장 버전 pointer다
 - `참조 태그` 는 기존 reference-tag 를 우선 적고, 현재 기능이 기존 태그로 충분히 설명되지 않으면 제안 태그를 함께 남긴다
 - `영향도 분석` 은 `analysis/context.json`, `analysis/file-index.json`, `analysis/manual-reference-tags.json` 을 참고해 관련 파일, 모듈, 흐름, 리스크를 정리한다
 - `사용 스킬` 은 `AGENTS.md` 와 `.codex/skills/` 를 참고해 이번 명세/구현에 사용할 프로젝트 전용 스킬을 적는다

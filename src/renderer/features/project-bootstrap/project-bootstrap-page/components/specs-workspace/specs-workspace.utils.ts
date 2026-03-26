@@ -22,6 +22,14 @@ export function describeSpecStatus(status: ProjectSpecDocument['meta']['status']
   }
 }
 
+export function describeSpecVersionBadge(spec: ProjectSpecDocument): string {
+  if (!spec.meta.currentVersion) {
+    return '작업 초안';
+  }
+
+  return spec.meta.currentVersion;
+}
+
 export function formatSpecDayLabel(value: string): string {
   return formatSpecTimestamp(value, {
     month: 'numeric',
@@ -42,7 +50,7 @@ export function formatSpecDateTimeLabel(value: string): string {
 export function getSpecSummary(spec: ProjectSpecDocument): string {
   return (
     spec.meta.summary ??
-    `${describeSpecStatus(spec.meta.status)} · ${spec.meta.latestVersion} · 채팅과 문서 초안을 이어갈 수 있습니다.`
+    `${describeSpecStatus(spec.meta.status)} · ${describeSpecVersionBadge(spec)} · 채팅과 문서 초안을 이어갈 수 있습니다.`
   );
 }
 

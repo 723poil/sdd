@@ -109,6 +109,22 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleSaveSpec = (input: Parameters<typeof workbench.onSaveSpec>[0]) => {
     return workbench.onSaveSpec(input);
   };
+  const handleReadSpecVersionHistory = (
+    input: Parameters<typeof workbench.onReadSpecVersionHistory>[0],
+  ) => {
+    return workbench.onReadSpecVersionHistory(input);
+  };
+  const handleReadSpecVersionDiff = (
+    input: Parameters<typeof workbench.onReadSpecVersionDiff>[0],
+  ) => {
+    return workbench.onReadSpecVersionDiff(input);
+  };
+  const handleApplySpecVersion = (input: Parameters<typeof workbench.onApplySpecVersion>[0]) => {
+    return workbench.onApplySpecVersion(input);
+  };
+  const handleDeleteSpecVersion = (input: Parameters<typeof workbench.onDeleteSpecVersion>[0]) => {
+    return workbench.onDeleteSpecVersion(input);
+  };
   const handleSaveReferenceTags = (
     referenceTags: Parameters<typeof workbench.onSaveReferenceTags>[0],
   ) => {
@@ -202,13 +218,21 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               workbench.inspection?.initializationState === 'ready' &&
               workbench.inspection.isWritable
             }
+            canWriteSpecs={
+              workbench.inspection?.initializationState === 'ready' &&
+              workbench.inspection.isWritable
+            }
             errorMessage={workbench.errorMessage}
             isCancellingReferenceTags={workbench.isCancellingReferenceTags}
             isGeneratingReferenceTags={workbench.isGeneratingReferenceTags}
             isSavingReferenceTags={workbench.isSavingReferenceTags}
             isSavingSpec={workbench.isSavingSpec}
+            onApplySpecVersion={handleApplySpecVersion}
             onCancelReferenceTagGeneration={handleCancelReferenceTagGeneration}
+            onDeleteSpecVersion={handleDeleteSpecVersion}
             onGenerateReferenceTags={handleGenerateReferenceTags}
+            onReadSpecVersionDiff={handleReadSpecVersionDiff}
+            onReadSpecVersionHistory={handleReadSpecVersionHistory}
             onSaveAnalysisDocumentLayouts={handleSaveAnalysisDocumentLayouts}
             onSaveSpec={handleSaveSpec}
             onSaveReferenceTags={handleSaveReferenceTags}
@@ -217,6 +241,7 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             onSelectWorkspacePage={handleSelectWorkspacePage}
             selectedAnalysisDocumentId={workbench.selectedAnalysisDocumentId}
             selectedSpecId={workbench.selectedSpecId}
+            specConflictBySpecId={workbench.specConflictBySpecId}
             specs={workbench.specs}
           />
 
