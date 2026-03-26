@@ -11,7 +11,10 @@ import type {
   ProjectSpecApplyVersionResult,
   ProjectSpecDeleteVersionResult,
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
+  ProjectSpecRelation,
   ProjectSpecSaveResult,
+  ProjectSpecStatus,
   ProjectSpecVersionDiff,
   ProjectSpecVersionDocument,
   ProjectSpecVersionHistoryEntry,
@@ -36,6 +39,7 @@ export const projectIpcChannels = {
   readSpecs: 'project/read-specs',
   createSpec: 'project/create-spec',
   saveSpec: 'project/save-spec',
+  updateSpecMeta: 'project/update-spec-meta',
   readSpecVersionHistory: 'project/read-spec-version-history',
   readSpecVersion: 'project/read-spec-version',
   readSpecVersionDiff: 'project/read-spec-version-diff',
@@ -116,6 +120,14 @@ export interface SaveProjectSpecInput {
   revision: number;
   title: string;
   markdown: string;
+}
+
+export interface UpdateProjectSpecMetaInput {
+  rootPath: string;
+  specId: string;
+  revision: number;
+  status: ProjectSpecStatus;
+  relations: ProjectSpecRelation[];
 }
 
 export interface ReadProjectSpecVersionHistoryInput {
@@ -251,6 +263,7 @@ export interface RendererProjectApi {
   readSpecs(input: ReadProjectSpecsInput): Promise<Result<ProjectSpecDocument[]>>;
   createSpec(input: CreateProjectSpecInput): Promise<Result<CreateProjectSpecOutput>>;
   saveSpec(input: SaveProjectSpecInput): Promise<Result<ProjectSpecSaveResult>>;
+  updateSpecMeta(input: UpdateProjectSpecMetaInput): Promise<Result<ProjectSpecMetaUpdateResult>>;
   readSpecVersionHistory(
     input: ReadProjectSpecVersionHistoryInput,
   ): Promise<Result<ProjectSpecVersionHistoryEntry[]>>;

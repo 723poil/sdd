@@ -64,6 +64,14 @@ export const DOCUMENT_MAP_VIEWPORT_PRESET: WorkspaceMapViewportPreset = {
   viewportPadding: 64,
 };
 
+export const SPECS_MAP_VIEWPORT_PRESET: WorkspaceMapViewportPreset = {
+  minScale: 0.32,
+  maxScale: 2.4,
+  fitMinScale: 0.32,
+  fitMaxScale: 0.96,
+  viewportPadding: 28,
+};
+
 export const DOCUMENT_MAP_CARD_PRESET: WorkspaceMapCardPreset = {
   cardWidth: 360,
   cardHeight: 220,
@@ -100,14 +108,8 @@ export function clamp(value: number, min: number, max: number): number {
 export function getWorkspaceMapFitScale(input: WorkspaceMapFitScaleInput): number {
   const boundsWidth = Math.max(input.boundsWidth, 1);
   const boundsHeight = Math.max(input.boundsHeight, 1);
-  const availableWidth = Math.max(
-    input.stageWidth - input.viewportPreset.viewportPadding * 2,
-    1,
-  );
-  const availableHeight = Math.max(
-    input.stageHeight - input.viewportPreset.viewportPadding * 2,
-    1,
-  );
+  const availableWidth = Math.max(input.stageWidth - input.viewportPreset.viewportPadding * 2, 1);
+  const availableHeight = Math.max(input.stageHeight - input.viewportPreset.viewportPadding * 2, 1);
 
   return clamp(
     Math.min(availableWidth / boundsWidth, availableHeight / boundsHeight),
@@ -127,11 +129,7 @@ export function getWorkspaceMapNodeSpacingScale(
   viewportScale: number,
   preset: WorkspaceMapNodeScalePreset = WORKSPACE_MAP_NODE_SCALE_PRESET,
 ): number {
-  return clamp(
-    preset.spacingRatio / viewportScale,
-    preset.spacingMinScale,
-    preset.spacingMaxScale,
-  );
+  return clamp(preset.spacingRatio / viewportScale, preset.spacingMinScale, preset.spacingMaxScale);
 }
 
 function createAnalysisDocumentBoardLayoutPreset(

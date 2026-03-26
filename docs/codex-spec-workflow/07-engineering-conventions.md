@@ -446,6 +446,8 @@ store에 넣지 않는 것:
 - 저장 버전은 `versions/` 아래 immutable 파일로만 남긴다
 - 기존 버전 수정 금지
 - 최신 버전 pointer와 현재 기준 버전 pointer는 `meta.json`이 관리
+- `meta.json.status` 와 `meta.json.relations` 변경은 metadata-only update로 저장하고 새 Markdown 버전을 만들지 않는다
+- metadata-only update도 `revision` 충돌 검사를 통과해야 한다
 
 ### JSONL 규칙
 

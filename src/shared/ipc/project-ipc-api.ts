@@ -7,6 +7,7 @@ import type { ProjectInspection, RecentProject } from '@/domain/project/project-
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type {
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
   ProjectSpecSaveResult,
   ProjectSpecVersionDiff,
   ProjectSpecVersionDocument,
@@ -45,6 +46,7 @@ import type {
   RenameProjectOutput,
   ReorderRecentProjectsInput,
   SaveProjectSpecInput,
+  UpdateProjectSpecMetaInput,
   SaveProjectAnalysisDocumentLayoutsInput,
   SaveProjectReferenceTagsInput,
   SelectProjectDirectoryOutput,
@@ -121,6 +123,10 @@ export function createRendererProjectApi(invoke: IpcRendererInvoke['invoke']): R
     saveSpec: bindIpcInvoke1<SaveProjectSpecInput, Result<ProjectSpecSaveResult>>(
       invoke,
       projectIpcChannels.saveSpec,
+    ),
+    updateSpecMeta: bindIpcInvoke1<UpdateProjectSpecMetaInput, Result<ProjectSpecMetaUpdateResult>>(
+      invoke,
+      projectIpcChannels.updateSpecMeta,
     ),
     readSpecVersionHistory: bindIpcInvoke1<
       ReadProjectSpecVersionHistoryInput,

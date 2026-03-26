@@ -9,7 +9,10 @@ import type {
   ProjectSpecApplyVersionResult,
   ProjectSpecDeleteVersionResult,
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
+  ProjectSpecRelation,
   ProjectSpecSaveResult,
+  ProjectSpecStatus,
   ProjectSpecVersionDiff,
   ProjectSpecVersionHistoryEntry,
 } from '@/domain/project/project-spec-model';
@@ -38,6 +41,7 @@ interface MainWorkspaceProps {
   isGeneratingReferenceTags: boolean;
   isSavingReferenceTags: boolean;
   isSavingSpec: boolean;
+  isUpdatingSpecMeta: boolean;
   selectedAnalysisDocumentId: SelectedProjectAnalysisDocumentId;
   selectedSpecId: string | null;
   errorMessage: string | null;
@@ -51,6 +55,12 @@ interface MainWorkspaceProps {
     specId: string;
     title: string;
   }) => Promise<ProjectSpecSaveResult | null>;
+  onUpdateSpecMeta: (input: {
+    specId: string;
+    revision: number;
+    status: ProjectSpecStatus;
+    relations: ProjectSpecRelation[];
+  }) => Promise<ProjectSpecMetaUpdateResult | null>;
   onReadSpecVersionHistory: (input: {
     specId: string;
   }) => Promise<ProjectSpecVersionHistoryEntry[] | null>;
@@ -132,9 +142,11 @@ export function MainWorkspace(props: MainWorkspaceProps) {
             onSaveSpec={props.onSaveSpec}
             onViewModeChange={setSpecsViewMode}
             isSavingSpec={props.isSavingSpec}
+            isUpdatingSpecMeta={props.isUpdatingSpecMeta}
             selectedSpecId={props.selectedSpecId}
             specConflictBySpecId={props.specConflictBySpecId}
             specs={props.specs}
+            onUpdateSpecMeta={props.onUpdateSpecMeta}
             viewMode={specsViewMode}
           />
         </div>

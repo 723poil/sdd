@@ -2,7 +2,10 @@ import { mkdir, unlink } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
 import type { ProjectStoragePort } from '@/application/project/project.ports';
-import { ANALYSIS_FILE_INDEX_SCHEMA_VERSION, SPEC_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
+import {
+  ANALYSIS_FILE_INDEX_SCHEMA_VERSION,
+  SPEC_INDEX_SCHEMA_VERSION,
+} from '@/domain/project/project-model';
 import { type ProjectAnalysisContext } from '@/domain/project/project-analysis-model';
 import {
   createEmptyProjectReferenceTagDocument,
@@ -10,7 +13,9 @@ import {
   sanitizeProjectReferenceTagDocument,
 } from '@/domain/project/project-reference-tag-model';
 import {
+  areProjectSpecRelationsEqual,
   createProjectSpecDocument,
+  createNextProjectSpecMetaAfterMetadataUpdate,
   createNextProjectSpecMeta,
   createNextProjectSpecVersionId,
   createDefaultProjectSpecSlug,
@@ -18,6 +23,7 @@ import {
   createInitialProjectSpecMarkdown,
   createProjectSpecMeta,
   normalizeProjectSpecDraft,
+  validateProjectSpecMetadataUpdate,
 } from '@/domain/project/project-spec-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import {
@@ -48,7 +54,11 @@ import {
   getSpecMetaPath,
   getSpecVersionPath,
 } from '@/infrastructure/sdd/fs-project-storage-paths';
-import { ensureJsonFile, ensureTextFile, pathExists } from '@/infrastructure/sdd/fs-project-storage-io';
+import {
+  ensureJsonFile,
+  ensureTextFile,
+  pathExists,
+} from '@/infrastructure/sdd/fs-project-storage-io';
 import {
   buildProjectAnalysisWriteFailureDetails,
   cleanupProjectAnalysisBackup,
@@ -304,6 +314,91 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
       });
     },
 
+    async updateProjectSpecMeta(input) {
+      const rootPath = resolve(input.rootPath);
+      const { projectJsonPath, specsIndexPath } = getProjectStoragePaths(rootPath);
+
+      const existingProjectMetaResult = await this.readProjectMeta({ rootPath });
+      if (!existingProjectMetaResult.ok) {
+        return existingProjectMetaResult;
+      }
+
+      if (!existingProjectMetaResult.value) {
+        return err(
+          createProjectError(
+            'PROJECT_NOT_INITIALIZED',
+            'project.json 이 없어 명세 메타데이터를 저장할 수 없습니다.',
+            projectJsonPath,
+          ),
+        );
+      }
+
+      const existingSpecMetaResult = await readSpecMetaDocument({
+        rootPath,
+        specId: input.specId,
+      });
+      if (!existingSpecMetaResult.ok) {
+        return existingSpecMetaResult;
+      }
+
+      if (!existingSpecMetaResult.value) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '저장할 명세 메타를 찾지 못했습니다.',
+            input.specId,
+          ),
+        );
+      }
+
+      const existingSpecMeta = existingSpecMetaResult.value;
+      if (existingSpecMeta.revision !== input.revision) {
+        return ok({
+          kind: 'conflict',
+          latestRevision: existingSpecMeta.revision,
+          latestVersionId: existingSpecMeta.latestVersion,
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
+      }
+
+      const validationResult = validateProjectSpecMetadataUpdate({
+        current: existingSpecMeta,
+        status: input.status,
+        relations: input.relations,
+      });
+      if (!validationResult.ok) {
+        return err(validationResult.error);
+      }
+
+      if (
+        existingSpecMeta.status === validationResult.value.status &&
+        areProjectSpecRelationsEqual(existingSpecMeta.relations, validationResult.value.relations)
+      ) {
+        return ok({
+          kind: 'no-op',
+          spec: createProjectSpecDocument(existingSpecMeta),
+        });
+      }
+
+      const nextSpecMeta = createNextProjectSpecMetaAfterMetadataUpdate({
+        current: existingSpecMeta,
+        now: new Date().toISOString(),
+        status: validationResult.value.status,
+        relations: validationResult.value.relations,
+      });
+
+      await writeJsonAtomically(getSpecMetaPath(rootPath, input.specId), nextSpecMeta);
+      await rebuildProjectSpecIndex({
+        rootPath,
+        specsIndexPath,
+      });
+
+      return ok({
+        kind: 'updated',
+        spec: createProjectSpecDocument(nextSpecMeta),
+      });
+    },
+
     async readProjectSpecVersionHistory(input) {
       return readProjectSpecVersionHistory({
         rootPath: resolve(input.rootPath),
@@ -327,9 +422,7 @@ export function createFsProjectStorageRepository(): ProjectStoragePort {
         ...(typeof input.currentMarkdown !== 'undefined'
           ? { currentMarkdown: input.currentMarkdown }
           : {}),
-        ...(typeof input.currentTitle !== 'undefined'
-          ? { currentTitle: input.currentTitle }
-          : {}),
+        ...(typeof input.currentTitle !== 'undefined' ? { currentTitle: input.currentTitle } : {}),
       });
     },
 

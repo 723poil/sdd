@@ -1,4 +1,7 @@
-import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type {
+  ProjectSpecDocument,
+  ProjectSpecRelationType,
+} from '@/domain/project/project-spec-model';
 
 export function resolveSelectedSpec(
   specs: ProjectSpecDocument[],
@@ -61,4 +64,13 @@ function formatSpecTimestamp(value: string, options: Intl.DateTimeFormatOptions)
   }
 
   return new Intl.DateTimeFormat('ko-KR', options).format(date);
+}
+
+export function describeSpecRelationType(type: ProjectSpecRelationType): string {
+  switch (type) {
+    case 'derived-from':
+      return '파생';
+    case 'follow-up-to':
+      return '후속 개발';
+  }
 }

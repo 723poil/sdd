@@ -17,7 +17,10 @@ import type {
   ProjectSpecApplyVersionResult,
   ProjectSpecDeleteVersionResult,
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
+  ProjectSpecRelation,
   ProjectSpecSaveResult,
+  ProjectSpecStatus,
   ProjectSpecVersionDiff,
   ProjectSpecVersionDocument,
   ProjectSpecVersionHistoryEntry,
@@ -183,6 +186,13 @@ export interface ProjectStoragePort {
     markdown: string;
     summary?: string | null;
   }): Promise<Result<ProjectSpecSaveResult>>;
+  updateProjectSpecMeta(input: {
+    rootPath: string;
+    specId: string;
+    revision: number;
+    status: ProjectSpecStatus;
+    relations: ProjectSpecRelation[];
+  }): Promise<Result<ProjectSpecMetaUpdateResult>>;
   readProjectSpecVersionHistory(input: {
     rootPath: string;
     specId: string;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-26T00:17:41.350Z",
+  "generatedAt": "2026-03-26T14:31:28.698Z",
   "entries": [
     {
       "category": "source",
@@ -60,6 +60,16 @@
           "reason": "정적 import: @/application/project/cancel-project-reference-tag-generation.use-case"
         },
         {
+          "path": "src/application/project/cancel-project-session-message.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/cancel-project-session-message.use-case"
+        },
+        {
+          "path": "src/application/project/apply-project-spec-version.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/apply-project-spec-version.use-case"
+        },
+        {
           "path": "src/application/project/create-project-session.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/create-project-session.use-case"
@@ -68,6 +78,11 @@
           "path": "src/application/project/create-project-spec.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/create-project-spec.use-case"
+        },
+        {
+          "path": "src/application/project/delete-project-spec-version.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/delete-project-spec-version.use-case"
         },
         {
           "path": "src/application/project/generate-project-reference-tags.use-case.ts",
@@ -105,6 +120,11 @@
           "reason": "정적 import: @/application/project/read-project-analysis.use-case"
         },
         {
+          "path": "src/application/project/read-project-session-message-run-status.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-session-message-run-status.use-case"
+        },
+        {
           "path": "src/application/project/read-project-session-messages.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/read-project-session-messages.use-case"
@@ -113,6 +133,21 @@
           "path": "src/application/project/read-project-specs.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/read-project-specs.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-spec-version-diff.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-spec-version-diff.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-spec-version-history.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-spec-version-history.use-case"
+        },
+        {
+          "path": "src/application/project/read-project-spec-version.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/read-project-spec-version.use-case"
         },
         {
           "path": "src/application/project/remove-recent-project.use-case.ts",
@@ -153,6 +188,11 @@
           "path": "src/application/project/send-project-session-message.use-case.ts",
           "relationship": "imports",
           "reason": "정적 import: @/application/project/send-project-session-message.use-case"
+        },
+        {
+          "path": "src/application/project/update-project-spec-meta.use-case.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/update-project-spec-meta.use-case"
         },
         {
           "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
@@ -200,13 +240,18 @@
           "reason": "정적 import: @/infrastructure/reference-tags/node-project-reference-tag-generator.adapter"
         },
         {
+          "path": "src/infrastructure/spec-chat/in-memory-project-session-message-run-status.store.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/spec-chat/in-memory-project-session-message-run-status.store"
+        },
+        {
           "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
           "relationship": "imports",
           "reason": "정적 import: @/infrastructure/spec-chat/node-project-spec-chat.adapter"
         }
       ],
       "role": "메인 소스",
-      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 35건, 들어오는 참조 1건.",
+      "summary": "메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 44건, 들어오는 참조 1건.",
       "unresolvedReferences": []
     },
     {
@@ -308,7 +353,7 @@
         }
       ],
       "role": "인프라 레포지토리",
-      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 1건.",
+      "summary": "인프라 레포지토리입니다. TypeScript 파일 기준으로 나가는 참조 14건, 들어오는 참조 2건.",
       "unresolvedReferences": []
     },
     {
@@ -1361,7 +1406,7 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 34건.",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 43건.",
       "unresolvedReferences": []
     },
     {
@@ -1724,6 +1769,73 @@
         "cluster": "renderer/renderer"
       },
       "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 7건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
       "references": [
         {
@@ -1853,68 +1965,6 @@
         "cluster": "renderer/renderer"
       },
       "layer": "renderer/renderer/source",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-analysis-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건.",
-      "unresolvedReferences": []
-    },
-    {
-      "category": "source",
-      "classification": {
-        "category": {
-          "confidence": 0.68,
-          "reasons": [
-            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
-          ],
-          "status": "inferred"
-        },
-        "layer": {
-          "confidence": 0.78,
-          "reasons": [
-            "발견된 그룹 영역 renderer",
-            "반복 cluster renderer/renderer",
-            "fallback layer renderer"
-          ],
-          "status": "inferred"
-        }
-      },
-      "grouping": {
-        "area": "renderer",
-        "cluster": "renderer/renderer"
-      },
-      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
       "references": [
         {
@@ -1946,6 +1996,68 @@
           "path": "src/renderer/features/agent-cli-settings/index.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/agent-cli-settings"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 6건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size"
         }
       ],
       "role": "렌더러 소스",
@@ -2121,6 +2233,63 @@
       ],
       "role": "애플리케이션 소스",
       "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 2건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+          "relationship": "extends",
+          "reason": "상속: WorkspaceBoardLinkLike"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 2건.",
       "unresolvedReferences": []
     },
     {
@@ -2466,63 +2635,6 @@
       "unresolvedReferences": []
     },
     {
-      "category": "source",
-      "classification": {
-        "category": {
-          "confidence": 0.68,
-          "reasons": [
-            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
-          ],
-          "status": "inferred"
-        },
-        "layer": {
-          "confidence": 0.78,
-          "reasons": [
-            "발견된 그룹 영역 renderer",
-            "반복 cluster renderer/renderer",
-            "fallback layer renderer"
-          ],
-          "status": "inferred"
-        }
-      },
-      "grouping": {
-        "area": "renderer",
-        "cluster": "renderer/renderer"
-      },
-      "layer": "renderer/renderer/source",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
-      "references": [
-        {
-          "path": "src/domain/project/project-spec-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-spec-model"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 5건, 들어오는 참조 1건.",
-      "unresolvedReferences": []
-    },
-    {
       "category": "entrypoint",
       "classification": {
         "category": {
@@ -2626,7 +2738,7 @@
         }
       ],
       "role": "애플리케이션 소스",
-      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 8건.",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 11건.",
       "unresolvedReferences": []
     },
     {
@@ -2678,7 +2790,7 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 3건.",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 5건.",
       "unresolvedReferences": []
     },
     {
@@ -3018,12 +3130,116 @@
         "cluster": "src/application/project"
       },
       "layer": "src/application/project/source",
+      "path": "src/application/project/apply-project-spec-version.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/create-project-session.use-case.ts",
       "references": [
         {
           "path": "src/domain/project/project-session-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
+      "path": "src/application/project/delete-project-spec-version.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
           "path": "src/shared/contracts/result.ts",
@@ -3175,6 +3391,58 @@
       },
       "layer": "src/application/project/source",
       "path": "src/application/project/save-project-spec.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/ensure-project-storage-ready.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/ensure-project-storage-ready"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
+      "path": "src/application/project/update-project-spec-meta.use-case.ts",
       "references": [
         {
           "path": "src/domain/project/project-spec-model.ts",
@@ -3422,6 +3690,58 @@
         "layer": {
           "confidence": 0.78,
           "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/spec-chat",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/spec-chat"
+      },
+      "layer": "src/infrastructure/spec-chat/source",
+      "path": "src/infrastructure/spec-chat/in-memory-project-session-message-run-status.store.ts",
+      "references": [
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        },
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
             "발견된 그룹 영역 renderer",
             "반복 cluster renderer/renderer",
             "fallback layer renderer"
@@ -3511,6 +3831,105 @@
       ],
       "role": "렌더러 소스",
       "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 4건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 domain",
+            "반복 cluster domain/domain",
+            "fallback layer domain/project/source"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "domain",
+        "cluster": "domain/domain"
+      },
+      "layer": "domain/domain/source",
+      "path": "src/domain/project/project-spec-model.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-model"
+        },
+        {
+          "path": "src/domain/project/project-errors.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-errors"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        }
+      ],
+      "role": "도메인 소스",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 30건.",
       "unresolvedReferences": []
     },
     {
@@ -3820,6 +4239,53 @@
         "cluster": "src/application/project"
       },
       "layer": "src/application/project/source",
+      "path": "src/application/project/cancel-project-session-message.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/list-project-sessions.use-case.ts",
       "references": [
         {
@@ -4008,12 +4474,200 @@
         "cluster": "src/application/project"
       },
       "layer": "src/application/project/source",
+      "path": "src/application/project/read-project-session-message-run-status.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-session-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
       "path": "src/application/project/read-project-session-messages.use-case.ts",
       "references": [
         {
           "path": "src/domain/project/project-session-model.ts",
           "relationship": "imports",
           "reason": "정적 import: @/domain/project/project-session-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
+      "path": "src/application/project/read-project-spec-version-diff.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
+      "path": "src/application/project/read-project-spec-version-history.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/shared/contracts/result.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/shared/contracts/result"
+        },
+        {
+          "path": "src/application/project/project.ports.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/application/project/project.ports"
+        }
+      ],
+      "role": "애플리케이션 소스",
+      "summary": "애플리케이션 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 application",
+            "반복 cluster src/application/project",
+            "fallback layer application"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "application",
+        "cluster": "src/application/project"
+      },
+      "layer": "src/application/project/source",
+      "path": "src/application/project/read-project-spec-version.use-case.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
         },
         {
           "path": "src/shared/contracts/result.ts",
@@ -4666,53 +5320,6 @@
         "cluster": "renderer/renderer"
       },
       "layer": "renderer/renderer/source",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
-      "references": [
-        {
-          "path": "src/domain/project/project-spec-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-spec-model"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument"
-        },
-        {
-          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 3건, 들어오는 참조 1건.",
-      "unresolvedReferences": []
-    },
-    {
-      "category": "source",
-      "classification": {
-        "category": {
-          "confidence": 0.68,
-          "reasons": [
-            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
-          ],
-          "status": "inferred"
-        },
-        "layer": {
-          "confidence": 0.78,
-          "reasons": [
-            "발견된 그룹 영역 renderer",
-            "반복 cluster renderer/renderer",
-            "fallback layer renderer"
-          ],
-          "status": "inferred"
-        }
-      },
-      "grouping": {
-        "area": "renderer",
-        "cluster": "renderer/renderer"
-      },
-      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
       "references": [
         {
@@ -4778,6 +5385,53 @@
       ],
       "role": "진입점 후보",
       "summary": "정적 분석에서 진입점 후보로 감지한 파일입니다.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "test",
+      "classification": {
+        "category": {
+          "confidence": 0.95,
+          "reasons": [
+            "테스트 경로 또는 파일명 규칙에서 tests/specs-workspace-map.utils.test.ts 를 테스트로 분류했습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 test",
+            "반복 cluster test",
+            "fallback layer test"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "test",
+        "cluster": "test"
+      },
+      "layer": "test",
+      "path": "tests/specs-workspace-map.utils.test.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry"
+        }
+      ],
+      "role": "테스트 기능 테스트",
+      "summary": "테스트 기능 테스트입니다. 테스트 경로를 별도 그룹으로 분리해 관리합니다.",
       "unresolvedReferences": []
     },
     {
@@ -5391,6 +6045,48 @@
         "cluster": "renderer/renderer"
       },
       "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        },
+        {
+          "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils"
+        }
+      ],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 2건, 들어오는 참조 1건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
       "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
       "references": [
         {
@@ -5491,6 +6187,48 @@
       "unresolvedReferences": []
     },
     {
+      "category": "test",
+      "classification": {
+        "category": {
+          "confidence": 0.95,
+          "reasons": [
+            "테스트 경로 또는 파일명 규칙에서 tests/fs-project-storage.repository.test.ts 를 테스트로 분류했습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 test",
+            "반복 cluster test",
+            "fallback layer test"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "test",
+        "cluster": "test"
+      },
+      "layer": "test",
+      "path": "tests/fs-project-storage.repository.test.ts",
+      "references": [
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage.repository"
+        },
+        {
+          "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths"
+        }
+      ],
+      "role": "테스트 레포지토리 테스트",
+      "summary": "테스트 레포지토리 테스트입니다. 테스트 경로를 별도 그룹으로 분리해 관리합니다.",
+      "unresolvedReferences": []
+    },
+    {
       "category": "source",
       "classification": {
         "category": {
@@ -5524,7 +6262,7 @@
         }
       ],
       "role": "공용 소스",
-      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 60건.",
+      "summary": "공용 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 70건.",
       "unresolvedReferences": []
     },
     {
@@ -5561,44 +6299,7 @@
         }
       ],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 26건.",
-      "unresolvedReferences": []
-    },
-    {
-      "category": "source",
-      "classification": {
-        "category": {
-          "confidence": 0.68,
-          "reasons": [
-            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
-          ],
-          "status": "inferred"
-        },
-        "layer": {
-          "confidence": 0.78,
-          "reasons": [
-            "발견된 그룹 영역 domain",
-            "반복 cluster domain/domain",
-            "fallback layer domain/project/source"
-          ],
-          "status": "inferred"
-        }
-      },
-      "grouping": {
-        "area": "domain",
-        "cluster": "domain/domain"
-      },
-      "layer": "domain/domain/source",
-      "path": "src/domain/project/project-spec-model.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-model"
-        }
-      ],
-      "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 20건.",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 28건.",
       "unresolvedReferences": []
     },
     {
@@ -5635,7 +6336,44 @@
         }
       ],
       "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 5건.",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 6건.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 infrastructure",
+            "반복 cluster src/infrastructure/sdd",
+            "fallback layer infrastructure"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "infrastructure",
+        "cluster": "src/infrastructure/sdd"
+      },
+      "layer": "src/infrastructure/sdd/source",
+      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-analysis-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-analysis-model"
+        }
+      ],
+      "role": "인프라 소스",
+      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 5건.",
       "unresolvedReferences": []
     },
     {
@@ -5688,19 +6426,19 @@
         "layer": {
           "confidence": 0.78,
           "reasons": [
-            "발견된 그룹 영역 infrastructure",
-            "반복 cluster src/infrastructure/sdd",
-            "fallback layer infrastructure"
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
           ],
           "status": "inferred"
         }
       },
       "grouping": {
-        "area": "infrastructure",
-        "cluster": "src/infrastructure/sdd"
+        "area": "renderer",
+        "cluster": "renderer/renderer"
       },
-      "layer": "src/infrastructure/sdd/source",
-      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
       "references": [
         {
           "path": "src/domain/project/project-analysis-model.ts",
@@ -5708,8 +6446,8 @@
           "reason": "정적 import: @/domain/project/project-analysis-model"
         }
       ],
-      "role": "인프라 소스",
-      "summary": "인프라 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건.",
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 4건.",
       "unresolvedReferences": []
     },
     {
@@ -5737,12 +6475,12 @@
         "cluster": "renderer/renderer"
       },
       "layer": "renderer/renderer/source",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
       "references": [
         {
-          "path": "src/domain/project/project-analysis-model.ts",
+          "path": "src/domain/project/project-spec-model.ts",
           "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-analysis-model"
+          "reason": "정적 import: @/domain/project/project-spec-model"
         }
       ],
       "role": "렌더러 소스",
@@ -6002,43 +6740,6 @@
           "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
           "relationship": "imports",
           "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils"
-        }
-      ],
-      "role": "렌더러 소스",
-      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 1건, 들어오는 참조 2건.",
-      "unresolvedReferences": []
-    },
-    {
-      "category": "source",
-      "classification": {
-        "category": {
-          "confidence": 0.68,
-          "reasons": [
-            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
-          ],
-          "status": "inferred"
-        },
-        "layer": {
-          "confidence": 0.78,
-          "reasons": [
-            "발견된 그룹 영역 renderer",
-            "반복 cluster renderer/renderer",
-            "fallback layer renderer"
-          ],
-          "status": "inferred"
-        }
-      },
-      "grouping": {
-        "area": "renderer",
-        "cluster": "renderer/renderer"
-      },
-      "layer": "renderer/renderer/source",
-      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
-      "references": [
-        {
-          "path": "src/domain/project/project-spec-model.ts",
-          "relationship": "imports",
-          "reason": "정적 import: @/domain/project/project-spec-model"
         }
       ],
       "role": "렌더러 소스",
@@ -6414,6 +7115,43 @@
       "unresolvedReferences": []
     },
     {
+      "category": "test",
+      "classification": {
+        "category": {
+          "confidence": 0.95,
+          "reasons": [
+            "테스트 경로 또는 파일명 규칙에서 tests/project-spec-model.test.ts 를 테스트로 분류했습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 test",
+            "반복 cluster test",
+            "fallback layer test"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "test",
+        "cluster": "test"
+      },
+      "layer": "test",
+      "path": "tests/project-spec-model.test.ts",
+      "references": [
+        {
+          "path": "src/domain/project/project-spec-model.ts",
+          "relationship": "imports",
+          "reason": "정적 import: @/domain/project/project-spec-model"
+        }
+      ],
+      "role": "테스트 기능 테스트",
+      "summary": "테스트 기능 테스트입니다. 테스트 경로를 별도 그룹으로 분리해 관리합니다.",
+      "unresolvedReferences": []
+    },
+    {
       "category": "source",
       "classification": {
         "category": {
@@ -6577,7 +7315,7 @@
       "path": "src/domain/project/project-session-model.ts",
       "references": [],
       "role": "도메인 소스",
-      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 16건.",
+      "summary": "도메인 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 19건.",
       "unresolvedReferences": []
     },
     {
@@ -6984,6 +7722,37 @@
       "unresolvedReferences": []
     },
     {
+      "category": "source",
+      "classification": {
+        "category": {
+          "confidence": 0.68,
+          "reasons": [
+            "명시적 역할명은 없지만 구조 발견 결과를 기준으로 소스 파일로 유지합니다."
+          ],
+          "status": "inferred"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 renderer",
+            "반복 cluster renderer/renderer",
+            "fallback layer renderer"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "renderer",
+        "cluster": "renderer/renderer"
+      },
+      "layer": "renderer/renderer/source",
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts",
+      "references": [],
+      "role": "렌더러 소스",
+      "summary": "렌더러 소스입니다. TypeScript 파일 기준으로 나가는 참조 없음, 들어오는 참조 2건.",
+      "unresolvedReferences": []
+    },
+    {
       "category": "entrypoint",
       "classification": {
         "category": {
@@ -7372,6 +8141,37 @@
       "references": [],
       "role": "설정 파일",
       "summary": "정적 분석에서 확인한 주요 설정 파일입니다.",
+      "unresolvedReferences": []
+    },
+    {
+      "category": "test",
+      "classification": {
+        "category": {
+          "confidence": 0.95,
+          "reasons": [
+            "테스트 경로 또는 파일명 규칙에서 tests/register-path-aliases.ts 를 테스트로 분류했습니다."
+          ],
+          "status": "confirmed"
+        },
+        "layer": {
+          "confidence": 0.78,
+          "reasons": [
+            "발견된 그룹 영역 test",
+            "반복 cluster test",
+            "fallback layer test"
+          ],
+          "status": "inferred"
+        }
+      },
+      "grouping": {
+        "area": "test",
+        "cluster": "test"
+      },
+      "layer": "test",
+      "path": "tests/register-path-aliases.ts",
+      "references": [],
+      "role": "테스트 기능 테스트",
+      "summary": "테스트 기능 테스트입니다. 테스트 경로를 별도 그룹으로 분리해 관리합니다.",
       "unresolvedReferences": []
     },
     {

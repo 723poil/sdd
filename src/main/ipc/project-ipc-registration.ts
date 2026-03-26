@@ -34,6 +34,7 @@ import { createSaveProjectReferenceTagsUseCase } from '@/application/project/sav
 import { createSaveProjectSpecUseCase } from '@/application/project/save-project-spec.use-case';
 import { createSelectProjectDirectoryUseCase } from '@/application/project/select-project-directory.use-case';
 import { createSendProjectSessionMessageUseCase } from '@/application/project/send-project-session-message.use-case';
+import { createUpdateProjectSpecMetaUseCase } from '@/application/project/update-project-spec-meta.use-case';
 import { createFsAgentCliSettingsRepository } from '@/infrastructure/app-settings/fs-agent-cli-settings.repository';
 import { createInMemoryProjectAnalysisRunStatusStore } from '@/infrastructure/analysis/in-memory-project-analysis-run-status.store';
 import { createNodeProjectAnalyzerAdapter } from '@/infrastructure/analysis/node-project-analyzer.adapter';
@@ -169,6 +170,10 @@ function createProjectIpcUseCases() {
     projectInspector,
     projectStorage,
   });
+  const updateProjectSpecMeta = createUpdateProjectSpecMetaUseCase({
+    projectInspector,
+    projectStorage,
+  });
   const applyProjectSpecVersion = createApplyProjectSpecVersionUseCase({
     projectInspector,
     projectStorage,
@@ -233,6 +238,7 @@ function createProjectIpcUseCases() {
     saveProjectAnalysisDocumentLayouts,
     saveProjectReferenceTags,
     saveProjectSpec,
+    updateProjectSpecMeta,
     cancelProjectSessionMessage,
     selectProjectDirectory,
     sendProjectSessionMessage,
@@ -277,6 +283,7 @@ function registerProjectSpecIpc(target: IpcMainHandleTarget, useCases: ProjectIp
   registerInputHandle(target, projectIpcChannels.readSpecs, useCases.readProjectSpecs);
   registerInputHandle(target, projectIpcChannels.createSpec, useCases.createProjectSpec);
   registerInputHandle(target, projectIpcChannels.saveSpec, useCases.saveProjectSpec);
+  registerInputHandle(target, projectIpcChannels.updateSpecMeta, useCases.updateProjectSpecMeta);
   registerInputHandle(
     target,
     projectIpcChannels.readSpecVersionHistory,
@@ -288,7 +295,11 @@ function registerProjectSpecIpc(target: IpcMainHandleTarget, useCases: ProjectIp
     projectIpcChannels.readSpecVersionDiff,
     useCases.readProjectSpecVersionDiff,
   );
-  registerInputHandle(target, projectIpcChannels.applySpecVersion, useCases.applyProjectSpecVersion);
+  registerInputHandle(
+    target,
+    projectIpcChannels.applySpecVersion,
+    useCases.applyProjectSpecVersion,
+  );
   registerInputHandle(
     target,
     projectIpcChannels.deleteSpecVersion,

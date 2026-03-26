@@ -99,6 +99,7 @@ export interface ProjectBootstrapWorkbenchState {
   isSelecting: boolean;
   isCreatingSpec: boolean;
   isSavingSpec: boolean;
+  isUpdatingSpecMeta: boolean;
   isCreatingSession: boolean;
   isSavingReferenceTags: boolean;
   isSavingChatRuntimeSettings: boolean;

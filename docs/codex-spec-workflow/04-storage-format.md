@@ -369,6 +369,10 @@
 - `createdAt`
 - `updatedAt`
 - `summary`
+- `relations`
+  - `targetSpecId`
+  - `type`
+  - `createdAt`
 
 주의:
 
@@ -378,6 +382,10 @@
 - 첫 실질 저장 또는 첫 채팅 반영이 `v1` 이다
 - 직접 편집 저장과 채팅 기반 초안 갱신 모두 실질 변경이 있을 때만 `versions/` 에 새 버전을 추가하고 `revision` 을 증가시킨다
 - 이전 버전 적용은 `draftMarkdown` 과 `currentVersion` 만 바꾸고 기존 버전 파일은 덮어쓰지 않는다
+- `status` 는 현재 MVP에서 `draft`, `approved`, `archived` 를 저장할 수 있지만, 사용자 메타데이터 편집 UI는 `draft <-> archived` 전환만 직접 노출한다
+- `relations` 는 현재 명세 기준의 연결 메타다. `derived-from`, `follow-up-to` 두 타입만 저장하고, 렌더러는 이를 바탕으로 `targetSpecId -> current spec` 방향 연결선을 그린다
+- `status` 변경과 `relations` 추가/삭제 같은 metadata-only update는 새 Markdown 버전을 만들지 않는다
+- 최신 계약은 `schemaVersion: 3` 이고, 기존 `schemaVersion: 2` 메타는 `relations = []` 으로 fallback read 한다
 
 ### `.sdd/specs/<spec-slug>/versions/v1.md`
 

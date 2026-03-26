@@ -5,12 +5,16 @@ import {
   type ProjectSpecApplyVersionResult,
   type ProjectSpecDeleteVersionResult,
   type ProjectSpecDocument,
+  type ProjectSpecMetaUpdateResult,
+  type ProjectSpecRelation,
   type ProjectSpecSaveResult,
+  type ProjectSpecStatus,
   type ProjectSpecVersionDiff,
   type ProjectSpecVersionHistoryEntry,
 } from '@/domain/project/project-spec-model';
 
 import { MarkdownDocument } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument';
+import { SpecMetadataPanel } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel';
 import {
   describeSpecStatus,
   describeSpecVersionBadge,
@@ -19,12 +23,14 @@ import {
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils';
 
 type SpecEditorViewMode = 'preview' | 'split' | 'write';
+type SpecVersionPanelView = 'diff' | 'history';
 type CopyStatus = 'error' | 'idle' | 'success';
 
 interface SpecsWorkspaceDocumentViewProps {
   canWriteSpecs: boolean;
   hasConflict: boolean;
   isSavingSpec: boolean;
+  isUpdatingSpecMeta: boolean;
   onApplySpecVersion: (input: {
     revision: number;
     specId: string;
@@ -51,7 +57,15 @@ interface SpecsWorkspaceDocumentViewProps {
     specId: string;
     title: string;
   }) => Promise<ProjectSpecSaveResult | null>;
+  onSelectSpec: (specId: string) => void;
+  onUpdateSpecMeta: (input: {
+    specId: string;
+    revision: number;
+    status: ProjectSpecStatus;
+    relations: ProjectSpecRelation[];
+  }) => Promise<ProjectSpecMetaUpdateResult | null>;
   selectedSpec: ProjectSpecDocument;
+  specs: ProjectSpecDocument[];
 }
 
 export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProps) {
@@ -59,13 +73,17 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
     canWriteSpecs,
     hasConflict,
     isSavingSpec,
+    isUpdatingSpecMeta,
     onApplySpecVersion,
     onDeleteSpecVersion,
     onReadSpecVersionDiff,
     onReadSpecVersionHistory,
     onReturnToMap,
     onSaveSpec,
+    onSelectSpec,
+    onUpdateSpecMeta,
     selectedSpec,
+    specs,
   } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [editorViewMode, setEditorViewMode] = useState<SpecEditorViewMode>('write');
@@ -73,11 +91,14 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
   const [draftMarkdown, setDraftMarkdown] = useState(selectedSpec.markdown);
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [versionPanelView, setVersionPanelView] = useState<SpecVersionPanelView>('history');
   const [versionHistory, setVersionHistory] = useState<ProjectSpecVersionHistoryEntry[] | null>(
     null,
   );
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
-  const [selectedVersionDiff, setSelectedVersionDiff] = useState<ProjectSpecVersionDiff | null>(null);
+  const [selectedVersionDiff, setSelectedVersionDiff] = useState<ProjectSpecVersionDiff | null>(
+    null,
+  );
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingDiff, setIsLoadingDiff] = useState(false);
   const [isApplyingVersion, setIsApplyingVersion] = useState(false);
@@ -101,6 +122,7 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
 
     previousSpecIdRef.current = selectedSpec.meta.id;
     setIsHistoryOpen(false);
+    setVersionPanelView('history');
     setVersionHistory(null);
     setSelectedVersionId(null);
     setSelectedVersionDiff(null);
@@ -126,8 +148,7 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
     };
   }, [copyStatus]);
 
-  const isDirty =
-    draftTitle !== selectedSpec.meta.title || draftMarkdown !== selectedSpec.markdown;
+  const isDirty = draftTitle !== selectedSpec.meta.title || draftMarkdown !== selectedSpec.markdown;
   const currentVersionLabel = describeSpecVersionBadge(selectedSpec);
   const latestVersionLabel =
     selectedSpec.meta.latestVersion &&
@@ -136,6 +157,9 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
       ? `최신 ${selectedSpec.meta.latestVersion}`
       : null;
   const versionCount = versionHistory?.length ?? 0;
+  const compareSummaryLabel = selectedVersionDiff
+    ? `+${selectedVersionDiff.summary.addedLineCount} / -${selectedVersionDiff.summary.removedLineCount}`
+    : null;
   const previewMarkdown = useMemo(
     () =>
       replaceProjectSpecTitleHeading({
@@ -186,6 +210,9 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
   const handleToggleHistory = async () => {
     const nextOpen = !isHistoryOpen;
     setIsHistoryOpen(nextOpen);
+    if (nextOpen) {
+      setVersionPanelView('history');
+    }
     setPanelErrorMessage(null);
 
     if (!nextOpen || versionHistory !== null) {
@@ -225,6 +252,7 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
     }
 
     setSelectedVersionDiff(diffResult);
+    setVersionPanelView('diff');
   };
 
   const handleApplyVersion = async (versionId: string) => {
@@ -304,6 +332,7 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
     if (selectedVersionId === entry.versionId) {
       setSelectedVersionId(null);
       setSelectedVersionDiff(null);
+      setVersionPanelView('history');
     }
   };
 
@@ -432,9 +461,17 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
         <div>
           <h4>{selectedSpec.meta.title}</h4>
           <div className="specs-map__meta">
-            <span className="specs-map__meta-chip">{describeSpecStatus(selectedSpec.meta.status)}</span>
+            <span
+              className={`specs-map__meta-chip ${
+                selectedSpec.meta.status === 'archived' ? 'specs-map__meta-chip--archived' : ''
+              }`}
+            >
+              {describeSpecStatus(selectedSpec.meta.status)}
+            </span>
             <span className="specs-map__meta-chip">{currentVersionLabel}</span>
-            {latestVersionLabel ? <span className="specs-map__meta-chip">{latestVersionLabel}</span> : null}
+            {latestVersionLabel ? (
+              <span className="specs-map__meta-chip">{latestVersionLabel}</span>
+            ) : null}
             {hasConflict ? (
               <span className="specs-map__meta-chip specs-map__meta-chip--alert">충돌</span>
             ) : null}
@@ -461,6 +498,14 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
                 {panelErrorMessage}
               </p>
             ) : null}
+            <SpecMetadataPanel
+              canWriteSpecs={canWriteSpecs}
+              isUpdatingSpecMeta={isUpdatingSpecMeta}
+              onSelectSpec={onSelectSpec}
+              onUpdateSpecMeta={onUpdateSpecMeta}
+              selectedSpec={selectedSpec}
+              specs={specs}
+            />
             {isEditing ? (
               <div
                 className={`analysis-document-editor analysis-document-editor--${editorViewMode}`}
@@ -488,7 +533,10 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
                 </div>
                 {editorViewMode !== 'preview' ? (
                   <div className="analysis-document-editor__field">
-                    <label className="analysis-document-editor__label" htmlFor="spec-markdown-textarea">
+                    <label
+                      className="analysis-document-editor__label"
+                      htmlFor="spec-markdown-textarea"
+                    >
                       내용
                     </label>
                     <textarea
@@ -526,118 +574,161 @@ export function SpecsWorkspaceDocumentView(props: SpecsWorkspaceDocumentViewProp
             <div className="spec-version-panel__header">
               <div>
                 <span className="analysis-empty-panel__eyebrow">버전 기록</span>
-                <h5>저장 이력</h5>
+                <h5>{versionPanelView === 'history' ? '저장 이력' : '비교 보기'}</h5>
               </div>
-              <span className="spec-version-panel__count">{versionCount}개</span>
+              <span className="spec-version-panel__count">
+                {versionPanelView === 'history'
+                  ? `${versionCount}개`
+                  : (compareSummaryLabel ?? '대상 선택')}
+              </span>
             </div>
-            {isLoadingHistory ? (
-              <p className="spec-version-panel__hint">불러오는 중</p>
-            ) : versionCount === 0 ? (
-              <p className="spec-version-panel__hint">저장 버전 없음</p>
-            ) : (
-              <div className="spec-version-panel__list">
-                {versionHistory?.map((entry) => (
-                  <section
-                    className={`spec-version-card ${
-                      selectedVersionId === entry.versionId ? 'spec-version-card--selected' : ''
-                    }`}
-                    key={entry.versionId}
-                  >
-                    <div className="spec-version-card__header">
-                      <strong>{entry.versionId}</strong>
-                      <div className="specs-map__meta">
-                        {entry.isCurrent ? (
-                          <span className="specs-map__meta-chip">현재 기준</span>
-                        ) : null}
-                        {entry.isLatest ? <span className="specs-map__meta-chip">최신 저장</span> : null}
+            <div className="spec-version-panel__tabs" role="tablist" aria-label="버전 패널 보기">
+              <button
+                aria-selected={versionPanelView === 'history'}
+                className={`spec-version-panel__tab ${
+                  versionPanelView === 'history' ? 'spec-version-panel__tab--active' : ''
+                }`}
+                onClick={() => {
+                  setVersionPanelView('history');
+                }}
+                role="tab"
+                type="button"
+              >
+                저장 이력
+              </button>
+              <button
+                aria-selected={versionPanelView === 'diff'}
+                className={`spec-version-panel__tab ${
+                  versionPanelView === 'diff' ? 'spec-version-panel__tab--active' : ''
+                }`}
+                disabled={!selectedVersionDiff && !isLoadingDiff}
+                onClick={() => {
+                  setVersionPanelView('diff');
+                }}
+                role="tab"
+                type="button"
+              >
+                비교
+              </button>
+            </div>
+            {versionPanelView === 'history' ? (
+              isLoadingHistory ? (
+                <p className="spec-version-panel__hint">불러오는 중</p>
+              ) : versionCount === 0 ? (
+                <p className="spec-version-panel__hint">저장 버전 없음</p>
+              ) : (
+                <div className="spec-version-panel__list">
+                  {versionHistory?.map((entry) => (
+                    <section
+                      className={`spec-version-card ${
+                        selectedVersionId === entry.versionId ? 'spec-version-card--selected' : ''
+                      }`}
+                      key={entry.versionId}
+                    >
+                      <div className="spec-version-card__header">
+                        <strong>{entry.versionId}</strong>
+                        <div className="specs-map__meta">
+                          {entry.isCurrent ? (
+                            <span className="specs-map__meta-chip">현재 기준</span>
+                          ) : null}
+                          {entry.isLatest ? (
+                            <span className="specs-map__meta-chip">최신 저장</span>
+                          ) : null}
+                        </div>
                       </div>
+                      <p className="spec-version-card__summary">{entry.summary ?? '요약 없음'}</p>
+                      <span className="spec-version-card__timestamp">
+                        {formatSpecDateTimeLabel(entry.createdAt)}
+                      </span>
+                      <div className="spec-version-card__actions">
+                        <button
+                          className="secondary-button"
+                          disabled={isLoadingDiff}
+                          onClick={() => {
+                            void handleCompareVersion(entry.versionId);
+                          }}
+                          title="현재 초안과 비교 보기"
+                          type="button"
+                        >
+                          비교 보기
+                        </button>
+                        <button
+                          className="secondary-button"
+                          disabled={!canWriteSpecs || !entry.canApply || isApplyingVersion}
+                          onClick={() => {
+                            void handleApplyVersion(entry.versionId);
+                          }}
+                          title="선택한 버전을 현재 초안으로 가져오기"
+                          type="button"
+                        >
+                          적용
+                        </button>
+                        <button
+                          className="secondary-button secondary-button--danger"
+                          disabled={!canWriteSpecs || !entry.canDelete || isDeletingVersion}
+                          onClick={() => {
+                            void handleDeleteVersion(entry);
+                          }}
+                          title="현재 기준/최신 저장 버전은 삭제되지 않습니다."
+                          type="button"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="spec-version-panel__diff">
+                <div className="spec-version-panel__diff-header">
+                  <h5>현재 초안 비교</h5>
+                  <button
+                    className="secondary-button"
+                    onClick={() => {
+                      setVersionPanelView('history');
+                    }}
+                    type="button"
+                  >
+                    다른 버전 선택
+                  </button>
+                </div>
+                {isLoadingDiff ? (
+                  <p className="spec-version-panel__hint">불러오는 중</p>
+                ) : selectedVersionDiff ? (
+                  <>
+                    <div className="spec-version-panel__diff-meta">
+                      <span className="specs-map__meta-chip">
+                        현재 {selectedVersionDiff.current.versionId ?? '작업 초안'}
+                      </span>
+                      <span className="specs-map__meta-chip">
+                        비교 {selectedVersionDiff.version.versionId}
+                      </span>
                     </div>
-                    <p className="spec-version-card__summary">{entry.summary ?? '요약 없음'}</p>
-                    <span className="spec-version-card__timestamp">
-                      {formatSpecDateTimeLabel(entry.createdAt)}
-                    </span>
-                    <div className="spec-version-card__actions">
-                      <button
-                        className="secondary-button"
-                        disabled={isLoadingDiff}
-                        onClick={() => {
-                          void handleCompareVersion(entry.versionId);
-                        }}
-                        title="현재 초안과 비교"
-                        type="button"
-                      >
-                        비교
-                      </button>
-                      <button
-                        className="secondary-button"
-                        disabled={!canWriteSpecs || !entry.canApply || isApplyingVersion}
-                        onClick={() => {
-                          void handleApplyVersion(entry.versionId);
-                        }}
-                        title="선택한 버전을 현재 초안으로 가져오기"
-                        type="button"
-                      >
-                        적용
-                      </button>
-                      <button
-                        className="secondary-button secondary-button--danger"
-                        disabled={!canWriteSpecs || !entry.canDelete || isDeletingVersion}
-                        onClick={() => {
-                          void handleDeleteVersion(entry);
-                        }}
-                        title="현재 기준/최신 저장 버전은 삭제되지 않습니다."
-                        type="button"
-                      >
-                        삭제
-                      </button>
+                    <div className="spec-version-diff">
+                      {selectedVersionDiff.lines.map((line, index) => (
+                        <div
+                          className={`spec-version-diff__line spec-version-diff__line--${line.type}`}
+                          key={`${index}-${line.type}`}
+                        >
+                          <span className="spec-version-diff__line-number">
+                            {line.versionLineNumber ?? ''}
+                          </span>
+                          <span className="spec-version-diff__line-number">
+                            {line.currentLineNumber ?? ''}
+                          </span>
+                          <code>{line.value || ' '}</code>
+                        </div>
+                      ))}
                     </div>
-                  </section>
-                ))}
+                  </>
+                ) : (
+                  <p className="spec-version-panel__hint">
+                    저장 이력에서 비교할 버전을 고르면 이 화면에서 diff를 따로 볼 수 있습니다.
+                  </p>
+                )}
               </div>
             )}
-            <div className="spec-version-panel__diff">
-              <div className="spec-version-panel__diff-header">
-                <h5>비교</h5>
-                {selectedVersionDiff ? (
-                  <span className="spec-version-panel__count">
-                    +{selectedVersionDiff.summary.addedLineCount} / -
-                    {selectedVersionDiff.summary.removedLineCount}
-                  </span>
-                ) : null}
-              </div>
-              {isLoadingDiff ? (
-                <p className="spec-version-panel__hint">불러오는 중</p>
-              ) : selectedVersionDiff ? (
-                <>
-                  <div className="spec-version-panel__diff-meta">
-                    <span className="specs-map__meta-chip">
-                      현재 {selectedVersionDiff.current.versionId ?? '작업 초안'}
-                    </span>
-                    <span className="specs-map__meta-chip">
-                      비교 {selectedVersionDiff.version.versionId}
-                    </span>
-                  </div>
-                  <div className="spec-version-diff">
-                    {selectedVersionDiff.lines.map((line, index) => (
-                      <div
-                        className={`spec-version-diff__line spec-version-diff__line--${line.type}`}
-                        key={`${index}-${line.type}`}
-                      >
-                        <span className="spec-version-diff__line-number">
-                          {line.versionLineNumber ?? ''}
-                        </span>
-                        <span className="spec-version-diff__line-number">
-                          {line.currentLineNumber ?? ''}
-                        </span>
-                        <code>{line.value || ' '}</code>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <p className="spec-version-panel__hint">버전 선택</p>
-              )}
-            </div>
           </aside>
         ) : null}
       </div>

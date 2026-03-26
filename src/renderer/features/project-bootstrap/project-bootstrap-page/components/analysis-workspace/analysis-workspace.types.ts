@@ -35,11 +35,13 @@ export interface AnalysisStageSize {
 }
 
 export interface AnalysisRenderedLink {
+  from: ProjectAnalysisDocumentId;
   key: string;
   label: string;
   midX: number;
   midY: number;
   path: string;
+  to: ProjectAnalysisDocumentId;
 }
 
 export interface AnalysisFileReferenceCard {

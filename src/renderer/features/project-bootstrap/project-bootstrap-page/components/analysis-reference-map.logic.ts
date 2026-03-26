@@ -73,6 +73,7 @@ import type {
   AnalysisViewport,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types';
 import type { StructuredProjectAnalysis } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import { buildWorkspaceMapCurvedLinkGeometry } from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry';
 import {
   REFERENCE_GRAPH_TOP_OVERFLOW,
   REFERENCE_MAP_VIEWPORT_PRESET,
@@ -473,7 +474,7 @@ export function buildReferenceLinkPaths(input: {
       return [];
     }
 
-    const geometry = buildCurvedLinkGeometry({
+    const geometry = buildWorkspaceMapCurvedLinkGeometry({
       fromRect: fromNode,
       stageSize: input.stageSize,
       toRect: toNode,
@@ -1381,76 +1382,6 @@ function deduplicateFileReferences(
   return [...uniqueFileReferences.values()];
 }
 
-function buildCurvedLinkGeometry(input: {
-  fromRect: AnalysisRect;
-  stageSize: AnalysisStageSize;
-  summary?: boolean;
-  toRect: AnalysisRect;
-  viewport: AnalysisViewport;
-}): { midX: number; midY: number; path: string } {
-  const fromCenterX = input.fromRect.x + input.fromRect.width / 2;
-  const fromCenterY = input.fromRect.y + input.fromRect.height / 2;
-  const toCenterX = input.toRect.x + input.toRect.width / 2;
-  const toCenterY = input.toRect.y + input.toRect.height / 2;
-  const horizontalDistance = Math.abs(toCenterX - fromCenterX);
-  const verticalDistance = Math.abs(toCenterY - fromCenterY);
-  const useHorizontal = horizontalDistance >= verticalDistance * 1.1;
-
-  if (useHorizontal) {
-    const drawFromRight = fromCenterX <= toCenterX;
-    const start = toScreenPoint({
-      stageSize: input.stageSize,
-      viewport: input.viewport,
-      x: drawFromRight ? input.fromRect.x + input.fromRect.width : input.fromRect.x,
-      y: fromCenterY,
-    });
-    const end = toScreenPoint({
-      stageSize: input.stageSize,
-      viewport: input.viewport,
-      x: drawFromRight ? input.toRect.x : input.toRect.x + input.toRect.width,
-      y: toCenterY,
-    });
-    const controlOffset = Math.max(
-      Math.abs(end.x - start.x) * (input.summary ? 0.24 : 0.36),
-      input.summary ? 92 : 72,
-    );
-
-    return {
-      midX: (start.x + end.x) / 2,
-      midY: (start.y + end.y) / 2,
-      path: drawFromRight
-        ? `M ${start.x} ${start.y} C ${start.x + controlOffset} ${start.y}, ${end.x - controlOffset} ${end.y}, ${end.x} ${end.y}`
-        : `M ${start.x} ${start.y} C ${start.x - controlOffset} ${start.y}, ${end.x + controlOffset} ${end.y}, ${end.x} ${end.y}`,
-    };
-  }
-
-  const drawFromBottom = fromCenterY <= toCenterY;
-  const start = toScreenPoint({
-    stageSize: input.stageSize,
-    viewport: input.viewport,
-    x: fromCenterX,
-    y: drawFromBottom ? input.fromRect.y + input.fromRect.height : input.fromRect.y,
-  });
-  const end = toScreenPoint({
-    stageSize: input.stageSize,
-    viewport: input.viewport,
-    x: toCenterX,
-    y: drawFromBottom ? input.toRect.y : input.toRect.y + input.toRect.height,
-  });
-  const controlOffset = Math.max(
-    Math.abs(end.y - start.y) * (input.summary ? 0.28 : 0.34),
-    input.summary ? 78 : 62,
-  );
-
-  return {
-    midX: (start.x + end.x) / 2,
-    midY: (start.y + end.y) / 2,
-    path: drawFromBottom
-      ? `M ${start.x} ${start.y} C ${start.x} ${start.y + controlOffset}, ${end.x} ${end.y - controlOffset}, ${end.x} ${end.y}`
-      : `M ${start.x} ${start.y} C ${start.x} ${start.y - controlOffset}, ${end.x} ${end.y + controlOffset}, ${end.x} ${end.y}`,
-  };
-}
-
 function getGraphBounds(graph: AnalysisReferenceGraph): {
   height: number;
   minX: number;
@@ -1479,18 +1410,6 @@ function getGraphBounds(graph: AnalysisReferenceGraph): {
     width: maxX - minX + REFERENCE_MAP_VIEWPORT_PRESET.viewportPadding * 2,
     height:
       maxY - minY + REFERENCE_GRAPH_TOP_OVERFLOW + REFERENCE_MAP_VIEWPORT_PRESET.viewportPadding,
-  };
-}
-
-function toScreenPoint(input: {
-  stageSize: AnalysisStageSize;
-  viewport: AnalysisViewport;
-  x: number;
-  y: number;
-}): { x: number; y: number } {
-  return {
-    x: input.stageSize.width / 2 + input.viewport.offsetX + input.x * input.viewport.scale,
-    y: input.stageSize.height / 2 + input.viewport.offsetY + input.y * input.viewport.scale,
   };
 }
 

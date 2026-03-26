@@ -6,6 +6,7 @@ import {
   extractProjectSpecSummary,
   extractProjectSpecTitle,
   isLegacyProjectSpecMeta,
+  isPreviousProjectSpecMeta,
   isProjectSpecMeta,
   toProjectSpecSummary,
   type ProjectSpecDocument,
@@ -52,9 +53,7 @@ export async function readProjectSpecDocuments(input: {
     specs.push(createProjectSpecDocument(metaResult.value));
   }
 
-  return ok(
-    specs.sort((left, right) => right.meta.updatedAt.localeCompare(left.meta.updatedAt)),
-  );
+  return ok(specs.sort((left, right) => right.meta.updatedAt.localeCompare(left.meta.updatedAt)));
 }
 
 export async function readSpecMetaDocument(input: {
@@ -75,6 +74,24 @@ export async function readSpecMetaDocument(input: {
     return ok(parsedResult.value);
   }
 
+  if (isPreviousProjectSpecMeta(parsedResult.value)) {
+    return ok({
+      schemaVersion: 3,
+      id: parsedResult.value.id,
+      slug: parsedResult.value.slug,
+      title: parsedResult.value.title,
+      status: parsedResult.value.status,
+      createdAt: parsedResult.value.createdAt,
+      updatedAt: parsedResult.value.updatedAt,
+      revision: parsedResult.value.revision,
+      latestVersion: parsedResult.value.latestVersion,
+      currentVersion: parsedResult.value.currentVersion,
+      draftMarkdown: parsedResult.value.draftMarkdown,
+      summary: parsedResult.value.summary,
+      relations: [],
+    });
+  }
+
   if (isLegacyProjectSpecMeta(parsedResult.value)) {
     const legacyDraftResult = await readTextFile(
       getSpecVersionPath({
@@ -89,7 +106,7 @@ export async function readSpecMetaDocument(input: {
     }
 
     return ok({
-      schemaVersion: 2,
+      schemaVersion: 3,
       id: parsedResult.value.id,
       slug: parsedResult.value.slug,
       title: parsedResult.value.title,
@@ -101,6 +118,7 @@ export async function readSpecMetaDocument(input: {
       currentVersion: parsedResult.value.latestVersion,
       draftMarkdown: legacyDraftResult.value,
       summary: parsedResult.value.summary,
+      relations: [],
     });
   }
 

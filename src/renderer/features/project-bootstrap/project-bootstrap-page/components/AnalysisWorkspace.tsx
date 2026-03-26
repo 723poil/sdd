@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type {
   ProjectAnalysisDocumentId,
@@ -8,43 +8,24 @@ import type {
   SelectedProjectAnalysisDocumentId,
   StructuredProjectAnalysis,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
-import {
-  DOCUMENT_MAP_VIEWPORT_PRESET,
-  clamp,
-  getWorkspaceMapNodeFontScale,
-  getWorkspaceMapNodeSpacingScale,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
+import { DOCUMENT_MAP_VIEWPORT_PRESET } from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
 import { AnalysisWorkspaceDocumentView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView';
 import { AnalysisWorkspaceEmptyState } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState';
-import { AnalysisWorkspaceMapView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView';
-import type {
-  AnalysisInteractionState,
-  AnalysisStageSize,
-  AnalysisViewport,
-  AnalysisWorkspaceViewMode,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
+import type { AnalysisWorkspaceViewMode } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
 import {
   EMPTY_ANALYSIS_DOCUMENTS,
   EMPTY_DOCUMENT_LAYOUTS,
   EMPTY_DOCUMENT_LINKS,
-  INITIAL_VIEWPORT,
   buildAnalysisDocumentBoardNodes,
   buildAnalysisLinkPaths,
   createResolvedDocumentLayoutMap,
-  createStageGridStyle,
   createViewportToFitNodes,
-  mergeDocumentLayoutMaps,
   resolveAnalysisDocumentBoardLinks,
   resolveSelectedDocument,
   toDocumentLayoutMap,
-  toWorldPoint,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils';
-import {
-  EMPTY_WORKSPACE_STAGE_SIZE,
-  useWorkspaceStageSize,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size';
-
-const NODE_DRAG_THRESHOLD_PX = 3;
+import { WorkspaceBoardMapView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView';
+import { useWorkspaceBoardMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map';
 
 interface AnalysisWorkspaceProps {
   analysis: StructuredProjectAnalysis | null;
@@ -71,180 +52,56 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
   const documents = analysis?.documents ?? EMPTY_ANALYSIS_DOCUMENTS;
   const documentsKey = useMemo(() => documents.map((document) => document.id).join('|'), [documents]);
   const selectedDocument = resolveSelectedDocument(documents, selectedDocumentId);
-  const stageRef = useRef<HTMLDivElement | null>(null);
-  const interactionRef = useRef<AnalysisInteractionState | null>(null);
-  const ignoreClickNodeIdRef = useRef<ProjectAnalysisDocumentId | null>(null);
-  const boardPositionsRef = useRef<ProjectAnalysisDocumentLayoutMap>({});
-  const hasAdjustedViewportRef = useRef(false);
-  const [draggingNodeId, setDraggingNodeId] = useState<ProjectAnalysisDocumentId | null>(null);
-  const [isPanning, setIsPanning] = useState(false);
-  const [stageSize, setStageSize] = useState<AnalysisStageSize>(EMPTY_WORKSPACE_STAGE_SIZE);
-  const [viewport, setViewport] = useState<AnalysisViewport>(INITIAL_VIEWPORT);
-  const [draftBoardPositions, setDraftBoardPositions] = useState<ProjectAnalysisDocumentLayoutMap>(
-    {},
-  );
   const storedDocumentLayouts = analysis?.context.documentLayouts ?? EMPTY_DOCUMENT_LAYOUTS;
-  const storedDocumentLinks = analysis?.context.documentLinks ?? EMPTY_DOCUMENT_LINKS;
-  const baseBoardPositions = useMemo(
-    () => createResolvedDocumentLayoutMap(documents, storedDocumentLayouts),
+  const storedDocumentLayoutsKey = useMemo(
+    () =>
+      documents
+        .map((document) => {
+          const layout = storedDocumentLayouts[document.id];
+          return `${document.id}:${layout?.x ?? 'default'}:${layout?.y ?? 'default'}`;
+        })
+        .join('|'),
     [documents, storedDocumentLayouts],
+  );
+  const storedDocumentLinks = analysis?.context.documentLinks ?? EMPTY_DOCUMENT_LINKS;
+  const [documentLayoutsOverride, setDocumentLayoutsOverride] =
+    useState<ProjectAnalysisDocumentLayoutMap | null>(null);
+  const effectiveDocumentLayouts = documentLayoutsOverride ?? storedDocumentLayouts;
+  const baseBoardPositions = useMemo(
+    () => createResolvedDocumentLayoutMap(documents, effectiveDocumentLayouts),
+    [documents, effectiveDocumentLayouts],
   );
   const boardLinks = useMemo(
     () => resolveAnalysisDocumentBoardLinks(storedDocumentLinks),
     [storedDocumentLinks],
   );
-  const boardPositions = useMemo(
-    () =>
-      mergeDocumentLayoutMaps({
-        baseLayouts: baseBoardPositions,
-        overrideLayouts: draftBoardPositions,
-      }),
-    [baseBoardPositions, draftBoardPositions],
+  const baseBoardNodes = useMemo(
+    () => buildAnalysisDocumentBoardNodes(documents, baseBoardPositions),
+    [baseBoardPositions, documents],
   );
-
-  const returnToMap = () => {
-    onViewModeChange('map');
-  };
-
-  useEffect(() => {
-    boardPositionsRef.current = boardPositions;
-  }, [boardPositions]);
-
-  useEffect(() => {
-    hasAdjustedViewportRef.current = false;
-    setViewport(INITIAL_VIEWPORT);
-    setDraftBoardPositions({});
-    onViewModeChange('map');
-  }, [analysisSessionKey, documentsKey, onViewModeChange]);
-
-  const observedStageSize = useWorkspaceStageSize({
-    isEnabled: isActive && viewMode === 'map' && Boolean(analysis),
-    stageRef,
+  const boardMap = useWorkspaceBoardMap({
+    baseBoardNodes,
+    createViewportToFitNodes,
+    isActive: isActive && Boolean(analysis),
+    isMapVisible: viewMode === 'map',
+    maxScale: DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
+    minScale: DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+    onNodeDragEnd: (nextBoardNodes) => {
+      onSaveDocumentLayouts(toDocumentLayoutMap(nextBoardNodes, documents));
+    },
+    onNodeOpen: (nodeId) => {
+      onSelectDocument(nodeId);
+      onViewModeChange('document');
+    },
+    onReset: () => {
+      onViewModeChange('map');
+    },
+    resetKey: `${analysisSessionKey}#${documentsKey}`,
   });
 
   useEffect(() => {
-    setStageSize(observedStageSize);
-  }, [observedStageSize]);
-
-  const boardNodes = useMemo(
-    () => buildAnalysisDocumentBoardNodes(documents, boardPositions),
-    [boardPositions, documents],
-  );
-  const worldStyle = useMemo<CSSProperties>(
-    () => ({
-      transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
-      ['--analysis-map-node-font-scale' as string]: getWorkspaceMapNodeFontScale(viewport.scale),
-      ['--analysis-map-node-spacing-scale' as string]: getWorkspaceMapNodeSpacingScale(
-        viewport.scale,
-      ),
-    }),
-    [viewport.offsetX, viewport.offsetY, viewport.scale],
-  );
-
-  useEffect(() => {
-    if (
-      !isActive ||
-      viewMode !== 'map' ||
-      boardNodes.length === 0 ||
-      stageSize.width === 0 ||
-      stageSize.height === 0
-    ) {
-      return;
-    }
-
-    if (hasAdjustedViewportRef.current) {
-      return;
-    }
-
-    setViewport(createViewportToFitNodes(boardNodes, stageSize));
-    hasAdjustedViewportRef.current = true;
-  }, [boardNodes, isActive, stageSize, viewMode]);
-
-  useEffect(() => {
-    if (viewMode !== 'map') {
-      return;
-    }
-
-    const handlePointerMove = (event: PointerEvent) => {
-      const stageElement = stageRef.current;
-      const interaction = interactionRef.current;
-      if (!stageElement || !interaction) {
-        return;
-      }
-
-      if (interaction.kind === 'pan') {
-        const deltaX = event.clientX - interaction.startClientX;
-        const deltaY = event.clientY - interaction.startClientY;
-        interactionRef.current = {
-          ...interaction,
-          moved: interaction.moved || Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2,
-        };
-        hasAdjustedViewportRef.current = true;
-        setViewport({
-          ...viewport,
-          offsetX: interaction.startOffsetX + deltaX,
-          offsetY: interaction.startOffsetY + deltaY,
-        });
-        return;
-      }
-
-      const deltaX = event.clientX - interaction.startClientX;
-      const deltaY = event.clientY - interaction.startClientY;
-      const hasMovedEnough =
-        Math.abs(deltaX) > NODE_DRAG_THRESHOLD_PX || Math.abs(deltaY) > NODE_DRAG_THRESHOLD_PX;
-      if (!interaction.moved && !hasMovedEnough) {
-        return;
-      }
-
-      const worldPoint = toWorldPoint({
-        clientX: event.clientX,
-        clientY: event.clientY,
-        stageElement,
-        viewport,
-      });
-      if (!worldPoint) {
-        return;
-      }
-
-      interactionRef.current = {
-        ...interaction,
-        moved: true,
-      };
-      hasAdjustedViewportRef.current = true;
-      setDraftBoardPositions((current) => ({
-        ...current,
-        [interaction.nodeId]: {
-          x: worldPoint.x - interaction.pointerOffsetX,
-          y: worldPoint.y - interaction.pointerOffsetY,
-        },
-      }));
-    };
-
-    const handlePointerUp = () => {
-      const interaction = interactionRef.current;
-      if (interaction?.kind === 'node') {
-        ignoreClickNodeIdRef.current = interaction.nodeId;
-        if (interaction.moved) {
-          onSaveDocumentLayouts(toDocumentLayoutMap(boardPositionsRef.current, documents));
-        } else {
-          onSelectDocument(interaction.nodeId);
-          onViewModeChange('document');
-        }
-      }
-
-      interactionRef.current = null;
-      setDraggingNodeId(null);
-      setIsPanning(false);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, [documents, onSaveDocumentLayouts, onSelectDocument, onViewModeChange, viewMode, viewport]);
+    setDocumentLayoutsOverride(null);
+  }, [storedDocumentLayoutsKey]);
 
   useEffect(() => {
     if (viewMode !== 'document') {
@@ -266,142 +123,14 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
   }, [onViewModeChange, viewMode]);
 
   const linkPaths = useMemo(
-    () => buildAnalysisLinkPaths(boardNodes, boardLinks, stageSize, viewport),
-    [boardLinks, boardNodes, stageSize, viewport],
+    () => buildAnalysisLinkPaths(boardMap.boardNodes, boardLinks, boardMap.stageSize, boardMap.viewport),
+    [boardLinks, boardMap.boardNodes, boardMap.stageSize, boardMap.viewport],
   );
 
-  const fitBoardToStage = () => {
-    if (boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
-      return;
-    }
-
-    hasAdjustedViewportRef.current = true;
-    setViewport(createViewportToFitNodes(boardNodes, stageSize));
-  };
-
-  const applyScaleFromButton = (scaleDelta: number) => {
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    const stageRect = stageElement.getBoundingClientRect();
-    const anchorX = stageRect.width / 2;
-    const anchorY = stageRect.height / 2;
-
-    hasAdjustedViewportRef.current = true;
-    setViewport((current) => {
-      const nextScale = clamp(
-        current.scale * scaleDelta,
-        DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
-        DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
-      );
-      const worldX = (anchorX - stageRect.width / 2 - current.offsetX) / current.scale;
-      const worldY = (anchorY - stageRect.height / 2 - current.offsetY) / current.scale;
-
-      return {
-        scale: nextScale,
-        offsetX: anchorX - stageRect.width / 2 - worldX * nextScale,
-        offsetY: anchorY - stageRect.height / 2 - worldY * nextScale,
-      };
-    });
-  };
-
-  const handleStagePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) {
-      return;
-    }
-
-    interactionRef.current = {
-      kind: 'pan',
-      moved: false,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startOffsetX: viewport.offsetX,
-      startOffsetY: viewport.offsetY,
-    };
-    setIsPanning(true);
-  };
-
-  const handleStageWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    const stageRect = stageElement.getBoundingClientRect();
-    const stageX = event.clientX - stageRect.left;
-    const stageY = event.clientY - stageRect.top;
-    const nextScale = clamp(
-      viewport.scale * Math.exp(-event.deltaY * 0.0016),
-      DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
-      DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
-    );
-    const centerX = stageRect.width / 2;
-    const centerY = stageRect.height / 2;
-    const worldX = (stageX - centerX - viewport.offsetX) / viewport.scale;
-    const worldY = (stageY - centerY - viewport.offsetY) / viewport.scale;
-
-    hasAdjustedViewportRef.current = true;
-    setViewport({
-      scale: nextScale,
-      offsetX: stageX - centerX - worldX * nextScale,
-      offsetY: stageY - centerY - worldY * nextScale,
-    });
-  };
-
-  const handleNodeClick = (nodeId: ProjectAnalysisDocumentId) => {
-    if (ignoreClickNodeIdRef.current === nodeId) {
-      ignoreClickNodeIdRef.current = null;
-      return;
-    }
-
-    onSelectDocument(nodeId);
-    onViewModeChange('document');
-  };
-
-  const handleNodePointerDown = (
-    event: React.PointerEvent<HTMLButtonElement>,
-    node: {
-      id: ProjectAnalysisDocumentId;
-      x: number;
-      y: number;
-    },
-  ) => {
-    if (event.button !== 0) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    const worldPoint = toWorldPoint({
-      clientX: event.clientX,
-      clientY: event.clientY,
-      stageElement,
-      viewport,
-    });
-    if (!worldPoint) {
-      return;
-    }
-
-    interactionRef.current = {
-      kind: 'node',
-      moved: false,
-      nodeId: node.id,
-      pointerOffsetX: worldPoint.x - node.x,
-      pointerOffsetY: worldPoint.y - node.y,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-    };
-    setDraggingNodeId(node.id);
+  const handleResetPositions = () => {
+    setDocumentLayoutsOverride(EMPTY_DOCUMENT_LAYOUTS);
+    boardMap.resetBoardPositions();
+    onSaveDocumentLayouts(EMPTY_DOCUMENT_LAYOUTS);
   };
 
   return (
@@ -410,32 +139,38 @@ export function AnalysisWorkspace(props: AnalysisWorkspaceProps) {
         <AnalysisWorkspaceEmptyState />
       ) : viewMode === 'document' && selectedDocument ? (
         <AnalysisWorkspaceDocumentView
-          onReturnToMap={returnToMap}
+          onReturnToMap={() => {
+            onViewModeChange('map');
+          }}
           selectedDocument={selectedDocument}
         />
       ) : (
-        <AnalysisWorkspaceMapView
-          boardNodes={boardNodes}
-          draggingNodeId={draggingNodeId}
-          isPanning={isPanning}
+        <WorkspaceBoardMapView
+          boardNodes={boardMap.boardNodes}
+          draggingNodeId={boardMap.draggingNodeId}
+          isPanning={boardMap.isPanning}
           linkPaths={linkPaths}
-          onFitBoardToStage={fitBoardToStage}
-          onNodeClick={handleNodeClick}
-          onNodePointerDown={handleNodePointerDown}
-          onStagePointerDown={handleStagePointerDown}
-          onStageWheel={handleStageWheel}
-          onZoomIn={() => {
-            applyScaleFromButton(1.16);
-          }}
-          onZoomOut={() => {
-            applyScaleFromButton(1 / 1.16);
-          }}
-          selectedDocumentId={selectedDocument?.id ?? null}
-          stageSize={stageSize}
-          stageGridStyle={createStageGridStyle(viewport)}
-          stageRef={stageRef}
-          viewportScale={viewport.scale}
-          worldStyle={worldStyle}
+          markerId="analysis-map-arrowhead"
+          onFitBoardToStage={boardMap.fitBoardToStage}
+          onNodeClick={boardMap.handleNodeClick}
+          onNodePointerDown={boardMap.handleNodePointerDown}
+          onResetPositions={handleResetPositions}
+          onStagePointerDown={boardMap.handleStagePointerDown}
+          onStageWheel={boardMap.handleStageWheel}
+          onZoomIn={boardMap.zoomIn}
+          onZoomOut={boardMap.zoomOut}
+          renderNodeContent={(node) => (
+            <>
+              <span className="analysis-map__node-file">{node.fileName}</span>
+              <strong className="analysis-map__node-title">{node.title}</strong>
+              <span className="analysis-map__node-summary">{node.summary}</span>
+            </>
+          )}
+          selectedNodeId={selectedDocument?.id ?? null}
+          stageGridStyle={boardMap.stageGridStyle}
+          stageRef={boardMap.stageRef}
+          viewportScale={boardMap.viewport.scale}
+          worldStyle={boardMap.worldStyle}
         />
       )}
     </section>

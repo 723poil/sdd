@@ -109,12 +109,13 @@
 의미:
 
 - `Project`는 프로젝트 전체 설정과 분석 기준의 루트
-- `SpecDocument`는 버전, 상태, patch 적용 규칙의 루트
+- `SpecDocument`는 버전, 상태, 명세 관계, patch 적용 규칙의 루트
 
 권장 규칙:
 
 - 여러 파일을 바꾸는 작업도 aggregate 단위 유스케이스로 처리
 - UI는 개별 파일이 아니라 aggregate 결과를 바라봄
+- `archived` 상태 전환이나 명세 관계 수정처럼 버전을 만들지 않는 변경도 `SpecDocument` aggregate 유스케이스로 처리한다
 
 ## 2. 애플리케이션 패턴
 
@@ -185,7 +186,8 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 적용 대상:
 
 - 명세 상태
-  - `draft -> proposed -> approved -> superseded`
+  - `draft <-> archived` (현재 metadata-only UI 전이)
+  - `draft -> proposed -> approved -> superseded` (추후 확장 가능)
 - 실행 상태
   - `queued -> running -> blocked -> completed`
 
@@ -205,6 +207,7 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 
 - patch 적용 전 상태 전이 가능 여부를 검증
 - 같은 patch의 중복 적용을 막는 idempotency 검사를 둔다
+- 명세 관계는 자기 자신 연결과 같은 대상+타입 중복을 저장 전에 거부한다
 
 ## 3. 분석 기능 패턴
 
@@ -372,6 +375,7 @@ patch 반영에는 특히 command 형태가 잘 맞는다.
 - `meta.json.latestVersion`은 가장 최근에 생성된 저장 버전을 가리킨다
 - `meta.json.currentVersion`은 현재 작업 초안의 기준 버전을 가리킬 수 있다
 - 기존 버전 파일은 수정하지 않는다
+- `meta.json.status` 와 `meta.json.relations` 만 바뀌는 metadata-only update는 `versions/` 파일을 만들지 않는다
 
 ### 11) Append-only Log Pattern
 

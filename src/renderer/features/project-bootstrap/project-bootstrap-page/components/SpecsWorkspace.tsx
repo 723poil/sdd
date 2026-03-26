@@ -1,39 +1,32 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import type {
   ProjectSpecApplyVersionResult,
   ProjectSpecDeleteVersionResult,
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
+  ProjectSpecRelation,
   ProjectSpecSaveResult,
+  ProjectSpecStatus,
   ProjectSpecVersionDiff,
   ProjectSpecVersionHistoryEntry,
 } from '@/domain/project/project-spec-model';
-import {
-  DOCUMENT_MAP_VIEWPORT_PRESET,
-  SPECS_BOARD_LAYOUT_PRESET,
-  WORKSPACE_MAP_GRID_SIZE,
-  clamp,
-  getWorkspaceMapFitScale,
-  getWorkspaceMapNodeFontScale,
-  getWorkspaceMapNodeSpacingScale,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
+import { DOCUMENT_MAP_VIEWPORT_PRESET } from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
 import { SpecsWorkspaceDocumentView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView';
 import {
-  describeSpecStatus,
-  describeSpecVersionBadge,
-  formatSpecDayLabel,
-  getSpecSummary,
-  resolveSelectedSpec,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils';
-import {
-  EMPTY_WORKSPACE_STAGE_SIZE,
-  useWorkspaceStageSize,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size';
+  buildSpecBoardNodes,
+  buildSpecLinkPaths,
+  createViewportToFitNodes,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils';
+import { resolveSelectedSpec } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils';
+import { WorkspaceBoardMapView } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView';
+import { useWorkspaceBoardMap } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map';
 
 interface SpecsWorkspaceProps {
   canWriteSpecs: boolean;
   isActive: boolean;
   isSavingSpec: boolean;
+  isUpdatingSpecMeta: boolean;
   onApplySpecVersion: (input: {
     revision: number;
     specId: string;
@@ -53,73 +46,42 @@ interface SpecsWorkspaceProps {
   onReadSpecVersionHistory: (input: {
     specId: string;
   }) => Promise<ProjectSpecVersionHistoryEntry[] | null>;
-  onViewModeChange: (viewMode: SpecsWorkspaceViewMode) => void;
   onSaveSpec: (input: {
     markdown: string;
     revision: number;
     specId: string;
     title: string;
   }) => Promise<ProjectSpecSaveResult | null>;
+  onSelectSpec: (specId: string) => void;
+  onUpdateSpecMeta: (input: {
+    specId: string;
+    revision: number;
+    status: ProjectSpecStatus;
+    relations: ProjectSpecRelation[];
+  }) => Promise<ProjectSpecMetaUpdateResult | null>;
+  onViewModeChange: (viewMode: SpecsWorkspaceViewMode) => void;
   selectedSpecId: string | null;
   specConflictBySpecId: Record<string, boolean>;
   specs: ProjectSpecDocument[];
-  onSelectSpec: (specId: string) => void;
   viewMode: SpecsWorkspaceViewMode;
 }
 
 export type SpecsWorkspaceViewMode = 'map' | 'document';
-
-interface SpecBoardNode {
-  hasConflict: boolean;
-  height: number;
-  id: string;
-  slug: string;
-  status: string;
-  summary: string;
-  title: string;
-  updatedAtLabel: string;
-  version: string;
-  width: number;
-  x: number;
-  y: number;
-}
-
-interface SpecsViewport {
-  offsetX: number;
-  offsetY: number;
-  scale: number;
-}
-
-interface SpecsStageSize {
-  height: number;
-  width: number;
-}
-
-interface SpecsPanState {
-  moved: boolean;
-  startClientX: number;
-  startClientY: number;
-  startOffsetX: number;
-  startOffsetY: number;
-}
-
-const INITIAL_VIEWPORT: SpecsViewport = {
-  scale: 1,
-  offsetX: 0,
-  offsetY: 0,
-};
+const SPECS_BOARD_LAYOUT_RESET_VERSION = 'specs-board-layout-created-order-v1';
 
 export function SpecsWorkspace(props: SpecsWorkspaceProps) {
   const {
+    canWriteSpecs,
     isActive,
     isSavingSpec,
-    canWriteSpecs,
+    isUpdatingSpecMeta,
     onApplySpecVersion,
     onDeleteSpecVersion,
     onReadSpecVersionDiff,
     onReadSpecVersionHistory,
     onSaveSpec,
     onSelectSpec,
+    onUpdateSpecMeta,
     onViewModeChange,
     selectedSpecId,
     specConflictBySpecId,
@@ -127,61 +89,46 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     viewMode,
   } = props;
   const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
-  const specsKey = useMemo(() => specs.map((spec) => spec.meta.id).join('|'), [specs]);
-  const stageRef = useRef<HTMLDivElement | null>(null);
-  const hasAdjustedViewportRef = useRef(false);
-  const interactionRef = useRef<SpecsPanState | null>(null);
-  const [isPanning, setIsPanning] = useState(false);
-  const [stageSize, setStageSize] = useState<SpecsStageSize>(EMPTY_WORKSPACE_STAGE_SIZE);
-  const [viewport, setViewport] = useState<SpecsViewport>(INITIAL_VIEWPORT);
-  const boardNodes = useMemo(
+  const specsKey = useMemo(
+    () =>
+      specs
+        .map((spec) => {
+          const relationKey = spec.meta.relations
+            .map((relation) => `${relation.targetSpecId}:${relation.type}:${relation.createdAt}`)
+            .join(',');
+
+          return [
+            SPECS_BOARD_LAYOUT_RESET_VERSION,
+            spec.meta.id,
+            spec.meta.revision,
+            spec.meta.status,
+            spec.meta.updatedAt,
+            relationKey,
+          ].join('#');
+        })
+        .join('|'),
+    [specs],
+  );
+  const baseBoardNodes = useMemo(
     () => buildSpecBoardNodes(specs, specConflictBySpecId),
     [specConflictBySpecId, specs],
   );
-  const worldStyle = useMemo<CSSProperties>(
-    () => ({
-      transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.scale})`,
-      ['--analysis-map-node-font-scale' as string]: getWorkspaceMapNodeFontScale(viewport.scale),
-      ['--analysis-map-node-spacing-scale' as string]: getWorkspaceMapNodeSpacingScale(
-        viewport.scale,
-      ),
-    }),
-    [viewport.offsetX, viewport.offsetY, viewport.scale],
-  );
-
-  useEffect(() => {
-    hasAdjustedViewportRef.current = false;
-    setViewport(INITIAL_VIEWPORT);
-    onViewModeChange('map');
-  }, [onViewModeChange, specsKey]);
-
-  const observedStageSize = useWorkspaceStageSize({
-    isEnabled: isActive && specs.length > 0 && viewMode === 'map',
-    stageRef,
+  const boardMap = useWorkspaceBoardMap({
+    baseBoardNodes,
+    createViewportToFitNodes,
+    isActive,
+    isMapVisible: viewMode === 'map',
+    maxScale: DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
+    minScale: DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
+    onNodeOpen: (nodeId) => {
+      onSelectSpec(nodeId);
+      onViewModeChange('document');
+    },
+    onReset: () => {
+      onViewModeChange('map');
+    },
+    resetKey: specsKey,
   });
-
-  useEffect(() => {
-    setStageSize(observedStageSize);
-  }, [observedStageSize]);
-
-  useEffect(() => {
-    if (
-      !isActive ||
-      viewMode !== 'map' ||
-      boardNodes.length === 0 ||
-      stageSize.width === 0 ||
-      stageSize.height === 0
-    ) {
-      return;
-    }
-
-    if (hasAdjustedViewportRef.current) {
-      return;
-    }
-
-    setViewport(createViewportToFitNodes(boardNodes, stageSize));
-    hasAdjustedViewportRef.current = true;
-  }, [boardNodes, isActive, viewMode, stageSize]);
 
   useEffect(() => {
     if (viewMode !== 'document') {
@@ -202,81 +149,10 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
     };
   }, [onViewModeChange, viewMode]);
 
-  useEffect(() => {
-    if (viewMode !== 'map') {
-      return;
-    }
-
-    const handlePointerMove = (event: PointerEvent) => {
-      const interaction = interactionRef.current;
-      if (!interaction) {
-        return;
-      }
-
-      const deltaX = event.clientX - interaction.startClientX;
-      const deltaY = event.clientY - interaction.startClientY;
-      interactionRef.current = {
-        ...interaction,
-        moved: interaction.moved || Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2,
-      };
-      hasAdjustedViewportRef.current = true;
-      setViewport((current) => ({
-        ...current,
-        offsetX: interaction.startOffsetX + deltaX,
-        offsetY: interaction.startOffsetY + deltaY,
-      }));
-    };
-
-    const handlePointerUp = () => {
-      interactionRef.current = null;
-      setIsPanning(false);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, [viewMode]);
-
-  const fitBoardToStage = () => {
-    if (boardNodes.length === 0 || stageSize.width === 0 || stageSize.height === 0) {
-      return;
-    }
-
-    hasAdjustedViewportRef.current = true;
-    setViewport(createViewportToFitNodes(boardNodes, stageSize));
-  };
-
-  const applyScaleFromButton = (scaleDelta: number) => {
-    const stageElement = stageRef.current;
-    if (!stageElement) {
-      return;
-    }
-
-    const stageRect = stageElement.getBoundingClientRect();
-    const anchorX = stageRect.width / 2;
-    const anchorY = stageRect.height / 2;
-
-    hasAdjustedViewportRef.current = true;
-    setViewport((current) => {
-      const nextScale = clamp(
-        current.scale * scaleDelta,
-        DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
-        DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
-      );
-      const worldX = (anchorX - stageRect.width / 2 - current.offsetX) / current.scale;
-      const worldY = (anchorY - stageRect.height / 2 - current.offsetY) / current.scale;
-
-      return {
-        scale: nextScale,
-        offsetX: anchorX - stageRect.width / 2 - worldX * nextScale,
-        offsetY: anchorY - stageRect.height / 2 - worldY * nextScale,
-      };
-    });
-  };
+  const linkPaths = useMemo(
+    () => buildSpecLinkPaths(boardMap.boardNodes, specs, boardMap.stageSize, boardMap.viewport),
+    [boardMap.boardNodes, boardMap.stageSize, boardMap.viewport, specs],
+  );
 
   if (specs.length === 0) {
     return (
@@ -299,17 +175,21 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
       <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
         <SpecsWorkspaceDocumentView
           canWriteSpecs={canWriteSpecs}
+          hasConflict={Boolean(specConflictBySpecId[selectedSpec.meta.id])}
           isSavingSpec={isSavingSpec}
+          isUpdatingSpecMeta={isUpdatingSpecMeta}
           onApplySpecVersion={onApplySpecVersion}
           onDeleteSpecVersion={onDeleteSpecVersion}
           onReadSpecVersionDiff={onReadSpecVersionDiff}
           onReadSpecVersionHistory={onReadSpecVersionHistory}
-          onSaveSpec={onSaveSpec}
           onReturnToMap={() => {
             onViewModeChange('map');
           }}
-          hasConflict={Boolean(specConflictBySpecId[selectedSpec.meta.id])}
+          onSaveSpec={onSaveSpec}
+          onSelectSpec={onSelectSpec}
+          onUpdateSpecMeta={onUpdateSpecMeta}
           selectedSpec={selectedSpec}
+          specs={specs}
         />
       </section>
     );
@@ -317,243 +197,55 @@ export function SpecsWorkspace(props: SpecsWorkspaceProps) {
 
   return (
     <section className="analysis-workspace analysis-workspace--board specs-workspace specs-workspace--board">
-      <section className="analysis-map specs-map">
-        <div
-          className={`analysis-map__stage ${isPanning ? 'analysis-map__stage--panning' : ''}`}
-          onPointerDown={(event) => {
-            if (event.button !== 0) {
-              return;
-            }
-
-            interactionRef.current = {
-              moved: false,
-              startClientX: event.clientX,
-              startClientY: event.clientY,
-              startOffsetX: viewport.offsetX,
-              startOffsetY: viewport.offsetY,
-            };
-            setIsPanning(true);
-          }}
-          onWheel={(event) => {
-            event.preventDefault();
-
-            const stageElement = stageRef.current;
-            if (!stageElement) {
-              return;
-            }
-
-            const stageRect = stageElement.getBoundingClientRect();
-            const stageX = event.clientX - stageRect.left;
-            const stageY = event.clientY - stageRect.top;
-            const nextScale = clamp(
-              viewport.scale * Math.exp(-event.deltaY * 0.0016),
-              DOCUMENT_MAP_VIEWPORT_PRESET.minScale,
-              DOCUMENT_MAP_VIEWPORT_PRESET.maxScale,
-            );
-            const centerX = stageRect.width / 2;
-            const centerY = stageRect.height / 2;
-            const worldX = (stageX - centerX - viewport.offsetX) / viewport.scale;
-            const worldY = (stageY - centerY - viewport.offsetY) / viewport.scale;
-
-            hasAdjustedViewportRef.current = true;
-            setViewport({
-              scale: nextScale,
-              offsetX: stageX - centerX - worldX * nextScale,
-              offsetY: stageY - centerY - worldY * nextScale,
-            });
-          }}
-          ref={stageRef}
-          style={createStageGridStyle(viewport)}
-        >
-          <div
-            className="analysis-map__hud"
-            onPointerDown={(event) => {
-              event.stopPropagation();
-            }}
-          >
-            <div className="analysis-map__zoom-badge">{Math.round(viewport.scale * 100)}%</div>
-            <div className="analysis-map__zoom-controls">
-              <button
-                aria-label="축소"
-                className="analysis-map__control-button"
-                onClick={() => {
-                  applyScaleFromButton(1 / 1.16);
-                }}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 20 20">
-                  <path
-                    d="M5 10h10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-              </button>
-              <button
-                aria-label="확대"
-                className="analysis-map__control-button"
-                onClick={() => {
-                  applyScaleFromButton(1.16);
-                }}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 20 20">
-                  <path
-                    d="M10 5v10M5 10h10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-              </button>
-              <button
-                aria-label="화면에 맞추기"
-                className="analysis-map__control-button"
-                onClick={fitBoardToStage}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 20 20">
-                  <path
-                    d="M7 4H4v3M13 4h3v3M4 13v3h3M16 13v3h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-              </button>
+      <WorkspaceBoardMapView
+        boardNodes={boardMap.boardNodes}
+        draggingNodeId={boardMap.draggingNodeId}
+        getNodeClassName={(node) => `specs-map__node${node.isArchived ? ' specs-map__node--archived' : ''}`}
+        isPanning={boardMap.isPanning}
+        linkClassName="specs-map__link"
+        linkLabelClassName="specs-map__link-label"
+        linkPaths={linkPaths}
+        markerId="specs-map-arrowhead"
+        onFitBoardToStage={boardMap.fitBoardToStage}
+        onNodeClick={boardMap.handleNodeClick}
+        onNodePointerDown={boardMap.handleNodePointerDown}
+        onResetPositions={boardMap.resetBoardPositions}
+        onStagePointerDown={boardMap.handleStagePointerDown}
+        onStageWheel={boardMap.handleStageWheel}
+        onZoomIn={boardMap.zoomIn}
+        onZoomOut={boardMap.zoomOut}
+        renderNodeContent={(node) => (
+          <>
+            <div className="specs-map__node-header">
+              <span className="analysis-map__node-file">{node.slug}</span>
+              {node.isArchived ? <span className="specs-map__archived-badge">보관됨</span> : null}
             </div>
-          </div>
-
-          <div className="analysis-map__world-anchor">
-            <div className="analysis-map__world" style={worldStyle}>
-              {boardNodes.map((node) => (
-                <button
-                  className={`analysis-map__node specs-map__node ${
-                    selectedSpec?.meta.id === node.id ? 'analysis-map__node--selected' : ''
-                  }`}
-                  key={node.id}
-                  onClick={() => {
-                    onSelectSpec(node.id);
-                    onViewModeChange('document');
-                  }}
-                  onPointerDown={(event) => {
-                    event.stopPropagation();
-                  }}
-                  style={{
-                    left: `${node.x}px`,
-                    top: `${node.y}px`,
-                    width: `${node.width}px`,
-                    height: `${node.height}px`,
-                  }}
-                  type="button"
-                >
-                  <span className="analysis-map__node-file">{node.slug}</span>
-                  <strong className="analysis-map__node-title">{node.title}</strong>
-                  <div className="specs-map__meta">
-                    <span className="specs-map__meta-chip">{node.status}</span>
-                    <span className="specs-map__meta-chip">{node.version}</span>
-                    {node.hasConflict ? (
-                      <span className="specs-map__meta-chip specs-map__meta-chip--alert">충돌</span>
-                    ) : null}
-                    <span className="specs-map__meta-chip">{node.updatedAtLabel}</span>
-                  </div>
-                  <span className="analysis-map__node-summary">{node.summary}</span>
-                </button>
-              ))}
+            <strong className="analysis-map__node-title">{node.title}</strong>
+            <div className="specs-map__meta">
+              <span
+                className={`specs-map__meta-chip ${
+                  node.isArchived ? 'specs-map__meta-chip--archived' : ''
+                }`}
+              >
+                {node.status}
+              </span>
+              <span className="specs-map__meta-chip">{node.version}</span>
+              {node.hasConflict ? (
+                <span className="specs-map__meta-chip specs-map__meta-chip--alert">충돌</span>
+              ) : null}
+              <span className="specs-map__meta-chip">{node.updatedAtLabel}</span>
             </div>
-          </div>
-        </div>
-      </section>
+            <span className="analysis-map__node-summary">{node.summary}</span>
+          </>
+        )}
+        rootClassName="specs-map"
+        selectedNodeId={selectedSpec?.meta.id ?? null}
+        shouldShowLinkLabels={boardMap.viewport.scale >= 0.78}
+        stageGridStyle={boardMap.stageGridStyle}
+        stageRef={boardMap.stageRef}
+        viewportScale={boardMap.viewport.scale}
+        worldStyle={boardMap.worldStyle}
+      />
     </section>
   );
-}
-
-function buildSpecBoardNodes(
-  specs: ProjectSpecDocument[],
-  specConflictBySpecId: Record<string, boolean>,
-): SpecBoardNode[] {
-  const columnCount = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(specs.length))));
-  const totalWidth =
-    columnCount * SPECS_BOARD_LAYOUT_PRESET.cardWidth +
-    Math.max(columnCount - 1, 0) * SPECS_BOARD_LAYOUT_PRESET.columnGap;
-  const startX = -totalWidth / 2;
-  const startY = -SPECS_BOARD_LAYOUT_PRESET.cardHeight / 2;
-
-  return specs.map((spec, index) => {
-    const columnIndex = index % columnCount;
-    const rowIndex = Math.floor(index / columnCount);
-
-    return {
-      hasConflict: Boolean(specConflictBySpecId[spec.meta.id]),
-      id: spec.meta.id,
-      slug: spec.meta.slug,
-      status: describeSpecStatus(spec.meta.status),
-      summary: getSpecSummary(spec),
-      title: spec.meta.title,
-      updatedAtLabel: formatSpecDayLabel(spec.meta.updatedAt),
-      version: describeSpecVersionBadge(spec),
-      width: SPECS_BOARD_LAYOUT_PRESET.cardWidth,
-      height: SPECS_BOARD_LAYOUT_PRESET.cardHeight,
-      x:
-        startX +
-        columnIndex * (SPECS_BOARD_LAYOUT_PRESET.cardWidth + SPECS_BOARD_LAYOUT_PRESET.columnGap) +
-        (rowIndex % 2 === 0 ? 0 : SPECS_BOARD_LAYOUT_PRESET.rowOffset),
-      y:
-        startY +
-        rowIndex * (SPECS_BOARD_LAYOUT_PRESET.cardHeight + SPECS_BOARD_LAYOUT_PRESET.rowGap),
-    };
-  });
-}
-
-function createViewportToFitNodes(
-  nodes: SpecBoardNode[],
-  stageSize: SpecsStageSize,
-): SpecsViewport {
-  const bounds = getNodeBounds(nodes);
-  const scale = getWorkspaceMapFitScale({
-    boundsWidth: bounds.width,
-    boundsHeight: bounds.height,
-    stageWidth: stageSize.width,
-    stageHeight: stageSize.height,
-    viewportPreset: DOCUMENT_MAP_VIEWPORT_PRESET,
-  });
-
-  return {
-    scale,
-    offsetX: -(bounds.minX + bounds.width / 2) * scale,
-    offsetY: -(bounds.minY + bounds.height / 2) * scale,
-  };
-}
-
-function getNodeBounds(nodes: SpecBoardNode[]): {
-  height: number;
-  minX: number;
-  minY: number;
-  width: number;
-} {
-  const minX = Math.min(...nodes.map((node) => node.x));
-  const minY = Math.min(...nodes.map((node) => node.y));
-  const maxX = Math.max(...nodes.map((node) => node.x + node.width));
-  const maxY = Math.max(...nodes.map((node) => node.y + node.height));
-
-  return {
-    minX,
-    minY,
-    width: maxX - minX,
-    height: maxY - minY,
-  };
-}
-
-function createStageGridStyle(viewport: SpecsViewport): Record<string, string> {
-  const gridSize = WORKSPACE_MAP_GRID_SIZE * viewport.scale;
-
-  return {
-    backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
-    backgroundSize: `${gridSize}px ${gridSize}px`,
-  };
 }

@@ -1,12 +1,17 @@
 import type { SPEC_INDEX_SCHEMA_VERSION } from '@/domain/project/project-model';
+import { createProjectError } from '@/domain/project/project-errors';
+import { err, ok, type Result } from '@/shared/contracts/result';
 
 export const LEGACY_PROJECT_SPEC_SCHEMA_VERSION = 1;
-export const PROJECT_SPEC_SCHEMA_VERSION = 2;
+export const PREVIOUS_PROJECT_SPEC_SCHEMA_VERSION = 2;
+export const PROJECT_SPEC_SCHEMA_VERSION = 3;
 const DEFAULT_PROJECT_SPEC_TITLE = '새 명세';
 const PROJECT_SPEC_SUMMARY_MAX_LENGTH = 180;
 
 export const PROJECT_SPEC_STATUSES = ['draft', 'approved', 'archived'] as const;
 export type ProjectSpecStatus = (typeof PROJECT_SPEC_STATUSES)[number];
+export const PROJECT_SPEC_RELATION_TYPES = ['derived-from', 'follow-up-to'] as const;
+export type ProjectSpecRelationType = (typeof PROJECT_SPEC_RELATION_TYPES)[number];
 export const PROJECT_SPEC_TEMPLATE_SECTION_TITLES = [
   '요약',
   '배경 / 문제',
@@ -35,6 +40,27 @@ export interface LegacyProjectSpecMeta {
   summary: string | null;
 }
 
+export interface PreviousProjectSpecMeta {
+  schemaVersion: typeof PREVIOUS_PROJECT_SPEC_SCHEMA_VERSION;
+  id: string;
+  slug: string;
+  title: string;
+  status: ProjectSpecStatus;
+  createdAt: string;
+  updatedAt: string;
+  revision: number;
+  latestVersion: string | null;
+  currentVersion: string | null;
+  draftMarkdown: string;
+  summary: string | null;
+}
+
+export interface ProjectSpecRelation {
+  targetSpecId: string;
+  type: ProjectSpecRelationType;
+  createdAt: string;
+}
+
 export interface ProjectSpecMeta {
   schemaVersion: typeof PROJECT_SPEC_SCHEMA_VERSION;
   id: string;
@@ -48,6 +74,7 @@ export interface ProjectSpecMeta {
   currentVersion: string | null;
   draftMarkdown: string;
   summary: string | null;
+  relations: ProjectSpecRelation[];
 }
 
 export interface ProjectSpecSummary {
@@ -183,6 +210,28 @@ export type ProjectSpecDeleteVersionResult =
   | ProjectSpecDeleteVersionDeletedResult
   | ProjectSpecDeleteVersionConflictResult;
 
+export interface ProjectSpecMetaUpdateUpdatedResult {
+  kind: 'updated';
+  spec: ProjectSpecDocument;
+}
+
+export interface ProjectSpecMetaUpdateNoOpResult {
+  kind: 'no-op';
+  spec: ProjectSpecDocument;
+}
+
+export interface ProjectSpecMetaUpdateConflictResult {
+  kind: 'conflict';
+  latestRevision: number;
+  latestVersionId: string | null;
+  spec: ProjectSpecDocument;
+}
+
+export type ProjectSpecMetaUpdateResult =
+  | ProjectSpecMetaUpdateUpdatedResult
+  | ProjectSpecMetaUpdateNoOpResult
+  | ProjectSpecMetaUpdateConflictResult;
+
 export function createProjectSpecMeta(input: {
   currentVersion?: string | null;
   draftMarkdown: string;
@@ -192,6 +241,7 @@ export function createProjectSpecMeta(input: {
   slug: string;
   summary: string | null;
   title: string;
+  relations?: ProjectSpecRelation[];
 }): ProjectSpecMeta {
   return {
     schemaVersion: PROJECT_SPEC_SCHEMA_VERSION,
@@ -206,6 +256,7 @@ export function createProjectSpecMeta(input: {
     currentVersion: input.currentVersion ?? null,
     draftMarkdown: input.draftMarkdown,
     summary: input.summary,
+    relations: cloneProjectSpecRelations(input.relations ?? []),
   };
 }
 
@@ -344,10 +395,7 @@ export function normalizeProjectSpecDraft(input: {
   };
 }
 
-export function replaceProjectSpecTitleHeading(input: {
-  markdown: string;
-  title: string;
-}): string {
+export function replaceProjectSpecTitleHeading(input: { markdown: string; title: string }): string {
   return normalizeProjectSpecMarkdown(input);
 }
 
@@ -436,8 +484,30 @@ export function createNextProjectSpecMeta(input: {
   };
 }
 
+export function createNextProjectSpecMetaAfterMetadataUpdate(input: {
+  current: ProjectSpecMeta;
+  now: string;
+  relations: ProjectSpecRelation[];
+  status: ProjectSpecStatus;
+}): ProjectSpecMeta {
+  return {
+    ...input.current,
+    status: input.status,
+    updatedAt: input.now,
+    revision: input.current.revision + 1,
+    relations: cloneProjectSpecRelations(input.relations),
+  };
+}
+
 export function isProjectSpecStatus(value: unknown): value is ProjectSpecStatus {
   return typeof value === 'string' && PROJECT_SPEC_STATUSES.includes(value as ProjectSpecStatus);
+}
+
+export function isProjectSpecRelationType(value: unknown): value is ProjectSpecRelationType {
+  return (
+    typeof value === 'string' &&
+    PROJECT_SPEC_RELATION_TYPES.includes(value as ProjectSpecRelationType)
+  );
 }
 
 export function isLegacyProjectSpecMeta(value: unknown): value is LegacyProjectSpecMeta {
@@ -461,6 +531,43 @@ export function isLegacyProjectSpecMeta(value: unknown): value is LegacyProjectS
   );
 }
 
+export function isPreviousProjectSpecMeta(value: unknown): value is PreviousProjectSpecMeta {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    candidate.schemaVersion === PREVIOUS_PROJECT_SPEC_SCHEMA_VERSION &&
+    typeof candidate.id === 'string' &&
+    typeof candidate.slug === 'string' &&
+    typeof candidate.title === 'string' &&
+    isProjectSpecStatus(candidate.status) &&
+    typeof candidate.createdAt === 'string' &&
+    typeof candidate.updatedAt === 'string' &&
+    typeof candidate.revision === 'number' &&
+    (typeof candidate.latestVersion === 'string' || candidate.latestVersion === null) &&
+    (typeof candidate.currentVersion === 'string' || candidate.currentVersion === null) &&
+    typeof candidate.draftMarkdown === 'string' &&
+    (typeof candidate.summary === 'string' || candidate.summary === null)
+  );
+}
+
+export function isProjectSpecRelation(value: unknown): value is ProjectSpecRelation {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    typeof candidate.targetSpecId === 'string' &&
+    isProjectSpecRelationType(candidate.type) &&
+    typeof candidate.createdAt === 'string'
+  );
+}
+
 export function isProjectSpecMeta(value: unknown): value is ProjectSpecMeta {
   if (!value || typeof value !== 'object') {
     return false;
@@ -480,7 +587,9 @@ export function isProjectSpecMeta(value: unknown): value is ProjectSpecMeta {
     (typeof candidate.latestVersion === 'string' || candidate.latestVersion === null) &&
     (typeof candidate.currentVersion === 'string' || candidate.currentVersion === null) &&
     typeof candidate.draftMarkdown === 'string' &&
-    (typeof candidate.summary === 'string' || candidate.summary === null)
+    (typeof candidate.summary === 'string' || candidate.summary === null) &&
+    Array.isArray(candidate.relations) &&
+    candidate.relations.every((relation) => isProjectSpecRelation(relation))
   );
 }
 
@@ -495,6 +604,136 @@ export function toProjectSpecSummary(meta: ProjectSpecMeta): ProjectSpecSummary 
     updatedAt: meta.updatedAt,
     summary: meta.summary,
   };
+}
+
+export function validateProjectSpecMetadataUpdate(input: {
+  current: ProjectSpecMeta;
+  relations: ProjectSpecRelation[];
+  status: ProjectSpecStatus;
+}): Result<{
+  relations: ProjectSpecRelation[];
+  status: ProjectSpecStatus;
+}> {
+  const statusResult = validateProjectSpecStatusTransition({
+    currentStatus: input.current.status,
+    nextStatus: input.status,
+  });
+  if (!statusResult.ok) {
+    return statusResult;
+  }
+
+  const relationsResult = normalizeProjectSpecRelations({
+    relations: input.relations,
+    selfSpecId: input.current.id,
+  });
+  if (!relationsResult.ok) {
+    return relationsResult;
+  }
+
+  return ok({
+    status: statusResult.value,
+    relations: relationsResult.value,
+  });
+}
+
+export function areProjectSpecRelationsEqual(
+  left: ProjectSpecRelation[],
+  right: ProjectSpecRelation[],
+): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((relation, index) => {
+    const other = right[index];
+    return (
+      other?.targetSpecId === relation.targetSpecId &&
+      other.type === relation.type &&
+      other.createdAt === relation.createdAt
+    );
+  });
+}
+
+function validateProjectSpecStatusTransition(input: {
+  currentStatus: ProjectSpecStatus;
+  nextStatus: ProjectSpecStatus;
+}): Result<ProjectSpecStatus> {
+  if (input.currentStatus === input.nextStatus) {
+    return ok(input.nextStatus);
+  }
+
+  if (
+    (input.currentStatus === 'draft' && input.nextStatus === 'archived') ||
+    (input.currentStatus === 'archived' && input.nextStatus === 'draft')
+  ) {
+    return ok(input.nextStatus);
+  }
+
+  return err(
+    createProjectError(
+      'INVALID_PROJECT_SPEC_METADATA',
+      '명세 상태는 초안과 보관 사이에서만 변경할 수 있습니다.',
+    ),
+  );
+}
+
+function normalizeProjectSpecRelations(input: {
+  relations: ProjectSpecRelation[];
+  selfSpecId: string;
+}): Result<ProjectSpecRelation[]> {
+  const nextRelations: ProjectSpecRelation[] = [];
+  const relationKeys = new Set<string>();
+
+  for (const relation of input.relations) {
+    const targetSpecId = relation.targetSpecId.trim();
+    const createdAt = relation.createdAt.trim();
+    if (targetSpecId.length === 0) {
+      return err(
+        createProjectError('INVALID_PROJECT_SPEC_METADATA', '연결할 명세를 선택해 주세요.'),
+      );
+    }
+
+    if (targetSpecId === input.selfSpecId) {
+      return err(
+        createProjectError(
+          'INVALID_PROJECT_SPEC_METADATA',
+          '명세는 자기 자신과 연결할 수 없습니다.',
+        ),
+      );
+    }
+
+    if (createdAt.length === 0) {
+      return err(
+        createProjectError(
+          'INVALID_PROJECT_SPEC_METADATA',
+          '명세 관계 생성 시각이 올바르지 않습니다.',
+        ),
+      );
+    }
+
+    const relationKey = `${targetSpecId}::${relation.type}`;
+    if (relationKeys.has(relationKey)) {
+      return err(
+        createProjectError(
+          'INVALID_PROJECT_SPEC_METADATA',
+          '같은 대상 명세와 관계 타입은 한 번만 연결할 수 있습니다.',
+        ),
+      );
+    }
+
+    relationKeys.add(relationKey);
+    nextRelations.push({
+      targetSpecId,
+      type: relation.type,
+      createdAt,
+    });
+  }
+
+  return ok(nextRelations);
+}
+
+function cloneProjectSpecRelations(relations: ProjectSpecRelation[]): ProjectSpecRelation[] {
+  return relations.map((relation) => ({ ...relation }));
 }
 
 export function createProjectSpecVersionDiff(input: {

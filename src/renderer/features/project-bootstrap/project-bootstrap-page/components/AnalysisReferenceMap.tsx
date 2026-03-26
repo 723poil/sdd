@@ -17,8 +17,8 @@ import {
 import {
   EMPTY_STAGE_SIZE,
   INITIAL_VIEWPORT,
-  createStageGridStyle,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils';
+import { createStageGridStyle } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils';
 import {
   areViewportsClose,
   buildReferenceGraph,

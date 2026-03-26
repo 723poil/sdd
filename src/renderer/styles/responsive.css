@@ -266,6 +266,15 @@
     grid-template-columns: 1fr;
   }
 
+  .spec-metadata-panel__editor,
+  .spec-metadata-relation-card {
+    grid-template-columns: 1fr;
+  }
+
+  .spec-metadata-relation-card__actions {
+    justify-content: flex-start;
+  }
+
   .analysis-metric-pills {
     justify-content: flex-start;
   }

@@ -18,7 +18,10 @@ import type {
   ProjectSpecApplyVersionResult,
   ProjectSpecDeleteVersionResult,
   ProjectSpecDocument,
+  ProjectSpecMetaUpdateResult,
+  ProjectSpecRelation,
   ProjectSpecSaveResult,
+  ProjectSpecStatus,
   ProjectSpecVersionDiff,
   ProjectSpecVersionHistoryEntry,
 } from '@/domain/project/project-spec-model';
@@ -87,6 +90,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       specId: string;
       title: string;
     }): Promise<ProjectSpecSaveResult | null>;
+    onUpdateSpecMeta(input: {
+      specId: string;
+      revision: number;
+      status: ProjectSpecStatus;
+      relations: ProjectSpecRelation[];
+    }): Promise<ProjectSpecMetaUpdateResult | null>;
     onReadSpecVersionHistory(input: {
       specId: string;
     }): Promise<ProjectSpecVersionHistoryEntry[] | null>;
@@ -152,6 +161,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCreatingSpec, setIsCreatingSpec] = useState(false);
   const [isSavingSpec, setIsSavingSpec] = useState(false);
+  const [isUpdatingSpecMeta, setIsUpdatingSpecMeta] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSavingReferenceTags, setIsSavingReferenceTags] = useState(false);
   const [isSavingChatRuntimeSettings, setIsSavingChatRuntimeSettings] = useState(false);
@@ -1335,7 +1345,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
 
       if (result.value.kind === 'no-op') {
-        setMessage(`"${result.value.spec.meta.title}" 명세는 변경된 내용이 없어 그대로 유지했습니다.`);
+        setMessage(
+          `"${result.value.spec.meta.title}" 명세는 변경된 내용이 없어 그대로 유지했습니다.`,
+        );
         progressTasks.updateRequestProgressTask(saveSpecTask, {
           detail: `"${result.value.spec.meta.title}" 명세는 변경 없음으로 처리했습니다.`,
           status: 'succeeded',
@@ -1343,7 +1355,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return result.value;
       }
 
-      setMessage(`"${result.value.spec.meta.title}" 명세를 ${result.value.versionId}로 저장했습니다.`);
+      setMessage(
+        `"${result.value.spec.meta.title}" 명세를 ${result.value.versionId}로 저장했습니다.`,
+      );
       progressTasks.updateRequestProgressTask(saveSpecTask, {
         detail: `"${result.value.spec.meta.title}" 명세를 ${result.value.versionId}로 저장했습니다.`,
         status: 'succeeded',
@@ -1351,6 +1365,65 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return result.value;
     } finally {
       setIsSavingSpec(false);
+    }
+  }
+
+  async function handleUpdateSpecMeta(input: {
+    specId: string;
+    revision: number;
+    status: ProjectSpecStatus;
+    relations: ProjectSpecRelation[];
+  }): Promise<ProjectSpecMetaUpdateResult | null> {
+    const rootPath = selectedPathRef.current;
+    const sddApi = getRendererSddApi();
+    if (!rootPath || !sddApi || typeof sddApi.project.updateSpecMeta !== 'function') {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return null;
+    }
+
+    setIsUpdatingSpecMeta(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.project.updateSpecMeta({
+        rootPath,
+        specId: input.specId,
+        revision: input.revision,
+        status: input.status,
+        relations: input.relations,
+      });
+      if (!result.ok) {
+        setErrorMessage(result.error.message);
+        setMessage('명세 메타데이터를 저장하지 못했습니다.');
+        return null;
+      }
+
+      setSpecs((current) => upsertProjectSpec(current, result.value.spec));
+      setSpecConflictBySpecId((current) => {
+        const next = { ...current };
+        if (result.value.kind === 'conflict') {
+          next[result.value.spec.meta.id] = true;
+        } else {
+          delete next[result.value.spec.meta.id];
+        }
+        return next;
+      });
+
+      if (result.value.kind === 'conflict') {
+        setErrorMessage('다른 변경이 먼저 저장되어 명세 메타데이터 저장이 충돌했습니다.');
+        setMessage('명세 메타데이터 저장 중 충돌이 발생했습니다.');
+        return result.value;
+      }
+
+      if (result.value.kind === 'no-op') {
+        setMessage(`"${result.value.spec.meta.title}" 명세 메타데이터는 변경된 내용이 없습니다.`);
+        return result.value;
+      }
+
+      setMessage(`"${result.value.spec.meta.title}" 명세 메타데이터를 저장했습니다.`);
+      return result.value;
+    } finally {
+      setIsUpdatingSpecMeta(false);
     }
   }
 
@@ -1396,9 +1469,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       ...(typeof input.currentMarkdown !== 'undefined'
         ? { currentMarkdown: input.currentMarkdown }
         : {}),
-      ...(typeof input.currentTitle !== 'undefined'
-        ? { currentTitle: input.currentTitle }
-        : {}),
+      ...(typeof input.currentTitle !== 'undefined' ? { currentTitle: input.currentTitle } : {}),
     });
     if (!result.ok) {
       setErrorMessage(result.error.message);
@@ -1957,6 +2028,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       isSelecting,
       isCreatingSpec,
       isSavingSpec,
+      isUpdatingSpecMeta,
       isCreatingSession,
       isSavingReferenceTags,
       isSavingChatRuntimeSettings,
@@ -2052,6 +2124,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onSaveSpec(input: { markdown: string; revision: number; specId: string; title: string }) {
         return handleSaveSpec(input);
       },
+      onUpdateSpecMeta(input: {
+        specId: string;
+        revision: number;
+        status: ProjectSpecStatus;
+        relations: ProjectSpecRelation[];
+      }) {
+        return handleUpdateSpecMeta(input);
+      },
       onReadSpecVersionHistory(input: { specId: string }) {
         return handleReadSpecVersionHistory(input);
       },
@@ -2139,9 +2219,7 @@ function upsertProjectSessionSummary(
     ? sessions.map((session) => (session.id === nextSession.id ? { ...nextSession } : session))
     : [...sessions, { ...nextSession }];
 
-  return [...mergedSessions].sort((left, right) =>
-    right.updatedAt.localeCompare(left.updatedAt),
-  );
+  return [...mergedSessions].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
 
 function mergeProjectSessionMessages(

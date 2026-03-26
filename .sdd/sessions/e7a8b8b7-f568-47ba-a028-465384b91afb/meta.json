@@ -4,9 +4,9 @@
   "specId": "spec-03",
   "title": "새 명세 03 채팅",
   "createdAt": "2026-03-26T01:53:10.163Z",
-  "updatedAt": "2026-03-26T01:54:22.116Z",
-  "revision": 2,
-  "lastMessageAt": "2026-03-26T01:54:22.116Z",
-  "lastMessagePreview": "명세 관리에 대해서 기능 고도화를 할거야. 이미 작업이 끝난 명세에 대해서는 아카이브 표시를 할 수 있도록 기능을 추가해줄거고. 어떤 새 명세를...",
-  "messageCount": 1
+  "updatedAt": "2026-03-26T02:05:48.383Z",
+  "revision": 3,
+  "lastMessageAt": "2026-03-26T02:05:48.383Z",
+  "lastMessagePreview": "아카이브 표시와 명세 간 연결선 기능을 하나의 명세로 묶어 구체화했습니다. 현재 코드에는 `archived` 상태 값은 이미 있지만 바꾸는 액션...",
+  "messageCount": 2
 }

@@ -8,12 +8,7 @@ import type {
   SelectedProjectAnalysisDocumentId,
   StructuredProjectAnalysis,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
-import {
-  ANALYSIS_DOCUMENT_BOARD_LAYOUT_PRESET,
-  DOCUMENT_MAP_VIEWPORT_PRESET,
-  WORKSPACE_MAP_GRID_SIZE,
-  getWorkspaceMapFitScale,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
+import { ANALYSIS_DOCUMENT_BOARD_LAYOUT_PRESET } from '@/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared';
 
 import type {
   AnalysisDocumentBoardLink,
@@ -23,6 +18,10 @@ import type {
   AnalysisStageSize,
   AnalysisViewport,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types';
+import {
+  buildWorkspaceBoardLinkPaths,
+  createViewportToFitBoardNodes,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils';
 
 export const EMPTY_ANALYSIS_DOCUMENTS: ProjectAnalysisDocument[] = [];
 export const EMPTY_DOCUMENT_LAYOUTS: ProjectAnalysisDocumentLayoutMap = {};
@@ -102,13 +101,14 @@ export function mergeDocumentLayoutMaps(input: {
 }
 
 export function toDocumentLayoutMap(
-  boardPositions: ProjectAnalysisDocumentLayoutMap,
+  boardNodes: AnalysisDocumentBoardNode[],
   documents: ProjectAnalysisDocument[],
 ): ProjectAnalysisDocumentLayoutMap {
   const next: ProjectAnalysisDocumentLayoutMap = {};
+  const boardNodeById = new Map(boardNodes.map((node) => [node.id, node] as const));
 
   for (const document of documents) {
-    const position = boardPositions[document.id];
+    const position = boardNodeById.get(document.id);
     if (!position) {
       continue;
     }
@@ -128,39 +128,7 @@ export function buildAnalysisLinkPaths(
   stageSize: AnalysisStageSize,
   viewport: AnalysisViewport,
 ): AnalysisRenderedLink[] {
-  return links.flatMap((link) => {
-    const from = nodes.find((node) => node.id === link.from);
-    const to = nodes.find((node) => node.id === link.to);
-    if (!from || !to || stageSize.width === 0 || stageSize.height === 0) {
-      return [];
-    }
-
-    const start = toScreenPoint({
-      stageSize,
-      viewport,
-      x: from.x + from.width,
-      y: from.y + from.height / 2,
-    });
-    const end = toScreenPoint({
-      stageSize,
-      viewport,
-      x: to.x,
-      y: to.y + to.height / 2,
-    });
-    const controlOffset = Math.max((end.x - start.x) * 0.48, 90);
-    const midX = (start.x + end.x) / 2;
-    const midY = (start.y + end.y) / 2;
-
-    return [
-      {
-        key: `${link.from}-${link.to}`,
-        label: link.label,
-        midX,
-        midY,
-        path: `M ${start.x} ${start.y} C ${start.x + controlOffset} ${start.y}, ${end.x - controlOffset} ${end.y}, ${end.x} ${end.y}`,
-      },
-    ];
-  });
+  return buildWorkspaceBoardLinkPaths(nodes, links, stageSize, viewport);
 }
 
 export function resolveAnalysisDocumentBoardLinks(
@@ -220,29 +188,7 @@ export function createViewportToFitNodes(
   nodes: AnalysisDocumentBoardNode[],
   stageSize: AnalysisStageSize,
 ): AnalysisViewport {
-  const bounds = getNodeBounds(nodes);
-  const scale = getWorkspaceMapFitScale({
-    boundsWidth: bounds.width,
-    boundsHeight: bounds.height,
-    stageWidth: stageSize.width,
-    stageHeight: stageSize.height,
-    viewportPreset: DOCUMENT_MAP_VIEWPORT_PRESET,
-  });
-
-  return {
-    scale,
-    offsetX: -(bounds.minX + bounds.width / 2) * scale,
-    offsetY: -(bounds.minY + bounds.height / 2) * scale,
-  };
-}
-
-export function createStageGridStyle(viewport: AnalysisViewport): Record<string, string> {
-  const gridSize = WORKSPACE_MAP_GRID_SIZE * viewport.scale;
-
-  return {
-    backgroundPosition: `calc(50% + ${viewport.offsetX}px) calc(50% + ${viewport.offsetY}px)`,
-    backgroundSize: `${gridSize}px ${gridSize}px`,
-  };
+  return createViewportToFitBoardNodes(nodes, stageSize);
 }
 
 export function getAnalysisDocumentFileName(documentId: ProjectAnalysisDocumentId): string {
@@ -269,55 +215,4 @@ export function resolveSelectedDocument(
   }
 
   return documents.find((document) => document.id === selectedDocumentId) ?? documents[0] ?? null;
-}
-
-export function toWorldPoint(input: {
-  clientX: number;
-  clientY: number;
-  stageElement: HTMLDivElement;
-  viewport: AnalysisViewport;
-}): { x: number; y: number } | null {
-  const stageRect = input.stageElement.getBoundingClientRect();
-  if (stageRect.width === 0 || stageRect.height === 0) {
-    return null;
-  }
-
-  const stageX = input.clientX - stageRect.left;
-  const stageY = input.clientY - stageRect.top;
-
-  return {
-    x: (stageX - stageRect.width / 2 - input.viewport.offsetX) / input.viewport.scale,
-    y: (stageY - stageRect.height / 2 - input.viewport.offsetY) / input.viewport.scale,
-  };
-}
-
-function getNodeBounds(nodes: AnalysisDocumentBoardNode[]): {
-  height: number;
-  minX: number;
-  minY: number;
-  width: number;
-} {
-  const minX = Math.min(...nodes.map((node) => node.x));
-  const minY = Math.min(...nodes.map((node) => node.y));
-  const maxX = Math.max(...nodes.map((node) => node.x + node.width));
-  const maxY = Math.max(...nodes.map((node) => node.y + node.height));
-
-  return {
-    minX,
-    minY,
-    width: maxX - minX,
-    height: maxY - minY,
-  };
-}
-
-function toScreenPoint(input: {
-  stageSize: AnalysisStageSize;
-  viewport: AnalysisViewport;
-  x: number;
-  y: number;
-}): { x: number; y: number } {
-  return {
-    x: input.stageSize.width / 2 + input.viewport.offsetX + input.x * input.viewport.scale,
-    y: input.stageSize.height / 2 + input.viewport.offsetY + input.y * input.viewport.scale,
-  };
 }
