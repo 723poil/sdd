@@ -1,10 +1,16 @@
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectSpecSaveResult } from '@/domain/project/project-spec-model';
 import type {
+  ProjectSessionMessageAttachmentUpload,
   ProjectSessionMessage,
   ProjectSessionMeta,
 } from '@/domain/project/project-session-model';
 import { createProjectError } from '@/domain/project/project-errors';
+import {
+  createProjectSessionMessagePreview,
+  describeProjectSessionMessageAttachmentValidationIssue,
+  validateProjectSessionMessageAttachmentSelection,
+} from '@/domain/project/project-session-model';
 import type { Result } from '@/shared/contracts/result';
 import { err, ok } from '@/shared/contracts/result';
 
@@ -31,6 +37,7 @@ export interface SendProjectSessionMessageUseCase {
     rootPath: string;
     sessionId: string;
     text: string;
+    attachments: ProjectSessionMessageAttachmentUpload[];
   }): Promise<Result<SendProjectSessionMessageOutput>>;
 }
 
@@ -52,17 +59,60 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       }
 
       const trimmedText = input.text.trim();
-      if (trimmedText.length === 0) {
+      const attachmentValidationResult = validateProjectSessionMessageAttachmentSelection({
+        candidates: input.attachments.map((attachment) => ({
+          mimeType: attachment.mimeType,
+          name: attachment.name,
+          sizeBytes: attachment.sizeBytes,
+          source: attachment.source,
+        })),
+      });
+      if (attachmentValidationResult.rejected.length > 0) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_SESSION_ATTACHMENT',
+            attachmentValidationResult.rejected
+              .map((issue) => describeProjectSessionMessageAttachmentValidationIssue(issue))
+              .join('\n'),
+          ),
+        );
+      }
+
+      if (
+        input.attachments.some((attachment) => attachment.sizeBytes !== attachment.bytes.byteLength)
+      ) {
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_SESSION_ATTACHMENT',
+            '첨부 파일 크기 정보를 확인하지 못했습니다. 다시 선택해 주세요.',
+          ),
+        );
+      }
+
+      if (trimmedText.length === 0 && input.attachments.length === 0) {
         return err(
           createProjectError('INVALID_PROJECT_STORAGE', '빈 메시지는 저장할 수 없습니다.'),
         );
       }
 
+      const requestSummary = createProjectSessionMessagePreview({
+        attachments: input.attachments,
+        text: trimmedText,
+      });
       const startedAt = new Date().toISOString();
       const runControlResult = beginProjectSessionMessageRun(
         dependencies.sessionMessageRunStatusStore,
         {
-          requestText: trimmedText,
+          attachmentCount: input.attachments.length,
+          requestAttachments: input.attachments.map((attachment, index) => ({
+            id: `pending-attachment-${index + 1}`,
+            kind: attachment.kind,
+            mimeType: attachment.mimeType,
+            name: attachment.name,
+            sizeBytes: attachment.sizeBytes,
+          })),
+          requestText: trimmedText.length > 0 ? trimmedText : null,
+          requestSummary,
           rootPath: input.rootPath,
           sessionId: input.sessionId,
           startedAt,
@@ -82,6 +132,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       };
 
       const result = await dependencies.projectSessionStore.appendSessionMessage({
+        attachments: input.attachments,
         rootPath: input.rootPath,
         sessionId: input.sessionId,
         role: 'user',
@@ -237,6 +288,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       }
 
       const assistantAppendResult = await dependencies.projectSessionStore.appendSessionMessage({
+        attachments: [],
         rootPath: input.rootPath,
         sessionId: input.sessionId,
         role: 'assistant',

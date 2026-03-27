@@ -2,6 +2,7 @@ import type { ProjectAnalysisRunStatus } from '@/domain/project/project-analysis
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessagePendingAttachment,
   ProjectSessionMessageRunStatus,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
@@ -45,8 +46,11 @@ export function createRunningProjectAnalysisRunStatus(input: {
 }
 
 export function createRunningProjectSessionMessageRunStatus(input: {
+  attachmentCount: number;
   progressMessage: string;
-  requestText: string;
+  requestAttachments: ProjectSessionMessagePendingAttachment[];
+  requestSummary: string | null;
+  requestText: string | null;
   rootPath: string;
   sessionId: string;
   startedAt: string;
@@ -61,6 +65,9 @@ export function createRunningProjectSessionMessageRunStatus(input: {
     stageMessage: input.stageMessage,
     progressMessage: input.progressMessage,
     requestText: input.requestText,
+    requestSummary: input.requestSummary,
+    attachmentCount: input.attachmentCount,
+    requestAttachments: input.requestAttachments,
     startedAt: input.startedAt,
     updatedAt: input.startedAt,
     completedAt: null,
@@ -69,9 +76,12 @@ export function createRunningProjectSessionMessageRunStatus(input: {
 }
 
 export function createFailedProjectSessionMessageRunStatus(input: {
+  attachmentCount: number;
   completedAt: string;
   lastError: string;
   progressMessage: string | null;
+  requestAttachments: ProjectSessionMessagePendingAttachment[];
+  requestSummary: string | null;
   requestText: string | null;
   rootPath: string;
   sessionId: string;
@@ -89,6 +99,9 @@ export function createFailedProjectSessionMessageRunStatus(input: {
     stageMessage: input.stageMessage,
     progressMessage: input.progressMessage,
     requestText: input.requestText,
+    requestSummary: input.requestSummary,
+    attachmentCount: input.attachmentCount,
+    requestAttachments: input.requestAttachments,
     startedAt: input.startedAt,
     updatedAt: input.completedAt,
     completedAt: input.completedAt,
@@ -108,6 +121,9 @@ export function createCancelledProjectSessionMessageRunStatus(input: {
     stageMessage: '요청 취소됨',
     progressMessage: '응답 생성을 취소했습니다.',
     requestText: null,
+    requestSummary: null,
+    attachmentCount: 0,
+    requestAttachments: [],
     updatedAt: input.completedAt,
     completedAt: input.completedAt,
     lastError: null,

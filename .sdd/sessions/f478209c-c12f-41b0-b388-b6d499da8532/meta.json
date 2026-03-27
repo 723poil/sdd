@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "f478209c-c12f-41b0-b388-b6d499da8532",
+  "specId": "spec-04",
+  "title": "새 명세 04 채팅",
+  "createdAt": "2026-03-26T23:56:43.135Z",
+  "updatedAt": "2026-03-27T01:00:24.448Z",
+  "revision": 9,
+  "lastMessageAt": "2026-03-27T01:00:24.448Z",
+  "lastMessagePreview": "참조 분석과 저장된 태그를 다시 반영해 초안을 정리했습니다. 현재 근거상 이 기능은 `명세-채팅-세션`, `프로젝트-워크벤치-셸`, `ipc-런...",
+  "messageCount": 8
+}

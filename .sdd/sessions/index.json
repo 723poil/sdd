@@ -1,7 +1,196 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-26T23:55:06.940Z",
+  "generatedAt": "2026-03-27T01:56:40.910Z",
   "sessions": [
+    {
+      "id": "78ab9bda-ced6-4af5-a633-b3325543873e",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.882Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "516ed975-39fa-4002-aa91-22684fffb04d",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.874Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "90b42501-aa5c-4e55-af0a-ed868944f693",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.865Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "d17201d9-c4d2-46f2-ac99-3c544898e9ec",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.854Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "fb45dc4b-2de1-4bcf-a127-0c0f90979ba8",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.840Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "1e92172e-db3f-4f05-bb0e-0433b5a3f4cd",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.827Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "2bb34cab-be9b-4192-91b4-9183f9192786",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.809Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "5abafa4b-4027-4edb-af67-60c7c4c00073",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.769Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "57236bb1-98dd-4095-9298-5d509291e340",
+      "specId": "spec-05",
+      "title": "새 명세 05 채팅",
+      "updatedAt": "2026-03-27T01:56:40.718Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "f478209c-c12f-41b0-b388-b6d499da8532",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-27T01:00:24.448Z",
+      "lastMessageAt": "2026-03-27T01:00:24.448Z",
+      "lastMessagePreview": "참조 분석과 저장된 태그를 다시 반영해 초안을 정리했습니다. 현재 근거상 이 기능은 `명세-채팅-세션`, `프로젝트-워크벤치-셸`, `ipc-런...",
+      "messageCount": 8
+    },
+    {
+      "id": "2012fc90-384c-49cb-9729-ccf0cfca4945",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.127Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "99f90eb6-fd1b-4a25-abaa-f26dbc1726d1",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.085Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "18c79a18-835b-41e7-9104-b55565634bf2",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.071Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "38d8f77a-cc54-481a-90c3-d99f7f0c5a33",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.061Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ba2f53a2-9146-46ef-b258-cd069d71241d",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.048Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "7b4f9106-bfc1-4552-b435-b9ae8eb5fee6",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.039Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "4f25395a-f890-4d82-a885-7d9cf0964e8f",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.027Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "1bee22cd-fdfc-454b-888b-ad1b3d163f55",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.013Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "7e8b0d5e-94cb-43fe-8cec-9b09ba31ba4f",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:43.004Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "fbe8635f-ada6-4d6b-9133-b85d48c8dc62",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:42.957Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "f725f2aa-7e99-4461-bfd9-5b0b398b7976",
+      "specId": "spec-04",
+      "title": "새 명세 04 채팅",
+      "updatedAt": "2026-03-26T23:56:42.924Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
     {
       "id": "e7a8b8b7-f568-47ba-a028-465384b91afb",
       "specId": "spec-03",

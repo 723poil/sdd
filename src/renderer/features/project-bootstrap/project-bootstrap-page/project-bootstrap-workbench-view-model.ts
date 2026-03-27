@@ -1,4 +1,7 @@
-import type { ProjectBootstrapWorkbenchState, ProjectBootstrapWorkbenchViewModel } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import type {
+  ProjectBootstrapWorkbenchState,
+  ProjectBootstrapWorkbenchViewModel,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
 
 import {
   createProjectSessionStateKey,
@@ -19,11 +22,11 @@ export function createProjectBootstrapWorkbenchViewModel(
 ): ProjectBootstrapWorkbenchViewModel {
   const selectedAnalysisRunStatus =
     state.selectedPath !== null
-      ? state.analysisRunStatusesByRootPath[state.selectedPath] ?? null
+      ? (state.analysisRunStatusesByRootPath[state.selectedPath] ?? null)
       : null;
   const selectedReferenceTagGenerationStatus =
     state.selectedPath !== null
-      ? state.referenceTagGenerationStatusesByRootPath[state.selectedPath] ?? null
+      ? (state.referenceTagGenerationStatusesByRootPath[state.selectedPath] ?? null)
       : null;
   const visibleAnalysisRunStatus = getVisibleAnalysisRunStatus(selectedAnalysisRunStatus);
   const progressTasks = buildWorkbenchProgressTasks({
@@ -49,7 +52,8 @@ export function createProjectBootstrapWorkbenchViewModel(
     state.inspection.initializationState === 'ready' &&
     state.inspection.isWritable &&
     !isAnalyzing;
-  const canAnalyzeReferences = state.inspection !== null && state.inspection.isReadable && !isAnalyzing;
+  const canAnalyzeReferences =
+    state.inspection !== null && state.inspection.isReadable && !isAnalyzing;
   const canCancelAnalysis =
     visibleAnalysisRunStatus !== null &&
     (visibleAnalysisRunStatus.status === 'running' ||
@@ -57,9 +61,7 @@ export function createProjectBootstrapWorkbenchViewModel(
     visibleAnalysisRunStatus.stepIndex < visibleAnalysisRunStatus.stepTotal;
   const selectedSpec = resolveSelectedSpec(state.specs, state.selectedSpecId);
   const selectedSession = resolveSelectedSession(
-    selectedSpec
-      ? state.sessions.filter((session) => session.specId === selectedSpec.meta.id)
-      : [],
+    selectedSpec ? state.sessions.filter((session) => session.specId === selectedSpec.meta.id) : [],
     state.selectedSessionId,
   );
   const selectedSessionStateKey =
@@ -108,12 +110,22 @@ export function createProjectBootstrapWorkbenchViewModel(
     selectedSpec,
     sessionMessages:
       selectedSessionStateKey !== null
-        ? state.sessionMessagesBySessionKey[selectedSessionStateKey] ?? []
+        ? (state.sessionMessagesBySessionKey[selectedSessionStateKey] ?? [])
         : [],
     draftMessage:
       selectedSessionStateKey !== null
-        ? state.draftMessagesBySessionKey[selectedSessionStateKey] ?? ''
+        ? (state.draftMessagesBySessionKey[selectedSessionStateKey] ?? '')
         : '',
+    draftAttachments:
+      selectedSessionStateKey !== null
+        ? (state.draftAttachmentsBySessionKey[selectedSessionStateKey] ?? [])
+        : [],
+    draftAttachmentErrors:
+      selectedSessionStateKey !== null
+        ? (state.draftAttachmentErrorsBySessionKey[selectedSessionStateKey] ?? [])
+        : [],
+    isComposerDragActive:
+      selectedSessionStateKey !== null && state.composerDragSessionKey === selectedSessionStateKey,
     storageStatus: getStorageStatus(state.inspection),
     workbenchClassName: [
       'workbench',

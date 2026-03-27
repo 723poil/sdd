@@ -20,6 +20,7 @@ import type {
   ProjectSpecVersionHistoryEntry,
 } from '@/domain/project/project-spec-model';
 import type {
+  ProjectSessionMessageAttachmentUpload,
   ProjectSessionMessage,
   ProjectSessionMessageRunStatus,
   ProjectSessionMeta,
@@ -188,6 +189,7 @@ export interface ReadProjectSessionMessageRunStatusInput {
 }
 
 export interface SendProjectSessionMessageInput {
+  attachments: ProjectSessionMessageAttachmentUpload[];
   model: string;
   modelReasoningEffort: AgentCliModelReasoningEffort;
   rootPath: string;

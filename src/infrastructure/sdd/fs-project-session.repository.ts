@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import type { ProjectSessionPort } from '@/application/project/project.ports';
@@ -20,13 +20,18 @@ import {
   toProjectSessionViewSummaries,
   writeSessionIndexDocument,
 } from '@/infrastructure/sdd/fs-project-session-documents';
+import { persistProjectSessionMessageAttachments } from '@/infrastructure/sdd/fs-project-session-attachments';
 import {
+  getSessionMessageAttachmentsDirectoryPath,
   getSessionMessagesPath,
   getSessionMetaPath,
   getSessionsDirectoryPath,
 } from '@/infrastructure/sdd/fs-project-session-paths';
 import { pathExists } from '@/infrastructure/sdd/fs-project-storage-io';
-import { writeJsonAtomically, writeTextAtomically } from '@/infrastructure/fs/write-json-atomically';
+import {
+  writeJsonAtomically,
+  writeTextAtomically,
+} from '@/infrastructure/fs/write-json-atomically';
 
 async function ensureDirectory(path: string): Promise<void> {
   await mkdir(path, {
@@ -128,8 +133,21 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
       }
 
       const now = new Date().toISOString();
+      const messageId = randomUUID();
+      const persistedAttachmentsResult = await persistProjectSessionMessageAttachments({
+        attachments: input.attachments ?? [],
+        messageId,
+        now,
+        rootPath,
+        sessionId: input.sessionId,
+      });
+      if (!persistedAttachmentsResult.ok) {
+        return persistedAttachmentsResult;
+      }
+
       const message = createProjectSessionMessage({
-        id: randomUUID(),
+        attachments: persistedAttachmentsResult.value,
+        id: messageId,
         now,
         role: input.role,
         sessionId: input.sessionId,
@@ -137,16 +155,32 @@ export function createFsProjectSessionRepository(): ProjectSessionPort {
       });
 
       const nextSession = createNextProjectSessionMetaAfterMessage({
+        attachments: message.attachments,
         current: currentSession,
         now,
         text: input.text,
       });
 
-      await appendSessionMessageDocument({
-        rootPath,
-        message,
-        sessionId: input.sessionId,
-      });
+      try {
+        await appendSessionMessageDocument({
+          rootPath,
+          message,
+          sessionId: input.sessionId,
+        });
+      } catch (error) {
+        await rm(getSessionMessageAttachmentsDirectoryPath(rootPath, input.sessionId, messageId), {
+          force: true,
+          recursive: true,
+        });
+        return err(
+          createProjectError(
+            'INVALID_PROJECT_STORAGE',
+            '세션 메시지 로그를 저장하지 못했습니다.',
+            error instanceof Error ? error.message : undefined,
+          ),
+        );
+      }
+
       await writeJsonAtomically(getSessionMetaPath(rootPath, input.sessionId), nextSession);
 
       const sessionsResult = await this.listSessions({

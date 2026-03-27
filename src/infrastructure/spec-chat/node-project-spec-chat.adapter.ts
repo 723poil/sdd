@@ -57,8 +57,9 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
               runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
             outputLastMessagePath,
             outputSchemaPath,
-            prompt: createProjectSpecChatPrompt({
+            prompt: await createProjectSpecChatPrompt({
               projectName: input.projectName,
+              rootPath,
               sessionMessages: input.sessionMessages,
               spec: input.spec,
             }),

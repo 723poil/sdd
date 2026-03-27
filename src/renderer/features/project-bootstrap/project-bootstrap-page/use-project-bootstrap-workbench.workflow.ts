@@ -26,9 +26,12 @@ import type {
 } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessage,
+  ProjectSessionMessagePendingAttachment,
+  ProjectSessionMessageAttachmentSource,
   ProjectSessionMessageRunStatus,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
+import { createProjectSessionMessagePreview } from '@/domain/project/project-session-model';
 import { getRendererSddApi } from '@/renderer/renderer-sdd-api';
 
 import {
@@ -50,6 +53,12 @@ import {
   upsertProjectSessionSummary,
   upsertProjectSpec,
 } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils';
+import {
+  collectProjectSessionDraftAttachments,
+  createProjectSessionMessageAttachmentUploads,
+  revokeProjectSessionDraftAttachments,
+  type ProjectSessionDraftAttachment,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-session-attachment-draft';
 import type {
   ProjectBootstrapWorkbenchState,
   ReferenceTagGenerationStatus,
@@ -77,12 +86,15 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onCancelAnalysis(rootPath?: string): void;
     onCancelReferenceTagGeneration(rootPath?: string): void;
     onCancelSessionMessage(rootPath?: string, sessionId?: string): void;
+    onAddDraftAttachments(files: File[], source: ProjectSessionMessageAttachmentSource): void;
     onChangeDraftMessage(value: string): void;
     onChangeEditingProjectName(value: string): void;
     onCreateSpec(): void;
     onDragOverProject(rootPath: string): void;
     onDropProject(rootPath: string): void;
     onEndDraggingProject(): void;
+    onRemoveDraftAttachment(draftId: string): void;
+    onSetComposerDragActive(isActive: boolean): void;
     onChangeChatModel(model: string): void;
     onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort): void;
     onGenerateReferenceTags(): Promise<'succeeded' | 'failed' | 'cancelled'>;
@@ -160,6 +172,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [draftMessagesBySessionKey, setDraftMessagesBySessionKey] = useState<
     Record<string, string>
   >({});
+  const [draftAttachmentsBySessionKey, setDraftAttachmentsBySessionKey] = useState<
+    Record<string, ProjectSessionDraftAttachment[]>
+  >({});
+  const [draftAttachmentErrorsBySessionKey, setDraftAttachmentErrorsBySessionKey] = useState<
+    Record<string, string[]>
+  >({});
   const [sessionMessageRunStatusesBySessionKey, setSessionMessageRunStatusesBySessionKey] =
     useState<Record<string, ProjectSessionMessageRunStatus>>({});
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
@@ -168,6 +186,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [expandedProjectRootPaths, setExpandedProjectRootPaths] = useState<string[]>([]);
   const [draggingProjectRootPath, setDraggingProjectRootPath] = useState<string | null>(null);
   const [dropTargetRootPath, setDropTargetRootPath] = useState<string | null>(null);
+  const [composerDragSessionKey, setComposerDragSessionKey] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCreatingSpec, setIsCreatingSpec] = useState(false);
   const [isSavingSpec, setIsSavingSpec] = useState(false);
@@ -186,6 +205,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     Record<string, ReferenceTagGenerationStatus>
   >({});
   const referenceTagGenerationTaskIdsByRootPathRef = useRef<Record<string, string>>({});
+  const draftAttachmentsBySessionKeyRef = useRef<Record<string, ProjectSessionDraftAttachment[]>>(
+    {},
+  );
   const sessionMessageRunStatusesBySessionKeyRef = useRef<
     Record<string, ProjectSessionMessageRunStatus>
   >({});
@@ -198,6 +220,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     ? sessions.filter((session) => session.specId === selectedSpec.meta.id)
     : [];
   const selectedSession = resolveSelectedSession(specSessions, selectedSessionId);
+  const selectedSessionStateKey =
+    selectedPath && selectedSession
+      ? createProjectSessionStateKey({
+          rootPath: selectedPath,
+          sessionId: selectedSession.id,
+        })
+      : null;
 
   const applyProjectWorkspaceSnapshot = (input: {
     snapshot: ProjectWorkspaceSnapshot;
@@ -209,11 +238,24 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setSessions(input.snapshot.sessions);
   };
 
+  const clearAllDraftSessionState = () => {
+    for (const attachments of Object.values(draftAttachmentsBySessionKeyRef.current)) {
+      revokeProjectSessionDraftAttachments(attachments);
+    }
+
+    draftAttachmentsBySessionKeyRef.current = {};
+    setDraftMessagesBySessionKey({});
+    setDraftAttachmentsBySessionKey({});
+    setDraftAttachmentErrorsBySessionKey({});
+    setComposerDragSessionKey(null);
+  };
+
   const clearProjectWorkspaceSnapshot = () => {
     applyProjectWorkspaceSnapshot({
       snapshot: createEmptyProjectWorkspaceSnapshot(),
     });
     setSpecConflictBySpecId({});
+    clearAllDraftSessionState();
   };
 
   const setReferenceTagGenerationStatus = (
@@ -260,6 +302,37 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       sessionMessageRunStatusesBySessionKeyRef.current = nextStatuses;
       return nextStatuses;
     });
+  };
+
+  const setDraftAttachmentsForSession = (
+    sessionKey: string,
+    attachments: ProjectSessionDraftAttachment[] | null,
+  ) => {
+    setDraftAttachmentsBySessionKey((current) => {
+      const previousAttachments = current[sessionKey] ?? [];
+      const normalizedAttachments = attachments && attachments.length > 0 ? attachments : null;
+      const nextAttachments = replaceRecordValue(current, sessionKey, normalizedAttachments);
+
+      if (normalizedAttachments === null) {
+        revokeProjectSessionDraftAttachments(previousAttachments);
+      } else {
+        const nextAttachmentIds = new Set(
+          normalizedAttachments.map((attachment) => attachment.draftId),
+        );
+        revokeProjectSessionDraftAttachments(
+          previousAttachments.filter((attachment) => !nextAttachmentIds.has(attachment.draftId)),
+        );
+      }
+
+      draftAttachmentsBySessionKeyRef.current = nextAttachments;
+      return nextAttachments;
+    });
+  };
+
+  const setDraftAttachmentErrorsForSession = (sessionKey: string, errors: string[] | null) => {
+    setDraftAttachmentErrorsBySessionKey((current) =>
+      replaceRecordValue(current, sessionKey, errors && errors.length > 0 ? errors : null),
+    );
   };
 
   const setSessionMessageTaskId = (sessionKey: string, taskId: string | null) => {
@@ -338,6 +411,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   useEffect(() => {
     selectedPathRef.current = selectedPath;
   }, [selectedPath]);
+
+  useEffect(() => {
+    return () => {
+      for (const attachments of Object.values(draftAttachmentsBySessionKeyRef.current)) {
+        revokeProjectSessionDraftAttachments(attachments);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -986,7 +1067,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     const currentDraftMessage = draftMessagesBySessionKey[sessionKey] ?? '';
     const trimmedDraftMessage = currentDraftMessage.trim();
-    if (trimmedDraftMessage.length === 0) {
+    const currentDraftAttachments = draftAttachmentsBySessionKeyRef.current[sessionKey] ?? [];
+    if (trimmedDraftMessage.length === 0 && currentDraftAttachments.length === 0) {
       return;
     }
 
@@ -996,6 +1078,27 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    let attachmentUploads;
+    try {
+      attachmentUploads =
+        await createProjectSessionMessageAttachmentUploads(currentDraftAttachments);
+    } catch {
+      setDraftAttachmentErrorsForSession(sessionKey, [
+        '첨부를 읽지 못했습니다. 다시 선택한 뒤 보내 주세요.',
+      ]);
+      setErrorMessage('첨부를 읽지 못했습니다. 다시 선택한 뒤 보내 주세요.');
+      setMessage('메시지를 보내기 전에 첨부를 다시 확인해 주세요.');
+      return;
+    }
+
+    const requestText = trimmedDraftMessage.length > 0 ? trimmedDraftMessage : null;
+    const requestAttachments =
+      createPendingAttachmentsFromDraftAttachments(currentDraftAttachments);
+    const requestSummary = createProjectSessionMessagePreview({
+      attachments: currentDraftAttachments,
+      text: trimmedDraftMessage,
+    });
+    setDraftAttachmentErrorsForSession(sessionKey, null);
     const startedAt = new Date().toISOString();
     const sendMessageTask = progressTasks.startRequestProgressTask({
       detail: `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 응답을 기다리고 있습니다.`,
@@ -1008,8 +1111,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     });
     setSessionMessageTaskId(sessionKey, sendMessageTask.id);
     const runningStatus = createRunningProjectSessionMessageRunStatus({
-      progressMessage: '대화 로그에 질문을 기록하고 있습니다.',
-      requestText: trimmedDraftMessage,
+      attachmentCount: currentDraftAttachments.length,
+      progressMessage:
+        currentDraftAttachments.length > 0
+          ? '대화 로그와 첨부를 저장하고 있습니다.'
+          : '대화 로그에 질문을 기록하고 있습니다.',
+      requestAttachments,
+      requestSummary,
+      requestText,
       rootPath: selectedPath,
       sessionId: selectedSession.id,
       startedAt,
@@ -1026,6 +1135,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     try {
       const result = await sddApi.project.sendSessionMessage({
+        attachments: attachmentUploads,
         model: codexConnectionSettings.model,
         modelReasoningEffort: codexConnectionSettings.modelReasoningEffort,
         rootPath: selectedPath,
@@ -1045,6 +1155,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             );
           }
           setDraftMessagesBySessionKey((current) => replaceRecordValue(current, sessionKey, null));
+          setDraftAttachmentsForSession(sessionKey, null);
+          setDraftAttachmentErrorsForSession(sessionKey, null);
           setSessionMessageRunStatus({
             rootPath: selectedPath,
             sessionId: selectedSession.id,
@@ -1068,10 +1180,13 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           rootPath: selectedPath,
           sessionId: selectedSession.id,
           status: createFailedProjectSessionMessageRunStatus({
+            attachmentCount: currentDraftAttachments.length,
             completedAt,
             lastError: result.error.message,
             progressMessage: null,
-            requestText: null,
+            requestAttachments,
+            requestSummary,
+            requestText,
             rootPath: selectedPath,
             sessionId: selectedSession.id,
             startedAt,
@@ -1111,6 +1226,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       }
       setSessions((current) => upsertProjectSessionSummary(current, result.value.session));
       setDraftMessagesBySessionKey((current) => replaceRecordValue(current, sessionKey, null));
+      setDraftAttachmentsForSession(sessionKey, null);
+      setDraftAttachmentErrorsForSession(sessionKey, null);
 
       if (result.value.assistantErrorMessage) {
         const completedAt = new Date().toISOString();
@@ -1118,9 +1235,12 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           rootPath: selectedPath,
           sessionId: selectedSession.id,
           status: createFailedProjectSessionMessageRunStatus({
+            attachmentCount: 0,
             completedAt,
             lastError: result.value.assistantErrorMessage,
             progressMessage: null,
+            requestAttachments: [],
+            requestSummary: null,
             requestText: null,
             rootPath: selectedPath,
             sessionId: selectedSession.id,
@@ -1970,6 +2090,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       selectedSessionId,
       sessionMessagesBySessionKey,
       draftMessagesBySessionKey,
+      draftAttachmentsBySessionKey,
+      draftAttachmentErrorsBySessionKey,
       sessionMessageRunStatusesBySessionKey,
       recentProjects,
       editingProjectRootPath,
@@ -1977,6 +2099,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       expandedProjectRootPaths,
       draggingProjectRootPath,
       dropTargetRootPath,
+      composerDragSessionKey,
       isSelecting,
       isCreatingSpec,
       isSavingSpec,
@@ -2007,6 +2130,25 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
       onCancelSessionMessage(rootPath?: string, sessionId?: string) {
         void handleCancelSessionMessage(rootPath, sessionId);
+      },
+      onAddDraftAttachments(files: File[], source: ProjectSessionMessageAttachmentSource) {
+        if (!selectedSessionStateKey || files.length === 0) {
+          return;
+        }
+
+        const currentAttachments =
+          draftAttachmentsBySessionKeyRef.current[selectedSessionStateKey] ?? [];
+        const collectionResult = collectProjectSessionDraftAttachments({
+          existingAttachments: currentAttachments,
+          files,
+          source,
+        });
+
+        setDraftAttachmentsForSession(selectedSessionStateKey, [
+          ...currentAttachments,
+          ...collectionResult.attachments,
+        ]);
+        setDraftAttachmentErrorsForSession(selectedSessionStateKey, collectionResult.errors);
       },
       onChangeDraftMessage(value: string) {
         if (!selectedPath || !selectedSession?.id) {
@@ -2057,6 +2199,22 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onEndDraggingProject() {
         setDraggingProjectRootPath(null);
         setDropTargetRootPath(null);
+      },
+      onRemoveDraftAttachment(draftId: string) {
+        if (!selectedSessionStateKey) {
+          return;
+        }
+
+        const currentAttachments =
+          draftAttachmentsBySessionKeyRef.current[selectedSessionStateKey] ?? [];
+        setDraftAttachmentsForSession(
+          selectedSessionStateKey,
+          currentAttachments.filter((attachment) => attachment.draftId !== draftId),
+        );
+        setDraftAttachmentErrorsForSession(selectedSessionStateKey, null);
+      },
+      onSetComposerDragActive(isActive: boolean) {
+        setComposerDragSessionKey(isActive ? selectedSessionStateKey : null);
       },
       onSelectProject() {
         void handleSelectProject();
@@ -2129,4 +2287,17 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       },
     },
   };
+}
+
+function createPendingAttachmentsFromDraftAttachments(
+  attachments: readonly ProjectSessionDraftAttachment[],
+): ProjectSessionMessagePendingAttachment[] {
+  return attachments.map((attachment) => ({
+    id: attachment.draftId,
+    kind: attachment.kind,
+    mimeType: attachment.mimeType,
+    name: attachment.name,
+    previewUrl: attachment.previewUrl,
+    sizeBytes: attachment.sizeBytes,
+  }));
 }

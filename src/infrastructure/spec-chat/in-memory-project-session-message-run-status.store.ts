@@ -35,6 +35,9 @@ export function createInMemoryProjectSessionMessageRunStatusStore(): ProjectSess
         stageMessage: input.stageMessage,
         progressMessage: input.progressMessage ?? null,
         requestText: input.requestText,
+        requestSummary: input.requestSummary,
+        attachmentCount: input.attachmentCount,
+        requestAttachments: input.requestAttachments ?? [],
         startedAt: input.startedAt,
         updatedAt: input.startedAt,
         completedAt: null,
@@ -95,6 +98,18 @@ export function createInMemoryProjectSessionMessageRunStatusStore(): ProjectSess
             : input.progressMessage,
         requestText:
           typeof input.requestText === 'undefined' ? currentStatus.requestText : input.requestText,
+        requestSummary:
+          typeof input.requestSummary === 'undefined'
+            ? currentStatus.requestSummary
+            : input.requestSummary,
+        attachmentCount:
+          typeof input.attachmentCount === 'undefined'
+            ? currentStatus.attachmentCount
+            : input.attachmentCount,
+        requestAttachments:
+          typeof input.requestAttachments === 'undefined'
+            ? currentStatus.requestAttachments
+            : input.requestAttachments,
         updatedAt,
         completedAt:
           typeof input.completedAt === 'undefined' ? currentStatus.completedAt : input.completedAt,

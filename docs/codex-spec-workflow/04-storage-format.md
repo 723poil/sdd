@@ -51,6 +51,10 @@
     session-001/
       meta.json
       messages.jsonl
+      attachments/
+        message-001/
+          screenshot.png
+          notes.md
   specs/
     index.json
     project-overview/
@@ -343,11 +347,37 @@
 - `createdAt`
 - `role`
 - `text`
+- `attachments`
+  - `id`
+  - `kind`
+  - `source`
+  - `name`
+  - `mimeType`
+  - `sizeBytes`
+  - `relativePath`
+  - `createdAt`
 
 주의:
 
 - Codex 연결 전에는 user 중심 메시지만 존재할 수 있다
 - 이후 assistant/system 역할이 추가돼도 같은 포맷을 이어서 사용 가능해야 한다
+- 첨부 source of truth 는 각 메시지 레코드 안의 `attachments` manifest 배열이다
+- 별도의 mutable 첨부 목록 JSON 은 두지 않는다
+- `schemaVersion: 1` 텍스트 전용 메시지는 읽기 경계에서 `attachments: []` 로 fallback 할 수 있어야 한다
+
+### `.sdd/sessions/<session-id>/attachments/<message-id>/`
+
+역할:
+
+- 사용자 메시지 하나에 속한 첨부 원본 사본 저장 경로
+
+권장 규칙:
+
+- renderer 는 raw binary 를 typed IPC 로 main process 에 전달하고, 실제 파일 저장은 앱이 담당한다
+- 저장 경로는 메시지 단위로 분리해 이름 충돌을 피한다
+- manifest 의 `relativePath` 는 세션 디렉터리 기준 `attachments/<message-id>/...` 형식으로 남긴다
+- 이미지 첨부는 원본 포맷과 확장자를 최대한 유지한 사본 저장을 기본으로 한다
+- 텍스트/코드 첨부는 prompt 조립 시 저장 경로를 기준으로 읽고, UTF-8 로 안정적으로 해석될 때만 excerpt 를 함께 사용한다
 
 ### `.sdd/specs/<spec-slug>/meta.json`
 

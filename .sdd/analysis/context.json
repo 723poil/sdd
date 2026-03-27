@@ -14,6 +14,7 @@
     "src/application/app-settings/list-agent-cli-connections.use-case.ts",
     "src/application/app-settings/save-agent-cli-connection.use-case.ts",
     "src/application/project/activate-project.use-case.ts",
+    "src/application/project/analysis-run-status-reporter.ts",
     "src/application/project/analyze-project-workflow.ts",
     "src/application/project/analyze-project.use-case.ts",
     "src/application/project/apply-project-spec-version.use-case.ts",
@@ -30,9 +31,11 @@
     "src/application/project/list-project-sessions.use-case.ts",
     "src/application/project/list-recent-projects.use-case.ts",
     "src/application/project/project-analysis-draft-merger.ts",
+    "src/application/project/project-session-message-run.ts",
     "src/application/project/project.ports.ts",
     "src/application/project/read-project-analysis-run-status.use-case.ts",
     "src/application/project/read-project-analysis.use-case.ts",
+    "src/application/project/read-project-inspection.ts",
     "src/application/project/read-project-session-message-run-status.use-case.ts",
     "src/application/project/read-project-session-messages.use-case.ts",
     "src/application/project/read-project-spec-version-diff.use-case.ts",
@@ -66,7 +69,10 @@
     "src/infrastructure/analysis/project-analysis-detection.ts",
     "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
     "src/infrastructure/analysis/project-analysis-local-draft.ts",
+    "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+    "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts",
     "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+    "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
     "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
     "src/infrastructure/analysis/project-analysis-scanner.ts",
     "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
@@ -89,6 +95,7 @@
     "src/infrastructure/sdd/fs-project-session-paths.ts",
     "src/infrastructure/sdd/fs-project-session.repository.ts",
     "src/infrastructure/sdd/fs-project-spec-documents.ts",
+    "src/infrastructure/sdd/fs-project-storage-context.ts",
     "src/infrastructure/sdd/fs-project-storage-documents.ts",
     "src/infrastructure/sdd/fs-project-storage-io.ts",
     "src/infrastructure/sdd/fs-project-storage-paths.ts",
@@ -108,6 +115,8 @@
     "src/renderer/app-view.ts",
     "src/renderer/App.tsx",
     "src/renderer/components/AppViewSwitcher.tsx",
+    "src/renderer/components/IconActionButton.tsx",
+    "src/renderer/components/TooltipSurface.tsx",
     "src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts",
     "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
     "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
@@ -124,7 +133,6 @@
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
-    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
@@ -135,6 +143,7 @@
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
@@ -142,8 +151,13 @@
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types.ts",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
@@ -195,12 +209,9 @@
     "src/infrastructure/sdd",
     "src/infrastructure/spec-chat",
     "src/main",
-    "src/main 2",
     "src/main/ipc",
     "src/preload",
-    "src/preload 2",
     "src/renderer",
-    "src/renderer 2",
     "src/renderer/components",
     "src/renderer/features",
     "src/renderer/features/agent-cli-settings",
@@ -211,6 +222,7 @@
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags",
     "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace",
+    "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map",
     "src/renderer/styles",
     "src/shared",
     "src/shared/app",
@@ -255,12 +267,12 @@
     "src/domain",
     "src/infrastructure",
     "src/main",
-    "src/main 2",
     "src/preload",
-    "src/preload 2",
     "src/renderer",
-    "src/renderer 2",
     "src/shared",
+    "src/main 2",
+    "src/preload 2",
+    "src/renderer 2",
     ".codex/skills",
     "docs/codex-spec-workflow",
     "src/renderer/features/project-bootstrap",
@@ -310,20 +322,20 @@
       "y": 0
     },
     "purpose": {
-      "x": -105.8828125,
-      "y": -722.9765625
+      "x": -193.12934745179064,
+      "y": -513.9606146694215
     },
     "structure": {
-      "x": 27.869382747933884,
-      "y": 512.6591985192838
+      "x": -262.07657541322317,
+      "y": 586.0576790633609
     },
     "layers": {
-      "x": 658.9072400137742,
-      "y": 513.9864841597796
+      "x": 533.085141184573,
+      "y": 171.26338670798899
     },
     "connectivity": {
-      "x": 414.69866993801656,
-      "y": 33.65898329889808
+      "x": 514.6444128787879,
+      "y": -685.0213498622588
     }
   },
   "layers": [
@@ -401,7 +413,7 @@
       ],
       "directories": [],
       "name": "renderer/renderer/source",
-      "responsibility": "렌더러 renderer 소스 관련 코드 50개"
+      "responsibility": "렌더러 renderer 소스 관련 코드 57개"
     },
     {
       "dependsOn": [
@@ -443,7 +455,7 @@
       ],
       "directories": [],
       "name": "src/application/project/source",
-      "responsibility": "소스 application/project 관련 코드 35개"
+      "responsibility": "소스 application/project 관련 코드 38개"
     },
     {
       "dependsOn": [
@@ -465,7 +477,7 @@
       ],
       "directories": [],
       "name": "src/infrastructure/analysis/source",
-      "responsibility": "소스 infrastructure/analysis 관련 코드 16개"
+      "responsibility": "소스 infrastructure/analysis 관련 코드 19개"
     },
     {
       "dependsOn": [
@@ -531,7 +543,7 @@
       ],
       "directories": [],
       "name": "src/infrastructure/sdd/source",
-      "responsibility": "소스 infrastructure/sdd 관련 코드 8개"
+      "responsibility": "소스 infrastructure/sdd 관련 코드 9개"
     },
     {
       "dependsOn": [
@@ -561,12 +573,12 @@
     {
       "layer": "main",
       "path": ".",
-      "role": "주요 파일 172개. 소스 152개, 진입점 7개, 설정 파일 4개 중심 경로입니다."
+      "role": "주요 파일 186개. 소스 166개, 진입점 7개, 설정 파일 4개 중심 경로입니다."
     },
     {
       "layer": "main",
       "path": "src",
-      "role": "주요 파일 161개. 소스 149개, 진입점 7개, 레포지토리 4개 중심 경로입니다."
+      "role": "주요 파일 175개. 소스 163개, 진입점 7개, 레포지토리 4개 중심 경로입니다."
     },
     {
       "layer": "application",
@@ -576,7 +588,12 @@
     {
       "layer": "application",
       "path": "src/application/project",
-      "role": "주요 파일 35개. 소스 35개 중심 경로입니다."
+      "role": "주요 파일 38개. 소스 38개 중심 경로입니다."
+    },
+    {
+      "layer": null,
+      "path": "src/components",
+      "role": "정적 분석에서 주요 디렉터리로 감지했습니다."
     },
     {
       "layer": null,
@@ -601,7 +618,7 @@
     {
       "layer": "infrastructure",
       "path": "src/infrastructure/analysis",
-      "role": "주요 파일 16개. 소스 16개 중심 경로입니다."
+      "role": "주요 파일 19개. 소스 19개 중심 경로입니다."
     },
     {
       "layer": "infrastructure",
@@ -612,41 +629,36 @@
       "layer": "infrastructure",
       "path": "src/infrastructure/fs",
       "role": "주요 파일 2개. 소스 2개 중심 경로입니다."
-    },
-    {
-      "layer": "infrastructure",
-      "path": "src/infrastructure/reference-tags",
-      "role": "주요 파일 4개. 소스 4개 중심 경로입니다."
     }
   ],
   "connections": [
     {
       "from": "renderer/renderer/source",
-      "reason": "정적 참조 95건. 예: src/renderer/App.tsx -> src/renderer/app-view.ts, src/renderer/components/AppViewSwitcher.tsx -> src/renderer/app-view.ts, src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts -> src/renderer/features/agent-cli-settings/types.ts",
+      "reason": "정적 참조 114건. 예: src/renderer/App.tsx -> src/renderer/app-view.ts, src/renderer/components/AppViewSwitcher.tsx -> src/renderer/app-view.ts, src/renderer/components/IconActionButton.tsx -> src/renderer/components/TooltipSurface.tsx",
       "relationship": "정적 참조",
       "to": "renderer/renderer/source"
     },
     {
-      "from": "renderer/renderer/source",
-      "reason": "정적 참조 51건. 예: src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/types.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
-      "relationship": "정적 참조",
-      "to": "domain/domain/source"
-    },
-    {
       "from": "src/application/project/source",
-      "reason": "정적 참조 48건. 예: src/application/project/activate-project.use-case.ts -> src/application/project/inspect-project.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/initialize-project-storage.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/project.ports.ts",
+      "reason": "정적 참조 54건. 예: src/application/project/activate-project.use-case.ts -> src/application/project/inspect-project.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/initialize-project-storage.use-case.ts, src/application/project/activate-project.use-case.ts -> src/application/project/project.ports.ts",
       "relationship": "정적 참조",
       "to": "src/application/project/source"
     },
     {
-      "from": "src/application/project/source",
-      "reason": "정적 참조 48건. 예: src/application/project/activate-project.use-case.ts -> src/domain/project/project-model.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-errors.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-analysis-model.ts",
+      "from": "renderer/renderer/source",
+      "reason": "정적 참조 53건. 예: src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx -> src/domain/app-settings/agent-cli-connection-model.ts, src/renderer/features/agent-cli-settings/types.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
       "relationship": "정적 참조",
       "to": "domain/domain/source"
     },
     {
       "from": "src/application/project/source",
-      "reason": "정적 참조 34건. 예: src/application/project/activate-project.use-case.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project-workflow.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project.use-case.ts -> src/shared/contracts/result.ts",
+      "reason": "정적 참조 50건. 예: src/application/project/activate-project.use-case.ts -> src/domain/project/project-model.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-errors.ts, src/application/project/analyze-project-workflow.ts -> src/domain/project/project-analysis-model.ts",
+      "relationship": "정적 참조",
+      "to": "domain/domain/source"
+    },
+    {
+      "from": "src/application/project/source",
+      "reason": "정적 참조 36건. 예: src/application/project/activate-project.use-case.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project-workflow.ts -> src/shared/contracts/result.ts, src/application/project/analyze-project.use-case.ts -> src/shared/contracts/result.ts",
       "relationship": "정적 참조",
       "to": "shared/shared/source"
     },
@@ -658,19 +670,19 @@
     },
     {
       "from": "src/infrastructure/analysis/source",
-      "reason": "정적 참조 19건. 예: src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-errors.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
-      "relationship": "정적 참조",
-      "to": "domain/domain/source"
-    },
-    {
-      "from": "src/infrastructure/analysis/source",
-      "reason": "정적 참조 18건. 예: src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-prompt.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-result.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "reason": "정적 참조 28건. 예: src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-prompt.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-codex-result.ts, src/infrastructure/analysis/node-project-analyzer.adapter.ts -> src/infrastructure/analysis/project-analysis-local-draft.ts",
       "relationship": "정적 참조",
       "to": "src/infrastructure/analysis/source"
     },
     {
+      "from": "src/infrastructure/analysis/source",
+      "reason": "정적 참조 21건. 예: src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts -> src/domain/project/project-errors.ts, src/infrastructure/analysis/node-project-analyzer-codex-execution.ts -> src/domain/app-settings/agent-cli-connection-model.ts",
+      "relationship": "정적 참조",
+      "to": "domain/domain/source"
+    },
+    {
       "from": "src/infrastructure/sdd/source",
-      "reason": "정적 참조 16건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/domain/project/project-errors.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-reference-tag-model.ts",
+      "reason": "정적 참조 19건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/domain/project/project-errors.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-analysis-model.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/domain/project/project-reference-tag-model.ts",
       "relationship": "정적 참조",
       "to": "domain/domain/source"
     },
@@ -681,16 +693,16 @@
       "to": "domain/domain/source"
     },
     {
+      "from": "src/infrastructure/sdd/source",
+      "reason": "정적 참조 13건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/infrastructure/sdd/fs-project-storage-io.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-documents.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "relationship": "정적 참조",
+      "to": "src/infrastructure/sdd/source"
+    },
+    {
       "from": "shared/shared/source",
       "reason": "정적 참조 11건. 예: src/shared/contracts/result.ts -> src/shared/contracts/app-error.ts, src/shared/ipc/project-ipc-api.ts -> src/shared/ipc/project-ipc.ts, src/shared/ipc/project-ipc-api.ts -> src/shared/contracts/result.ts",
       "relationship": "정적 참조",
       "to": "shared/shared/source"
-    },
-    {
-      "from": "src/infrastructure/sdd/source",
-      "reason": "정적 참조 10건. 예: src/infrastructure/sdd/fs-project-analysis-backup.ts -> src/infrastructure/sdd/fs-project-storage-io.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-documents.ts, src/infrastructure/sdd/fs-project-analysis-persistence.ts -> src/infrastructure/sdd/fs-project-storage-paths.ts",
-      "relationship": "정적 참조",
-      "to": "src/infrastructure/sdd/source"
     }
   ],
   "documentLinks": [
@@ -1123,6 +1135,12 @@
       "to": "src/renderer/app-view.ts"
     },
     {
+      "from": "src/renderer/components/IconActionButton.tsx",
+      "reason": "정적 import: @/renderer/components/TooltipSurface",
+      "relationship": "imports",
+      "to": "src/renderer/components/TooltipSurface.tsx"
+    },
+    {
       "from": "src/renderer/features/agent-cli-settings/index.ts",
       "reason": "정적 import: @/renderer/features/agent-cli-settings/AgentCliSettingsPage",
       "relationship": "imports",
@@ -1309,6 +1327,30 @@
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts"
     },
     {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
+      "reason": "정적 import: @/domain/project/project-session-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-session-model.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
+      "reason": "정적 import: @/shared/contracts/app-error",
+      "relationship": "imports",
+      "to": "src/shared/contracts/app-error.ts"
+    },
+    {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types",
       "relationship": "imports",
@@ -1478,12 +1520,6 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
-      "reason": "정적 import: @/shared/contracts/app-error",
-      "relationship": "imports",
-      "to": "src/shared/contracts/app-error.ts"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
       "reason": "정적 import: @/renderer/renderer-sdd-api",
       "relationship": "imports",
       "to": "src/renderer/renderer-sdd-api.ts"
@@ -1493,6 +1529,12 @@
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
@@ -1640,6 +1682,12 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts"
@@ -1694,12 +1742,6 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView",
-      "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts"
@@ -1712,9 +1754,15 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView",
       "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts"
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
@@ -1856,21 +1904,27 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils",
-      "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils",
       "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts"
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
@@ -1909,6 +1963,18 @@
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts"
     },
     {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
+      "reason": "정적 import: @/renderer/components/IconActionButton",
+      "relationship": "imports",
+      "to": "src/renderer/components/IconActionButton.tsx"
+    },
+    {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types",
       "relationship": "imports",
@@ -1925,18 +1991,6 @@
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
-      "reason": "정적 import: @/domain/project/project-analysis-model",
-      "relationship": "imports",
-      "to": "src/domain/project/project-analysis-model.ts"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceMapView.tsx",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types",
-      "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
@@ -1958,6 +2012,18 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
+      "reason": "정적 import: @/renderer/components/IconActionButton",
+      "relationship": "imports",
+      "to": "src/renderer/components/IconActionButton.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts"
@@ -1976,21 +2042,15 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
       "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts"
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts"
-    },
-    {
-      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
-      "reason": "상속: WorkspaceBoardLinkLike",
-      "relationship": "extends",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
@@ -2006,9 +2066,21 @@
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+      "reason": "정적 import: @/renderer/components/IconActionButton",
+      "relationship": "imports",
+      "to": "src/renderer/components/IconActionButton.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon.tsx"
     },
     {
       "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
@@ -2021,6 +2093,72 @@
       "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils",
       "relationship": "imports",
       "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
+    },
+    {
+      "from": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry",
+      "relationship": "imports",
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts"
     },
     {
       "from": "src/application/app-settings/app-settings.ports.ts",
@@ -2119,6 +2257,18 @@
       "to": "src/shared/contracts/result.ts"
     },
     {
+      "from": "src/application/project/analysis-run-status-reporter.ts",
+      "reason": "정적 import: @/application/project/project.ports",
+      "relationship": "imports",
+      "to": "src/application/project/project.ports.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project-workflow.ts",
+      "reason": "정적 import: @/application/project/analysis-run-status-reporter",
+      "relationship": "imports",
+      "to": "src/application/project/analysis-run-status-reporter.ts"
+    },
+    {
       "from": "src/application/project/analyze-project-workflow.ts",
       "reason": "정적 import: @/application/project/ensure-project-storage-ready",
       "relationship": "imports",
@@ -2135,6 +2285,12 @@
       "reason": "정적 import: @/application/project/project-analysis-draft-merger",
       "relationship": "imports",
       "to": "src/application/project/project-analysis-draft-merger.ts"
+    },
+    {
+      "from": "src/application/project/analyze-project-workflow.ts",
+      "reason": "정적 import: @/application/project/read-project-inspection",
+      "relationship": "imports",
+      "to": "src/application/project/read-project-inspection.ts"
     },
     {
       "from": "src/application/project/analyze-project-workflow.ts",
@@ -2467,6 +2623,24 @@
       "to": "src/domain/project/project-analysis-model.ts"
     },
     {
+      "from": "src/application/project/project-session-message-run.ts",
+      "reason": "정적 import: @/application/project/project.ports",
+      "relationship": "imports",
+      "to": "src/application/project/project.ports.ts"
+    },
+    {
+      "from": "src/application/project/project-session-message-run.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/application/project/project-session-message-run.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
       "from": "src/application/project/project.ports.ts",
       "reason": "정적 import: @/domain/app-settings/agent-cli-connection-model",
       "relationship": "imports",
@@ -2540,6 +2714,24 @@
     },
     {
       "from": "src/application/project/read-project-analysis.use-case.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/application/project/read-project-inspection.ts",
+      "reason": "정적 import: @/application/project/project.ports",
+      "relationship": "imports",
+      "to": "src/application/project/project.ports.ts"
+    },
+    {
+      "from": "src/application/project/read-project-inspection.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/application/project/read-project-inspection.ts",
       "reason": "정적 import: @/shared/contracts/result",
       "relationship": "imports",
       "to": "src/shared/contracts/result.ts"
@@ -2845,6 +3037,12 @@
       "to": "src/application/project/project.ports.ts"
     },
     {
+      "from": "src/application/project/send-project-session-message.use-case.ts",
+      "reason": "정적 import: @/application/project/project-session-message-run",
+      "relationship": "imports",
+      "to": "src/application/project/project-session-message-run.ts"
+    },
+    {
       "from": "src/application/project/update-project-spec-meta.use-case.ts",
       "reason": "정적 import: @/domain/project/project-spec-model",
       "relationship": "imports",
@@ -3145,6 +3343,36 @@
       "to": "src/infrastructure/analysis/project-analysis-summary.ts"
     },
     {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor.constants",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor.types",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-file-descriptions.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-file-descriptions.ts"
+    },
+    {
       "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
       "reason": "정적 import: @/domain/project/project-analysis-model",
       "relationship": "imports",
@@ -3161,6 +3389,12 @@
       "reason": "정적 import: @/infrastructure/analysis/project-analysis-path-alias-resolver",
       "relationship": "imports",
       "to": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor-summaries",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts"
     },
     {
       "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
@@ -3188,6 +3422,42 @@
     },
     {
       "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor.constants",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor.types",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
+      "reason": "정적 import: @/domain/project/project-analysis-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-analysis-model.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-local-reference-extractor.constants",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-file-descriptions",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-file-descriptions.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
+      "reason": "정적 import: @/infrastructure/analysis/project-analysis-scanner",
+      "relationship": "imports",
+      "to": "src/infrastructure/analysis/project-analysis-scanner.ts"
+    },
+    {
+      "from": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
       "reason": "상속: ProjectAnalysisUnresolvedFileReference",
       "relationship": "extends",
       "to": "src/domain/project/project-analysis-model.ts"
@@ -3583,6 +3853,48 @@
       "to": "src/infrastructure/sdd/fs-project-storage-io.ts"
     },
     {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/domain/project/project-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/domain/project/project-spec-model",
+      "relationship": "imports",
+      "to": "src/domain/project/project-spec-model.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/domain/project/project-errors",
+      "relationship": "imports",
+      "to": "src/domain/project/project-errors.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/shared/contracts/result",
+      "relationship": "imports",
+      "to": "src/shared/contracts/result.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-documents",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-documents.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-paths",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-paths.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-spec-documents",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-spec-documents.ts"
+    },
+    {
       "from": "src/infrastructure/sdd/fs-project-storage-documents.ts",
       "reason": "정적 import: @/domain/project/project-analysis-model",
       "relationship": "imports",
@@ -3743,6 +4055,12 @@
       "reason": "정적 import: @/infrastructure/fs/write-json-atomically",
       "relationship": "imports",
       "to": "src/infrastructure/fs/write-json-atomically.ts"
+    },
+    {
+      "from": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "reason": "정적 import: @/infrastructure/sdd/fs-project-storage-context",
+      "relationship": "imports",
+      "to": "src/infrastructure/sdd/fs-project-storage-context.ts"
     },
     {
       "from": "src/infrastructure/spec-chat/in-memory-project-session-message-run-status.store.ts",
@@ -4064,9 +4382,9 @@
     },
     {
       "from": "tests/specs-workspace-map.utils.test.ts",
-      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry",
+      "reason": "정적 import: @/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils",
       "relationship": "imports",
-      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts"
+      "to": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts"
     }
   ],
   "referenceAnalysis": {
@@ -4085,7 +4403,13 @@
         {
           "confidence": 0.9,
           "path": "src/application/project",
-          "reason": "같은 경로 축 아래에서 35개 이상의 소스 파일이 반복됩니다.",
+          "reason": "같은 경로 축 아래에서 38개 이상의 소스 파일이 반복됩니다.",
+          "sourceRoot": "src"
+        },
+        {
+          "confidence": 0.69,
+          "path": "src/components",
+          "reason": "같은 경로 축 아래에서 3개 이상의 소스 파일이 반복됩니다.",
           "sourceRoot": "src"
         },
         {
@@ -4103,7 +4427,7 @@
         {
           "confidence": 0.9,
           "path": "src/features/project-bootstrap",
-          "reason": "같은 경로 축 아래에서 40개 이상의 소스 파일이 반복됩니다.",
+          "reason": "같은 경로 축 아래에서 45개 이상의 소스 파일이 반복됩니다.",
           "sourceRoot": "src"
         },
         {
@@ -4115,7 +4439,7 @@
         {
           "confidence": 0.9,
           "path": "src/infrastructure/analysis",
-          "reason": "같은 경로 축 아래에서 16개 이상의 소스 파일이 반복됩니다.",
+          "reason": "같은 경로 축 아래에서 19개 이상의 소스 파일이 반복됩니다.",
           "sourceRoot": "src"
         },
         {
@@ -4139,7 +4463,7 @@
         {
           "confidence": 0.9,
           "path": "src/infrastructure/sdd",
-          "reason": "같은 경로 축 아래에서 10개 이상의 소스 파일이 반복됩니다.",
+          "reason": "같은 경로 축 아래에서 11개 이상의 소스 파일이 반복됩니다.",
           "sourceRoot": "src"
         },
         {
@@ -4164,7 +4488,7 @@
       "notes": [
         "소스 루트 1개를 기준으로 분류와 참조 해석을 수행합니다.",
         "alias 설정 파일 1개를 구조 발견에 반영했습니다.",
-        "반복 feature cluster 후보 14개를 찾았습니다."
+        "반복 feature cluster 후보 15개를 찾았습니다."
       ],
       "packageRoots": [
         {

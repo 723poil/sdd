@@ -27,7 +27,9 @@ import type {
 } from '@/domain/project/project-spec-model';
 import type { ProjectReferenceTagDocument } from '@/domain/project/project-reference-tag-model';
 import type {
+  ProjectSessionMessageAttachmentUpload,
   ProjectSessionMessage,
+  ProjectSessionMessagePendingAttachment,
   ProjectSessionMessageRole,
   ProjectSessionMessageRunStatus,
   ProjectSessionMeta,
@@ -102,7 +104,10 @@ export interface ProjectSessionMessageRunStatusPort {
   beginSessionMessageRun(input: {
     rootPath: string;
     sessionId: string;
-    requestText: string;
+    requestText: string | null;
+    requestSummary: string | null;
+    attachmentCount: number;
+    requestAttachments?: ProjectSessionMessagePendingAttachment[];
     stageMessage: string;
     progressMessage?: string | null;
     startedAt: string;
@@ -120,6 +125,9 @@ export interface ProjectSessionMessageRunStatusPort {
     stageMessage?: string;
     progressMessage?: string | null;
     requestText?: string | null;
+    requestSummary?: string | null;
+    attachmentCount?: number;
+    requestAttachments?: ProjectSessionMessagePendingAttachment[];
     stepIndex?: number;
     stepTotal?: number;
     updatedAt?: string;
@@ -140,6 +148,7 @@ export interface ProjectSessionPort {
     sessionId: string;
   }): Promise<Result<ProjectSessionMessage[]>>;
   appendSessionMessage(input: {
+    attachments?: ProjectSessionMessageAttachmentUpload[];
     rootPath: string;
     sessionId: string;
     role: ProjectSessionMessageRole;
@@ -236,7 +245,10 @@ export interface ProjectStoragePort {
   }): Promise<Result<ProjectReferenceTagDocument>>;
 }
 
-export type ProjectStorageBootstrapPort = Pick<ProjectStoragePort, 'readProjectMeta' | 'initializeStorage'>;
+export type ProjectStorageBootstrapPort = Pick<
+  ProjectStoragePort,
+  'readProjectMeta' | 'initializeStorage'
+>;
 
 export type ProjectInspectionStoragePort = Pick<ProjectStoragePort, 'readProjectMeta'>;
 

@@ -77,6 +77,12 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleCancelSessionMessage = () => {
     workbench.onCancelSessionMessage();
   };
+  const handleAddDraftAttachments = (
+    files: File[],
+    source: Parameters<typeof workbench.onAddDraftAttachments>[1],
+  ) => {
+    workbench.onAddDraftAttachments(files, source);
+  };
   const handleCancelBottomStatusTask = (task: WorkbenchProgressTask) => {
     if (task.kind === 'analysis') {
       workbench.onCancelAnalysis(task.rootPath ?? undefined);
@@ -94,6 +100,12 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   };
   const handleSendMessage = () => {
     workbench.onSendMessage();
+  };
+  const handleRemoveDraftAttachment = (draftId: string) => {
+    workbench.onRemoveDraftAttachment(draftId);
+  };
+  const handleSetComposerDragActive = (isActive: boolean) => {
+    workbench.onSetComposerDragActive(isActive);
   };
   const handleSelectProject = () => {
     workbench.onSelectProject();
@@ -281,12 +293,16 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               chatModel={workbench.chatModel}
               chatReasoningEffort={workbench.chatReasoningEffort}
               draftMessage={workbench.draftMessage}
+              draftAttachments={workbench.draftAttachments}
+              draftAttachmentErrors={workbench.draftAttachmentErrors}
               inspection={workbench.inspection}
+              isComposerDragActive={workbench.isComposerDragActive}
               isAnalyzing={workbench.isAnalyzing}
               isCancellingAnalysis={workbench.isCancellingAnalysis}
               isCreatingSpec={workbench.isCreatingSpec}
               isCreatingSession={workbench.isCreatingSession}
               isSavingChatRuntimeSettings={workbench.isSavingChatRuntimeSettings}
+              onAddDraftAttachments={handleAddDraftAttachments}
               canCancelMessage={workbench.canCancelMessage}
               isCancellingMessage={workbench.isCancellingMessage}
               isSendingMessage={workbench.isSendingMessage}
@@ -298,7 +314,9 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               onChangeChatReasoningEffort={handleChangeChatReasoningEffort}
               onChangeDraftMessage={handleChangeDraftMessage}
               onCreateSpec={handleCreateSpec}
+              onRemoveDraftAttachment={handleRemoveDraftAttachment}
               onSendMessage={handleSendMessage}
+              onSetComposerDragActive={handleSetComposerDragActive}
               onToggleSidebar={handleToggleRightSidebar}
               selectedSpec={workbench.selectedSpec}
               selectedSession={workbench.selectedSession}

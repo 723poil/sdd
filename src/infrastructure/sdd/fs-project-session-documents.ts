@@ -1,10 +1,11 @@
 import { appendFile, readdir } from 'node:fs/promises';
 
 import {
-  isProjectSessionMessage,
+  normalizeProjectSessionMessage,
   normalizeProjectSessionMeta,
   PROJECT_SESSION_INDEX_SCHEMA_VERSION,
   toProjectSessionSummary,
+  toPersistedProjectSessionMessage,
   type ProjectSessionIndex,
   type ProjectSessionMessage,
   type ProjectSessionMeta,
@@ -14,17 +15,14 @@ import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok, type Result } from '@/shared/contracts/result';
 
 import { writeJsonAtomically } from '@/infrastructure/fs/write-json-atomically';
+import { hydrateProjectSessionMessageAttachments } from '@/infrastructure/sdd/fs-project-session-attachments';
 import {
   getSessionIndexPath,
   getSessionMessagesPath,
   getSessionMetaPath,
   getSessionsDirectoryPath,
 } from '@/infrastructure/sdd/fs-project-session-paths';
-import {
-  pathExists,
-  readJsonFile,
-  readTextFile,
-} from '@/infrastructure/sdd/fs-project-storage-io';
+import { pathExists, readJsonFile, readTextFile } from '@/infrastructure/sdd/fs-project-storage-io';
 
 export async function readSessionIds(rootPath: string): Promise<string[]> {
   const sessionsDirectoryPath = getSessionsDirectoryPath(rootPath);
@@ -47,10 +45,7 @@ export async function readSessionMetaDocument(input: {
     return ok(null);
   }
 
-  const parsedResult = await readJsonFile(
-    metaPath,
-    '세션 메타 파일을 읽거나 파싱할 수 없습니다.',
-  );
+  const parsedResult = await readJsonFile(metaPath, '세션 메타 파일을 읽거나 파싱할 수 없습니다.');
   if (!parsedResult.ok) {
     return err(parsedResult.error);
   }
@@ -58,7 +53,11 @@ export async function readSessionMetaDocument(input: {
   const normalizedMeta = normalizeProjectSessionMeta(parsedResult.value);
   if (!normalizedMeta) {
     return err(
-      createProjectError('INVALID_PROJECT_STORAGE', '세션 메타 파일이 현재 계약을 만족하지 않습니다.', metaPath),
+      createProjectError(
+        'INVALID_PROJECT_STORAGE',
+        '세션 메타 파일이 현재 계약을 만족하지 않습니다.',
+        metaPath,
+      ),
     );
   }
 
@@ -92,11 +91,16 @@ export async function readSessionMessagesDocument(input: {
       parsed = JSON.parse(line) as unknown;
     } catch {
       return err(
-        createProjectError('INVALID_PROJECT_STORAGE', '세션 메시지 로그를 파싱할 수 없습니다.', messagesPath),
+        createProjectError(
+          'INVALID_PROJECT_STORAGE',
+          '세션 메시지 로그를 파싱할 수 없습니다.',
+          messagesPath,
+        ),
       );
     }
 
-    if (!isProjectSessionMessage(parsed)) {
+    const normalizedMessage = normalizeProjectSessionMessage(parsed);
+    if (!normalizedMessage) {
       return err(
         createProjectError(
           'INVALID_PROJECT_STORAGE',
@@ -106,7 +110,14 @@ export async function readSessionMessagesDocument(input: {
       );
     }
 
-    messages.push(parsed);
+    messages.push({
+      ...normalizedMessage,
+      attachments: hydrateProjectSessionMessageAttachments({
+        attachments: normalizedMessage.attachments,
+        rootPath: input.rootPath,
+        sessionId: input.sessionId,
+      }),
+    });
   }
 
   return ok(messages);
@@ -123,7 +134,9 @@ export async function writeSessionIndexDocument(input: {
   } satisfies ProjectSessionIndex);
 }
 
-export function toProjectSessionViewSummaries(sessions: ProjectSessionMeta[]): ProjectSessionSummary[] {
+export function toProjectSessionViewSummaries(
+  sessions: ProjectSessionMeta[],
+): ProjectSessionSummary[] {
   return sessions.map((session) => toProjectSessionSummary(session));
 }
 
@@ -133,5 +146,9 @@ export async function appendSessionMessageDocument(input: {
   sessionId: string;
 }): Promise<void> {
   const messagePath = getSessionMessagesPath(input.rootPath, input.sessionId);
-  await appendFile(messagePath, `${JSON.stringify(input.message)}\n`, 'utf8');
+  await appendFile(
+    messagePath,
+    `${JSON.stringify(toPersistedProjectSessionMessage(input.message))}\n`,
+    'utf8',
+  );
 }

@@ -3,24 +3,47 @@ import {
   type ProjectSpecDocument,
 } from '@/domain/project/project-spec-model';
 import type { ProjectSessionMessage } from '@/domain/project/project-session-model';
+import { readProjectSessionMessageAttachmentTextExcerpt } from '@/infrastructure/sdd/fs-project-session-attachments';
 
 const MAX_PROMPT_MESSAGE_COUNT = 24;
 const MAX_PROMPT_HISTORY_CHARACTERS = 12_000;
+const MAX_PROMPT_ATTACHMENT_EXCERPT_CHARACTERS_PER_FILE = 1_200;
+const MAX_PROMPT_ATTACHMENT_EXCERPT_TOTAL_CHARACTERS = 4_000;
+const PROMPT_ATTACHMENT_HISTORY_WEIGHT = 160;
 
-export function createProjectSpecChatPrompt(input: {
+interface PromptMessageContext {
+  attachments: PromptMessageAttachmentContext[];
+  createdAt: string;
+  role: ProjectSessionMessage['role'];
+  text: string;
+}
+
+interface PromptMessageAttachmentContext {
+  excerpt: string | null;
+  kind: 'image' | 'file';
+  mimeType: string;
+  name: string;
+  savedPath: string;
+  sizeBytes: number;
+}
+
+export async function createProjectSpecChatPrompt(input: {
   projectName: string;
+  rootPath: string;
   sessionMessages: ProjectSessionMessage[];
   spec: ProjectSpecDocument;
-}): string {
+}): Promise<string> {
   const projectName = escapeXml(input.projectName);
   const specTitle = escapeXml(input.spec.meta.title);
   const specStatus = escapeXml(describeSpecStatus(input.spec.meta.status));
   const specVersion = escapeXml(input.spec.meta.currentVersion ?? 'draft');
   const specSummary = escapeXml(input.spec.meta.summary ?? '요약 없음');
   const specMarkdown = escapeXml(input.spec.markdown);
-  const conversationHistory = renderConversationHistory(
-    selectPromptMessages(input.sessionMessages),
-  );
+  const promptMessages = await buildPromptMessageContexts({
+    messages: selectPromptMessages(input.sessionMessages),
+    rootPath: input.rootPath,
+  });
+  const conversationHistory = renderConversationHistory(promptMessages);
 
   return [
     '<spec_chat_request>',
@@ -35,13 +58,14 @@ export function createProjectSpecChatPrompt(input: {
     '    <input path=".sdd/analysis/context.json">Optional structured project context the agent may inspect when it needs architecture or file hints.</input>',
     '    <input path=".sdd/analysis/file-index.json">Optional indexed file references the agent may inspect when it needs exact paths or related files.</input>',
     '    <input path=".sdd/analysis/manual-reference-tags.json">Optional saved reference-tag catalog and file assignments for the reference map.</input>',
+    '    <input path=".sdd/sessions">Project-scoped chat logs and saved message attachments. Inspect recent attachment paths when they affect the request.</input>',
     '    <input path="AGENTS.md">Optional project-specific instructions and skill index. Inspect it when present.</input>',
     '    <input path=".codex/skills">Optional project skill directory. Inspect relevant SKILL.md files when present.</input>',
     '    <current_spec>',
-      `      <status>${specStatus}</status>`,
-      `      <version>${specVersion}</version>`,
-      `      <summary>${specSummary}</summary>`,
-      `      <markdown>${specMarkdown}</markdown>`,
+    `      <status>${specStatus}</status>`,
+    `      <version>${specVersion}</version>`,
+    `      <summary>${specSummary}</summary>`,
+    `      <markdown>${specMarkdown}</markdown>`,
     '    </current_spec>',
     '    <spec_template>',
     renderSpecTemplateSections(),
@@ -51,7 +75,7 @@ export function createProjectSpecChatPrompt(input: {
     '    </conversation_history>',
     '  </inputs>',
     '  <workflow>',
-    '    <stage id="analysis">Read the current spec and recent conversation first. Inspect .sdd analysis artifacts, saved reference tags, AGENTS.md, and project skill files when they matter for the requested feature, affected scope, reference tags, skill selection, or implementation impact. Use the reference map evidence to determine likely impacted files and flows instead of guessing.</stage>',
+    '    <stage id="analysis">Read the current spec and recent conversation first. Inspect .sdd analysis artifacts, saved reference tags, AGENTS.md, project skill files, and recent saved message attachments when they matter for the requested feature, affected scope, reference tags, skill selection, UI evidence, or implementation impact. Use the reference map evidence to determine likely impacted files and flows instead of guessing.</stage>',
     '    <stage id="execution">Produce one user-facing chat reply and one updated full spec draft. Keep the spec in the fixed template structure, revise the title and markdown when the conversation changes the plan, list relevant existing reference tags, propose new tags when the capability does not fit existing ones, and update the impact-analysis and project-skill sections using real repository evidence when available.</stage>',
     '    <stage id="verification">Check that the updated spec keeps the required sections, that impact analysis is grounded in file-index, file references, or saved reference tags when possible, that project skills come from AGENTS.md or .codex/skills when present, and that uncertainty is labeled clearly instead of invented facts.</stage>',
     '  </workflow>',
@@ -72,6 +96,7 @@ export function createProjectSpecChatPrompt(input: {
     '    <constraint>The 사용 스킬 section must state which project-defined skills should be used for this spec, based on AGENTS.md or .codex/skills when available.</constraint>',
     '    <constraint>Do not claim that the spec file or codebase was already edited unless the user explicitly says it was changed.</constraint>',
     '    <constraint>If exact repository evidence matters, inspect the real repository or saved analysis files instead of guessing.</constraint>',
+    '    <constraint>If the current or recent conversation includes saved attachments, inspect the saved attachment paths before answering when the files are relevant.</constraint>',
     '    <constraint>When naming files, use exact relative paths that already exist.</constraint>',
     '    <constraint>If the user request is ambiguous, state the key uncertainty briefly and still provide the most practical next answer.</constraint>',
     '    <constraint>Keep the reply high signal. Prefer short paragraphs or flat bullets over long essays.</constraint>',
@@ -128,7 +153,10 @@ function selectPromptMessages(messages: ProjectSessionMessage[]): ProjectSession
       continue;
     }
 
-    const nextCharacters = totalCharacters + message.text.length;
+    const nextCharacters =
+      totalCharacters +
+      message.text.length +
+      message.attachments.length * PROMPT_ATTACHMENT_HISTORY_WEIGHT;
     if (selected.length > 0 && nextCharacters > MAX_PROMPT_HISTORY_CHARACTERS) {
       break;
     }
@@ -140,17 +168,116 @@ function selectPromptMessages(messages: ProjectSessionMessage[]): ProjectSession
   return selected;
 }
 
-function renderConversationHistory(messages: ProjectSessionMessage[]): string {
+async function buildPromptMessageContexts(input: {
+  messages: ProjectSessionMessage[];
+  rootPath: string;
+}): Promise<PromptMessageContext[]> {
+  const contexts: PromptMessageContext[] = [];
+  let remainingExcerptCharacters = MAX_PROMPT_ATTACHMENT_EXCERPT_TOTAL_CHARACTERS;
+
+  for (let index = input.messages.length - 1; index >= 0; index -= 1) {
+    const message = input.messages[index];
+    if (!message) {
+      continue;
+    }
+
+    const attachments: PromptMessageAttachmentContext[] = [];
+    for (const attachment of message.attachments) {
+      const savedPath = createPromptAttachmentSavedPath(message.sessionId, attachment.relativePath);
+      let excerpt: string | null = null;
+
+      if (remainingExcerptCharacters > 0) {
+        excerpt = await readProjectSessionMessageAttachmentTextExcerpt({
+          attachment,
+          maxCharacters: Math.min(
+            MAX_PROMPT_ATTACHMENT_EXCERPT_CHARACTERS_PER_FILE,
+            remainingExcerptCharacters,
+          ),
+          rootPath: input.rootPath,
+          sessionId: message.sessionId,
+        });
+        if (excerpt) {
+          remainingExcerptCharacters -= excerpt.length;
+        }
+      }
+
+      attachments.push({
+        excerpt,
+        kind: attachment.kind,
+        mimeType: attachment.mimeType,
+        name: attachment.name,
+        savedPath,
+        sizeBytes: attachment.sizeBytes,
+      });
+    }
+
+    contexts.unshift({
+      attachments,
+      createdAt: message.createdAt,
+      role: message.role,
+      text: message.text,
+    });
+  }
+
+  return contexts;
+}
+
+function renderConversationHistory(messages: PromptMessageContext[]): string {
   if (messages.length === 0) {
     return '      <message role="system" created_at="">대화 이력이 없습니다.</message>';
   }
 
-  return messages
-    .map(
-      (message) =>
-        `      <message role="${message.role}" created_at="${escapeXml(message.createdAt)}">${escapeXml(message.text)}</message>`,
-    )
-    .join('\n');
+  return messages.map((message) => renderConversationMessage(message)).join('\n');
+}
+
+function renderConversationMessage(message: PromptMessageContext): string {
+  const content: string[] = [];
+  const normalizedText = message.text.trim();
+
+  if (normalizedText.length > 0) {
+    content.push(`        <text>${escapeXml(normalizedText)}</text>`);
+  }
+
+  if (message.attachments.length > 0) {
+    content.push('        <attachments>');
+    content.push(
+      ...message.attachments.map((attachment) => renderConversationAttachment(attachment)),
+    );
+    content.push('        </attachments>');
+  }
+
+  if (content.length === 0) {
+    content.push('        <text />');
+  }
+
+  return [
+    `      <message role="${message.role}" created_at="${escapeXml(message.createdAt)}">`,
+    ...content,
+    '      </message>',
+  ].join('\n');
+}
+
+function renderConversationAttachment(attachment: PromptMessageAttachmentContext): string {
+  const content: string[] = [
+    `          <attachment kind="${attachment.kind}" mime_type="${escapeXml(attachment.mimeType)}" name="${escapeXml(attachment.name)}" saved_path="${escapeXml(attachment.savedPath)}" size_bytes="${attachment.sizeBytes}">`,
+  ];
+
+  if (attachment.kind === 'image') {
+    content.push(
+      '            <inspection_hint>Inspect this saved image file when visual evidence matters.</inspection_hint>',
+    );
+  }
+
+  if (attachment.excerpt) {
+    content.push(`            <excerpt>${escapeXml(attachment.excerpt)}</excerpt>`);
+  }
+
+  content.push('          </attachment>');
+  return content.join('\n');
+}
+
+function createPromptAttachmentSavedPath(sessionId: string, relativePath: string): string {
+  return ['.sdd', 'sessions', sessionId, ...relativePath.split('/')].join('/');
 }
 
 function describeSpecStatus(status: ProjectSpecDocument['meta']['status']): string {

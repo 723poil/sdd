@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ChangeEvent, type ClipboardEvent, type DragEvent } from 'react';
 
 import {
   AGENT_CLI_MODEL_REASONING_EFFORTS,
@@ -6,15 +6,22 @@ import {
 } from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectInspection } from '@/domain/project/project-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
-import type {
-  ProjectSessionMessage,
-  ProjectSessionMessageRunStatus,
-  ProjectSessionMessageRole,
-  ProjectSessionSummary,
+import {
+  PROJECT_SESSION_MESSAGE_ATTACHMENT_PICKER_ACCEPT,
+  type ProjectSessionMessage,
+  type ProjectSessionMessageAttachmentManifest,
+  type ProjectSessionMessageAttachmentSource,
+  type ProjectSessionMessagePendingAttachment,
+  type ProjectSessionMessageRunStatus,
+  type ProjectSessionMessageRole,
+  type ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
-import type {
-  WorkspacePageId,
-} from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import type { ProjectSessionDraftAttachment } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-session-attachment-draft';
+import type { WorkspacePageId } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types';
+import {
+  ProjectSessionAttachmentList,
+  type ProjectSessionAttachmentListItem,
+} from '@/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSessionAttachmentList';
 import {
   describeAgentCliModel,
   describeAgentCliReasoningEffort,
@@ -35,6 +42,9 @@ interface InfoSidebarProps {
   selectedSession: ProjectSessionSummary | null;
   sessionMessages: ProjectSessionMessage[];
   draftMessage: string;
+  draftAttachments: ProjectSessionDraftAttachment[];
+  draftAttachmentErrors: string[];
+  isComposerDragActive: boolean;
   chatModel: string;
   chatReasoningEffort: AgentCliModelReasoningEffort;
   isCreatingSession: boolean;
@@ -43,6 +53,7 @@ interface InfoSidebarProps {
   isSendingMessage: boolean;
   isSavingChatRuntimeSettings: boolean;
   sessionMessageRunStatus: ProjectSessionMessageRunStatus | null;
+  onAddDraftAttachments: (files: File[], source: ProjectSessionMessageAttachmentSource) => void;
   onChangeChatModel: (value: string) => void;
   onChangeChatReasoningEffort: (value: AgentCliModelReasoningEffort) => void;
   onChangeDraftMessage: (value: string) => void;
@@ -51,15 +62,19 @@ interface InfoSidebarProps {
   onCancelAnalysis: () => void;
   onCancelMessage: () => void;
   onCreateSpec: () => void;
+  onRemoveDraftAttachment: (draftId: string) => void;
   onSendMessage: () => void;
+  onSetComposerDragActive: (isActive: boolean) => void;
   onToggleSidebar: () => void;
 }
 
 interface TimelineMessage {
+  attachments: ProjectSessionAttachmentListItem[];
   createdAt: string;
   id: string;
   pending?: boolean;
   role: ProjectSessionMessageRole;
+  summaryText: string | null;
   text: string;
 }
 
@@ -71,18 +86,24 @@ export function InfoSidebar(props: InfoSidebarProps) {
     props.selectedSession !== null &&
     !props.isCreatingSession;
   const isMessageRequestActive = props.isSendingMessage || props.isCancellingMessage;
+  const isComposerDisabled = !canWriteMessage || isMessageRequestActive;
   const canSendMessage =
-    canWriteMessage && props.draftMessage.trim().length > 0 && !isMessageRequestActive;
+    canWriteMessage &&
+    (props.draftMessage.trim().length > 0 || props.draftAttachments.length > 0) &&
+    !isMessageRequestActive;
   const composerStatusMessage = props.sessionMessageRunStatus
     ? getComposerStatusMessage(props.sessionMessageRunStatus)
     : props.isSavingChatRuntimeSettings
       ? '채팅 설정을 저장 중입니다.'
       : null;
   const chatLogEndRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const composerDragDepthRef = useRef(0);
   const timelineMessages = getTimelineMessages({
     sessionMessages: props.sessionMessages,
     sessionMessageRunStatus: props.sessionMessageRunStatus,
   });
+  const draftAttachmentItems = props.draftAttachments.map(toAttachmentListItemFromDraftAttachment);
 
   useEffect(() => {
     chatLogEndRef.current?.scrollIntoView({
@@ -90,6 +111,80 @@ export function InfoSidebar(props: InfoSidebarProps) {
       block: 'end',
     });
   }, [timelineMessages.length]);
+
+  useEffect(() => {
+    if (!props.isComposerDragActive) {
+      composerDragDepthRef.current = 0;
+    }
+  }, [props.isComposerDragActive]);
+
+  const handleAttachmentInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+    if (files.length > 0) {
+      props.onAddDraftAttachments(files, 'picker');
+    }
+
+    event.target.value = '';
+  };
+
+  const handleComposerPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = readDataTransferFiles(event.clipboardData);
+    if (files.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    props.onAddDraftAttachments(files, 'paste');
+  };
+
+  const handleComposerDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    if (!hasFileTransferData(event.dataTransfer)) {
+      return;
+    }
+
+    event.preventDefault();
+    composerDragDepthRef.current += 1;
+    props.onSetComposerDragActive(true);
+  };
+
+  const handleComposerDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!hasFileTransferData(event.dataTransfer)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+
+    if (!props.isComposerDragActive) {
+      props.onSetComposerDragActive(true);
+    }
+  };
+
+  const handleComposerDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    if (!hasFileTransferData(event.dataTransfer)) {
+      return;
+    }
+
+    composerDragDepthRef.current = Math.max(0, composerDragDepthRef.current - 1);
+    if (composerDragDepthRef.current === 0) {
+      props.onSetComposerDragActive(false);
+    }
+  };
+
+  const handleComposerDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (!hasFileTransferData(event.dataTransfer)) {
+      return;
+    }
+
+    event.preventDefault();
+    composerDragDepthRef.current = 0;
+    props.onSetComposerDragActive(false);
+
+    const files = readDataTransferFiles(event.dataTransfer);
+    if (files.length > 0) {
+      props.onAddDraftAttachments(files, 'drop');
+    }
+  };
 
   return (
     <aside className="sidebar sidebar--sessions info-sidebar">
@@ -104,10 +199,10 @@ export function InfoSidebar(props: InfoSidebarProps) {
               {!props.inspection
                 ? '프로젝트를 선택하면 채팅을 시작할 수 있습니다.'
                 : props.activeWorkspacePage !== 'specs'
-                ? '명세 페이지에서 채팅을 사용할 수 있습니다.'
+                  ? '명세 페이지에서 채팅을 사용할 수 있습니다.'
                   : hasProjectContext
-                  ? '질문이나 요구사항을 입력하면 명세 초안을 함께 갱신합니다.'
-                  : '채팅을 준비하는 중입니다.'}
+                    ? '질문이나 요구사항을 입력하면 명세 초안을 함께 갱신합니다.'
+                    : '채팅을 준비하는 중입니다.'}
             </p>
           </div>
           <button
@@ -196,16 +291,19 @@ export function InfoSidebar(props: InfoSidebarProps) {
 
             <div
               className={`info-sidebar-chat-composer ${
-                canWriteMessage && !isMessageRequestActive
-                  ? ''
-                  : 'info-sidebar-chat-composer--locked'
-              }`}
+                isComposerDisabled ? 'info-sidebar-chat-composer--locked' : ''
+              } ${props.isComposerDragActive ? 'info-sidebar-chat-composer--drag-active' : ''}`}
+              onDragEnter={handleComposerDragEnter}
+              onDragLeave={handleComposerDragLeave}
+              onDragOver={handleComposerDragOver}
+              onDrop={handleComposerDrop}
             >
               <textarea
                 className="info-sidebar-chat-composer__textarea"
                 onChange={(event) => {
                   props.onChangeDraftMessage(event.target.value);
                 }}
+                onPaste={handleComposerPaste}
                 placeholder={
                   canWriteMessage
                     ? isMessageRequestActive
@@ -213,49 +311,134 @@ export function InfoSidebar(props: InfoSidebarProps) {
                       : '명세에 반영할 요구사항이나 질문을 입력하세요.'
                     : '명세를 선택하면 채팅할 수 있습니다.'
                 }
-                readOnly={!canWriteMessage || isMessageRequestActive}
+                readOnly={isComposerDisabled}
                 rows={canWriteMessage ? 3 : 1}
                 value={props.draftMessage}
               />
+
+              <input
+                accept={PROJECT_SESSION_MESSAGE_ATTACHMENT_PICKER_ACCEPT}
+                className="info-sidebar-chat-composer__file-input"
+                hidden
+                multiple
+                onChange={handleAttachmentInputChange}
+                ref={fileInputRef}
+                type="file"
+              />
+
+              {draftAttachmentItems.length > 0 ? (
+                <ProjectSessionAttachmentList
+                  attachments={draftAttachmentItems}
+                  onRemove={props.onRemoveDraftAttachment}
+                  variant="composer"
+                />
+              ) : null}
+
+              {props.draftAttachmentErrors.length > 0 ? (
+                <div className="info-sidebar-chat-composer__errors" role="status">
+                  {props.draftAttachmentErrors.map((error) => (
+                    <p className="info-sidebar-chat-composer__error" key={error}>
+                      {error}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
 
               {composerStatusMessage ? (
                 <span className="info-sidebar-chat-composer__status">{composerStatusMessage}</span>
               ) : null}
 
               <div className="info-sidebar-chat-composer__footer">
+                <button
+                  aria-label="파일 첨부"
+                  className="sidebar-icon-button info-sidebar-chat-composer__action info-sidebar-chat-composer__attach"
+                  disabled={isComposerDisabled}
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                  }}
+                  title="파일 첨부"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="info-sidebar-chat-composer__action-icon"
+                    fill="none"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M7.75 10.75 12 6.5a2.475 2.475 0 0 1 3.5 3.5l-5 5a4.242 4.242 0 1 1-6-6l5.25-5.25"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                </button>
                 <div aria-label="현재 채팅 설정" className="info-sidebar-chat-composer__runtime">
-                  <select
-                    aria-label="현재 모델"
-                    className="info-sidebar-chat-composer__runtime-select"
-                    disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
-                    onChange={(event) => {
-                      props.onChangeChatModel(event.target.value);
-                    }}
-                    value={props.chatModel}
-                  >
-                    {getChatModelOptions(props.chatModel).map((model) => (
-                      <option key={model} value={model}>
-                        {describeAgentCliModel(model)}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="현재 추론 강도"
-                    className="info-sidebar-chat-composer__runtime-select"
-                    disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
-                    onChange={(event) => {
-                      props.onChangeChatReasoningEffort(
-                        event.target.value as AgentCliModelReasoningEffort,
-                      );
-                    }}
-                    value={props.chatReasoningEffort}
-                  >
-                    {AGENT_CLI_MODEL_REASONING_EFFORTS.map((modelReasoningEffort) => (
-                      <option key={modelReasoningEffort} value={modelReasoningEffort}>
-                        {describeAgentCliReasoningEffort(modelReasoningEffort)}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="info-sidebar-chat-composer__runtime-field">
+                    <select
+                      aria-label="현재 모델"
+                      className="info-sidebar-chat-composer__runtime-select"
+                      disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
+                      onChange={(event) => {
+                        props.onChangeChatModel(event.target.value);
+                      }}
+                      value={props.chatModel}
+                    >
+                      {getChatModelOptions(props.chatModel).map((model) => (
+                        <option key={model} value={model}>
+                          {describeAgentCliModel(model)}
+                        </option>
+                      ))}
+                    </select>
+                    <svg
+                      aria-hidden="true"
+                      className="info-sidebar-chat-composer__runtime-caret"
+                      fill="none"
+                      viewBox="0 0 12 12"
+                    >
+                      <path
+                        d="m3 4.5 3 3 3-3"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="info-sidebar-chat-composer__runtime-field info-sidebar-chat-composer__runtime-field--effort">
+                    <select
+                      aria-label="현재 추론 강도"
+                      className="info-sidebar-chat-composer__runtime-select"
+                      disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
+                      onChange={(event) => {
+                        props.onChangeChatReasoningEffort(
+                          event.target.value as AgentCliModelReasoningEffort,
+                        );
+                      }}
+                      value={props.chatReasoningEffort}
+                    >
+                      {AGENT_CLI_MODEL_REASONING_EFFORTS.map((modelReasoningEffort) => (
+                        <option key={modelReasoningEffort} value={modelReasoningEffort}>
+                          {describeAgentCliReasoningEffort(modelReasoningEffort)}
+                        </option>
+                      ))}
+                    </select>
+                    <svg
+                      aria-hidden="true"
+                      className="info-sidebar-chat-composer__runtime-caret"
+                      fill="none"
+                      viewBox="0 0 12 12"
+                    >
+                      <path
+                        d="m3 4.5 3 3 3-3"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.4"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 {props.canCancelMessage ? (
                   <button
@@ -318,11 +501,17 @@ export function InfoSidebar(props: InfoSidebarProps) {
 function renderTimelineMessage(message: TimelineMessage) {
   if (message.role === 'system') {
     return (
-      <article className="info-sidebar-chat-message info-sidebar-chat-message--system" key={message.id}>
+      <article
+        className="info-sidebar-chat-message info-sidebar-chat-message--system"
+        key={message.id}
+      >
         <span className="info-sidebar-chat-message__system-chip">{message.text}</span>
       </article>
     );
   }
+
+  const hasText = message.text.trim().length > 0;
+  const fallbackSummary = !hasText ? message.summaryText : null;
 
   if (message.role === 'user') {
     return (
@@ -333,7 +522,11 @@ function renderTimelineMessage(message: TimelineMessage) {
         key={message.id}
       >
         <div className="info-sidebar-chat-message__bubble">
-          <p>{message.text}</p>
+          {hasText ? <p>{message.text}</p> : null}
+          {message.attachments.length > 0 ? (
+            <ProjectSessionAttachmentList attachments={message.attachments} variant="message" />
+          ) : null}
+          {!hasText && fallbackSummary ? <p>{fallbackSummary}</p> : null}
         </div>
         <span className="info-sidebar-chat-message__meta">
           {message.pending ? '전송 중...' : formatMessageTimestamp(message.createdAt)}
@@ -343,13 +536,20 @@ function renderTimelineMessage(message: TimelineMessage) {
   }
 
   return (
-    <article className="info-sidebar-chat-message info-sidebar-chat-message--assistant" key={message.id}>
+    <article
+      className="info-sidebar-chat-message info-sidebar-chat-message--assistant"
+      key={message.id}
+    >
       <div className="info-sidebar-chat-message__header">
         <strong>{getMessageRoleLabel(message.role)}</strong>
         <span>{formatMessageTimestamp(message.createdAt)}</span>
       </div>
       <div className="info-sidebar-chat-message__body">
-        <p>{message.text}</p>
+        {hasText ? <p>{message.text}</p> : null}
+        {message.attachments.length > 0 ? (
+          <ProjectSessionAttachmentList attachments={message.attachments} variant="message" />
+        ) : null}
+        {!hasText && fallbackSummary ? <p>{fallbackSummary}</p> : null}
       </div>
     </article>
   );
@@ -416,9 +616,11 @@ function getTimelineMessages(input: {
   sessionMessageRunStatus: ProjectSessionMessageRunStatus | null;
 }): TimelineMessage[] {
   const baseMessages = input.sessionMessages.map((message) => ({
+    attachments: message.attachments.map(toAttachmentListItemFromMessageAttachment),
     createdAt: message.createdAt,
     id: message.id,
     role: message.role,
+    summaryText: null,
     text: message.text,
   }));
 
@@ -431,30 +633,47 @@ function getTimelineMessages(input: {
   }
 
   const pendingRequestText = input.sessionMessageRunStatus.requestText?.trim() ?? '';
-  if (pendingRequestText.length === 0) {
-    return baseMessages;
-  }
-
+  const pendingSummary = input.sessionMessageRunStatus.requestSummary?.trim() ?? '';
+  const pendingAttachments = input.sessionMessageRunStatus.requestAttachments.map(
+    toAttachmentListItemFromPendingAttachment,
+  );
   const lastMessage = baseMessages[baseMessages.length - 1];
-  if (lastMessage?.role === 'user' && lastMessage.text === pendingRequestText) {
+  const matchesLastUserMessage =
+    lastMessage?.role === 'user' &&
+    lastMessage.text.trim() === pendingRequestText &&
+    lastMessage.attachments.length === input.sessionMessageRunStatus.attachmentCount;
+
+  if (matchesLastUserMessage) {
     return baseMessages.map((message, index) =>
       index === baseMessages.length - 1 ? { ...message, pending: true } : message,
     );
   }
 
+  if (
+    pendingRequestText.length === 0 &&
+    pendingSummary.length === 0 &&
+    pendingAttachments.length === 0
+  ) {
+    return baseMessages;
+  }
+
   return [
     ...baseMessages,
     {
+      attachments: pendingAttachments,
       createdAt: input.sessionMessageRunStatus.startedAt ?? new Date().toISOString(),
       id: 'pending-user-message',
       pending: true,
       role: 'user',
+      summaryText: pendingSummary.length > 0 ? pendingSummary : null,
       text: pendingRequestText,
     },
   ];
 }
 
-function getComposerStatusMessage(sessionMessageRunStatus: ProjectSessionMessageRunStatus): string | null {
+function getComposerStatusMessage(
+  sessionMessageRunStatus: ProjectSessionMessageRunStatus,
+): string | null {
   switch (sessionMessageRunStatus.status) {
     case 'running':
     case 'cancelling':
@@ -492,4 +711,66 @@ function formatMessageTimestamp(value: string): string {
 
 function getChatModelOptions(currentModel: string): string[] {
   return getAgentCliModelOptions(currentModel);
+}
+
+function hasFileTransferData(dataTransfer: DataTransfer | null): boolean {
+  if (!dataTransfer) {
+    return false;
+  }
+
+  return Array.from(dataTransfer.types).includes('Files');
+}
+
+function readDataTransferFiles(dataTransfer: DataTransfer | null): File[] {
+  if (!dataTransfer) {
+    return [];
+  }
+
+  if (dataTransfer.files.length > 0) {
+    return Array.from(dataTransfer.files);
+  }
+
+  return Array.from(dataTransfer.items)
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => file !== null);
+}
+
+function toAttachmentListItemFromDraftAttachment(
+  attachment: ProjectSessionDraftAttachment,
+): ProjectSessionAttachmentListItem {
+  return {
+    id: attachment.draftId,
+    kind: attachment.kind,
+    mimeType: attachment.mimeType,
+    name: attachment.name,
+    previewUrl: attachment.previewUrl ?? null,
+    sizeBytes: attachment.sizeBytes,
+  };
+}
+
+function toAttachmentListItemFromMessageAttachment(
+  attachment: ProjectSessionMessageAttachmentManifest,
+): ProjectSessionAttachmentListItem {
+  return {
+    id: attachment.id,
+    kind: attachment.kind,
+    mimeType: attachment.mimeType,
+    name: attachment.name,
+    previewUrl: attachment.previewUrl ?? null,
+    sizeBytes: attachment.sizeBytes,
+  };
+}
+
+function toAttachmentListItemFromPendingAttachment(
+  attachment: ProjectSessionMessagePendingAttachment,
+): ProjectSessionAttachmentListItem {
+  return {
+    id: attachment.id,
+    kind: attachment.kind,
+    mimeType: attachment.mimeType,
+    name: attachment.name,
+    previewUrl: attachment.previewUrl ?? null,
+    sizeBytes: attachment.sizeBytes,
+  };
 }

@@ -15,6 +15,7 @@ import type {
 } from '@/domain/project/project-session-model';
 import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
+import type { ProjectSessionDraftAttachment } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-session-attachment-draft';
 
 export const WORKSPACE_PAGE_IDS = ['analysis', 'specs', 'references'] as const;
 export type WorkspacePageId = (typeof WORKSPACE_PAGE_IDS)[number];
@@ -89,6 +90,8 @@ export interface ProjectBootstrapWorkbenchState {
   specConflictBySpecId: Record<string, boolean>;
   sessionMessagesBySessionKey: Record<string, ProjectSessionMessage[]>;
   draftMessagesBySessionKey: Record<string, string>;
+  draftAttachmentsBySessionKey: Record<string, ProjectSessionDraftAttachment[]>;
+  draftAttachmentErrorsBySessionKey: Record<string, string[]>;
   sessionMessageRunStatusesBySessionKey: Record<string, ProjectSessionMessageRunStatusModel>;
   recentProjects: RecentProject[];
   editingProjectRootPath: string | null;
@@ -96,6 +99,7 @@ export interface ProjectBootstrapWorkbenchState {
   expandedProjectRootPaths: string[];
   draggingProjectRootPath: string | null;
   dropTargetRootPath: string | null;
+  composerDragSessionKey: string | null;
   isSelecting: boolean;
   isCreatingSpec: boolean;
   isSavingSpec: boolean;
@@ -124,6 +128,9 @@ export interface ProjectBootstrapWorkbenchViewModel {
   selectedSpec: ProjectSpecDocument | null;
   sessionMessages: ProjectSessionMessage[];
   draftMessage: string;
+  draftAttachments: ProjectSessionDraftAttachment[];
+  draftAttachmentErrors: string[];
+  isComposerDragActive: boolean;
   storageStatus: StatusBadgeModel;
   isAnalyzing: boolean;
   isCancellingAnalysis: boolean;

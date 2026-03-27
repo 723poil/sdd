@@ -1,0 +1,1294 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-03-27T00:50:14.904Z",
+  "revision": 1,
+  "tags": [
+    {
+      "id": "개발-실행패키징",
+      "label": "개발 실행·패키징",
+      "description": "개발 실행 스크립트와 빌드 구성을 묶습니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "공유-보드-프리미티브",
+      "label": "공유 보드 프리미티브",
+      "description": "분석과 명세 보드가 함께 쓰는 stage/viewport 프리미티브입니다.",
+      "color": "#b91c1c",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "공통-결과-계약",
+      "label": "공통 결과 계약",
+      "description": "여러 워크플로우가 공유하는 결과와 오류 계약입니다.",
+      "color": "#6d28d9",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "로컬-참조-분석",
+      "label": "로컬 참조 분석",
+      "description": "정적 스캔과 참조 추출로 분석 초안을 만듭니다.",
+      "color": "#b45309",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "명세-문서버전-관리",
+      "label": "명세 문서·버전 관리",
+      "description": "명세 보드, 본문 편집, 버전 이력을 함께 다룹니다.",
+      "color": "#0f172a",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "명세-채팅-세션",
+      "label": "명세 채팅 세션",
+      "description": "세션 메시지와 Codex 응답으로 명세 초안을 갱신합니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "분석-문서맵",
+      "label": "분석 문서맵",
+      "description": "분석 문서 보드와 레이아웃 저장을 담당합니다.",
+      "color": "#6d28d9",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "앱-셸-전환",
+      "label": "앱 셸 전환",
+      "description": "워크스페이스와 설정 화면 전환을 담당합니다.",
+      "color": "#0f766e",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "참조-태그-관리",
+      "label": "참조 태그 관리",
+      "description": "참조 맵과 파일 태그 생성·편집 흐름을 묶습니다.",
+      "color": "#15803d",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "프로젝트-분석-실행",
+      "label": "프로젝트 분석 실행",
+      "description": "분석 실행, 취소, 진행 상태 추적을 묶습니다.",
+      "color": "#0f766e",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "프로젝트-선택최근-목록",
+      "label": "프로젝트 선택·최근 목록",
+      "description": "프로젝트 선택과 최근 목록 유지 흐름을 묶습니다.",
+      "color": "#b91c1c",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "프로젝트-워크벤치-셸",
+      "label": "프로젝트 워크벤치 셸",
+      "description": "프로젝트 화면의 패널 조립과 상호작용 상태를 관리합니다.",
+      "color": "#2563eb",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "프로젝트-저장소-초기화",
+      "label": "프로젝트 저장소 초기화",
+      "description": "프로젝트 검사와 .sdd 초기화 경로를 다룹니다.",
+      "color": "#0f172a",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "codex-보강-분석",
+      "label": "Codex 보강 분석",
+      "description": "Codex로 분석 문서를 보강하는 실행 경로입니다.",
+      "color": "#be185d",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "codex-연결-설정",
+      "label": "Codex 연결 설정",
+      "description": "CLI 연결 정보와 모델·추론 강도 설정을 관리합니다.",
+      "color": "#15803d",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "electron-부트스트랩",
+      "label": "Electron 부트스트랩",
+      "description": "메인 프로세스 시작과 창 생성을 다룹니다.",
+      "color": "#b45309",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    },
+    {
+      "id": "ipc-런타임-브리지",
+      "label": "IPC 런타임 브리지",
+      "description": "preload와 typed IPC 계약, 핸들러 등록을 연결합니다.",
+      "color": "#be185d",
+      "createdAt": "2026-03-27T00:50:14.892Z",
+      "updatedAt": "2026-03-27T00:50:14.892Z"
+    }
+  ],
+  "assignments": [
+    {
+      "path": "electron.vite.config.ts",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "eslint.config.mjs",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "package.json",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "scripts/generate-icon-assets.ts",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "scripts/prepare-dev-mac-app.ts",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "scripts/run-dev.ts",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/app-settings.ports.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/check-agent-cli-connection.use-case.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/list-agent-cli-connections.use-case.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/app-settings/save-agent-cli-connection.use-case.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/application/project/activate-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/analysis-run-status-reporter.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/analyze-project-workflow.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/analyze-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/apply-project-spec-version.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/cancel-project-analysis.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/cancel-project-reference-tag-generation.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/cancel-project-session-message.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/create-project-session.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/create-project-spec.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/delete-project-spec-version.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/ensure-project-storage-ready.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/application/project/generate-project-reference-tags.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/initialize-project-storage.use-case.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/application/project/inspect-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/application/project/list-project-sessions.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/list-recent-projects.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/project-analysis-draft-merger.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/application/project/project-session-message-run.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/project.ports.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-analysis-run-status.use-case.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-analysis.use-case.ts",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-inspection.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-session-message-run-status.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-session-messages.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-spec-version-diff.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-spec-version-history.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-spec-version.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/read-project-specs.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/remove-recent-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/rename-project.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/reorder-recent-projects.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-analysis-document-layouts.use-case.ts",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-reference-tags.use-case.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/save-project-spec.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/application/project/select-project-directory.use-case.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/application/project/send-project-session-message.use-case.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/application/project/update-project-spec-meta.use-case.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/domain/app-settings/agent-cli-connection-model.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-analysis-model.ts",
+      "tagIds": [
+        "로컬-참조-분석",
+        "분석-문서맵",
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-errors.ts",
+      "tagIds": [
+        "공통-결과-계약"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-model.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-reference-tag-model.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-session-model.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/domain/project/project-spec-model.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/agent-cli/node-agent-cli-runtime.adapter.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/infrastructure/agent-cli/resolve-agent-cli-executable-path.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/in-memory-project-analysis-run-status.store.ts",
+      "tagIds": [
+        "프로젝트-분석-실행"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-execution.ts",
+      "tagIds": [
+        "codex-보강-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer-codex-settings.ts",
+      "tagIds": [
+        "codex-보강-분석",
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/node-project-analyzer.adapter.ts",
+      "tagIds": [
+        "codex-보강-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-codex-prompt.ts",
+      "tagIds": [
+        "codex-보강-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-codex-result.ts",
+      "tagIds": [
+        "codex-보강-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-detection.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-file-descriptions.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-draft.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor-summaries.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.constants.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-local-reference-extractor.types.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-path-alias-resolver.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-scanner.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-structure-discovery.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-summary.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis-vue-sfc.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/analysis/project-analysis.constants.ts",
+      "tagIds": [
+        "로컬-참조-분석"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-agent-cli-settings.repository.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-app-settings-store.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록",
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/infrastructure/app-settings/fs-recent-projects.repository.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/infrastructure/dialog/electron-project-dialog.adapter.ts",
+      "tagIds": [
+        "프로젝트-선택최근-목록"
+      ]
+    },
+    {
+      "path": "src/infrastructure/fs/node-project-inspector.adapter.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/fs/write-json-atomically.ts",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator-codex-execution.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/node-project-reference-tag-generator.adapter.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-prompt.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/reference-tags/project-reference-tag-generator-codex-result.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-analysis-backup.ts",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-analysis-persistence.ts",
+      "tagIds": [
+        "분석-문서맵",
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session-documents.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session-paths.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-session.repository.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-spec-documents.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-context.ts",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-documents.ts",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-io.ts",
+      "tagIds": [
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage-paths.ts",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/sdd/fs-project-storage.repository.ts",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "프로젝트-저장소-초기화"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/in-memory-project-session-message-run-status.store.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat-codex-execution.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/node-project-spec-chat.adapter.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-prompt.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/infrastructure/spec-chat/project-spec-chat-codex-result.ts",
+      "tagIds": [
+        "명세-채팅-세션"
+      ]
+    },
+    {
+      "path": "src/main/apply-mac-app-icon.ts",
+      "tagIds": [
+        "electron-부트스트랩"
+      ]
+    },
+    {
+      "path": "src/main/create-main-window.ts",
+      "tagIds": [
+        "electron-부트스트랩"
+      ]
+    },
+    {
+      "path": "src/main/ipc/project-ipc-registration.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/main/ipc/register-project-ipc.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/main/ipc/register-settings-ipc.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/main/main.ts",
+      "tagIds": [
+        "electron-부트스트랩"
+      ]
+    },
+    {
+      "path": "src/preload/index.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/renderer/app-view.ts",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/App.tsx",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/components/AppViewSwitcher.tsx",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/components/IconActionButton.tsx",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/components/TooltipSurface.tsx",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/agent-cli-settings.api.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/AgentCliSettingsPage.tsx",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/components/AgentCliConnectionCard.tsx",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/components/ConnectionStatusPill.tsx",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/index.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/types.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/use-agent-cli-settings-workflow.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/agent-cli-settings/utils.ts",
+      "tagIds": [
+        "codex-연결-설정"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/index.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.constants.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.logic.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-reference-map.types.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.types.ts",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/analysis-workspace.utils.ts",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceDocumentView.tsx",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/analysis-workspace/AnalysisWorkspaceEmptyState.tsx",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisReferenceMap.tsx",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/AnalysisWorkspace.tsx",
+      "tagIds": [
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/BottomStatusBar.tsx",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/InfoSidebar.tsx",
+      "tagIds": [
+        "명세-채팅-세션",
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MainWorkspace.tsx",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MarkdownDocument.tsx",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/MermaidDiagram.tsx",
+      "tagIds": [
+        "명세-문서버전-관리",
+        "분석-문서맵"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/ProjectSidebar.tsx",
+      "tagIds": [
+        "프로젝트-선택최근-목록",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/reference-tag-manager.utils.ts",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/reference-tags/ReferenceTagManager.tsx",
+      "tagIds": [
+        "참조-태그-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecActionIcon.tsx",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecMetadataPanel.tsx",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace-map.utils.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/specs-workspace.utils.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/specs-workspace/SpecsWorkspaceDocumentView.tsx",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/SpecsWorkspace.tsx",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/StatusBadge.tsx",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/WorkbenchSidebarResizeHandle.tsx",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/use-workspace-board-map.ts",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.types.ts",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/workspace-board-map.utils.ts",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/components/workspace-board-map/WorkspaceBoardMapView.tsx",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.types.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-page.utils.ts",
+      "tagIds": [
+        "명세-채팅-세션",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-state.utils.ts",
+      "tagIds": [
+        "명세-채팅-세션",
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench-view-model.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/project-bootstrap-workbench.api.ts",
+      "tagIds": [
+        "명세-채팅-세션",
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/ProjectBootstrapPage.tsx",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.ts",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-project-bootstrap-workbench.workflow.ts",
+      "tagIds": [
+        "명세-채팅-세션",
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-system-color-scheme.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-progress-tasks.ts",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workbench-sidebar-resize.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/use-workspace-stage-size.ts",
+      "tagIds": [
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workbench-progress-task.utils.ts",
+      "tagIds": [
+        "프로젝트-분석-실행",
+        "프로젝트-워크벤치-셸"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map-link-geometry.ts",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/features/project-bootstrap/project-bootstrap-page/workspace-map.shared.ts",
+      "tagIds": [
+        "공유-보드-프리미티브"
+      ]
+    },
+    {
+      "path": "src/renderer/global.d.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/renderer/index.html",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/main.tsx",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/renderer-sdd-api.ts",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/renderer/styles/app.css",
+      "tagIds": [
+        "앱-셸-전환"
+      ]
+    },
+    {
+      "path": "src/shared/app/app-display-name.ts",
+      "tagIds": [
+        "electron-부트스트랩"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/app-error.ts",
+      "tagIds": [
+        "공통-결과-계약"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/result.ts",
+      "tagIds": [
+        "공통-결과-계약"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/ipc-bridge.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/project-ipc-api.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/project-ipc.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/sdd-ipc.ts",
+      "tagIds": [
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/settings-ipc-api.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "src/shared/ipc/settings-ipc.ts",
+      "tagIds": [
+        "codex-연결-설정",
+        "ipc-런타임-브리지"
+      ]
+    },
+    {
+      "path": "tests/fs-project-storage.repository.test.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "tests/project-spec-model.test.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "tests/register-path-aliases.ts",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    },
+    {
+      "path": "tests/specs-workspace-map.utils.test.ts",
+      "tagIds": [
+        "명세-문서버전-관리"
+      ]
+    },
+    {
+      "path": "tsconfig.json",
+      "tagIds": [
+        "개발-실행패키징"
+      ]
+    }
+  ]
+}

@@ -163,7 +163,7 @@ Codex를 MCP 서버로 실행하는 방식이다.
 
 현재 채팅 UI에서도 이 설정을 직접 확인하고 바로 조정할 수 있다.
 
-현재 명세 채팅 실행 경로는 renderer가 typed IPC로 현재 turn 을 전달하고, main process가 저장된 CLI 연결 정보와 현재 선택된 모델/추론 강도를 합쳐 `codex exec` 를 실행한 뒤, 최종 assistant 응답을 세션 로그에 append 한다. 이때 prompt 는 선택된 명세 Markdown 과 최근 세션 메시지를 함께 넘겨 현재 명세 문맥을 유지한다.
+현재 명세 채팅 실행 경로는 renderer가 typed IPC로 현재 turn 의 텍스트와 첨부 binary payload 를 전달하고, main process가 사용자 메시지와 첨부 사본을 먼저 `.sdd/sessions/<session-id>/attachments/<message-id>/` 아래에 저장한 뒤, 저장된 CLI 연결 정보와 현재 선택된 모델/추론 강도를 합쳐 `codex exec` 를 실행한다. 최종 assistant 응답은 세션 로그에 append 하며, prompt 는 선택된 명세 Markdown, 최근 세션 메시지, 저장된 첨부 경로와 필요한 텍스트/code excerpt 를 함께 넘겨 현재 명세 문맥을 유지한다.
 
 아직 분리된 것:
 
