@@ -29,7 +29,7 @@ export function AppViewSwitcher(props: AppViewSwitcherProps) {
         }}
         type="button"
       >
-        Codex 연결
+        에이전트 설정
       </button>
     </nav>
   );

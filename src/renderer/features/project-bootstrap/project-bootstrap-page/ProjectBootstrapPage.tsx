@@ -51,6 +51,11 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
   const handleChangeChatModel = (model: string) => {
     workbench.onChangeChatModel(model);
   };
+  const handleChangeChatAgent = (
+    agentId: Parameters<typeof workbench.onChangeChatAgent>[0],
+  ) => {
+    workbench.onChangeChatAgent(agentId);
+  };
   const handleChangeChatReasoningEffort = (
     modelReasoningEffort: Parameters<typeof workbench.onChangeChatReasoningEffort>[0],
   ) => {
@@ -231,7 +236,8 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
             analysisSessionKey={workbench.selectedPath ?? 'no-project'}
             canManageReferenceTags={
               workbench.inspection?.initializationState === 'ready' &&
-              workbench.inspection.isWritable
+              workbench.inspection.isWritable &&
+              (workbench.selectedAgentConnection?.definition.capabilities.referenceTags ?? false)
             }
             canWriteSpecs={
               workbench.inspection?.initializationState === 'ready' &&
@@ -290,6 +296,7 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
                 workbench.inspection?.initializationState === 'ready' &&
                 workbench.inspection.isWritable
               }
+              agentConnections={workbench.agentCliConnections}
               chatModel={workbench.chatModel}
               chatReasoningEffort={workbench.chatReasoningEffort}
               draftMessage={workbench.draftMessage}
@@ -310,6 +317,7 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               onAnalyzeReferences={handleAnalyzeReferences}
               onCancelAnalysis={handleCancelAnalysis}
               onCancelMessage={handleCancelSessionMessage}
+              onChangeChatAgent={handleChangeChatAgent}
               onChangeChatModel={handleChangeChatModel}
               onChangeChatReasoningEffort={handleChangeChatReasoningEffort}
               onChangeDraftMessage={handleChangeDraftMessage}
@@ -319,6 +327,8 @@ export function ProjectBootstrapPage(props: ProjectBootstrapPageProps) {
               onSetComposerDragActive={handleSetComposerDragActive}
               onToggleSidebar={handleToggleRightSidebar}
               selectedSpec={workbench.selectedSpec}
+              selectedAgentConnection={workbench.selectedAgentConnection}
+              selectedAgentId={workbench.selectedAgentId}
               selectedSession={workbench.selectedSession}
               sessionMessageRunStatus={workbench.selectedSessionMessageRunStatus}
               sessionMessages={workbench.sessionMessages}

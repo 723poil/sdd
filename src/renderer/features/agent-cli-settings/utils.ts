@@ -3,12 +3,15 @@ import type {
   AgentCliCommandMode,
   AgentCliConnectionCheck,
   AgentCliConnectionRecord,
+  AgentCliId,
   AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import {
-  AGENT_CLI_MODEL_OPTIONS,
   AGENT_CLI_MODEL_REASONING_EFFORTS,
+  listAgentCliModelOptions,
 } from '@/domain/app-settings/agent-cli-connection-model';
+
+import type { AgentCliConnectionDraft } from '@/renderer/features/agent-cli-settings/types';
 
 export const AGENT_CLI_REASONING_EFFORT_OPTIONS = [...AGENT_CLI_MODEL_REASONING_EFFORTS];
 
@@ -17,7 +20,20 @@ export function describeAgentCliCommandMode(commandMode: AgentCliCommandMode): s
 }
 
 export function describeAgentCliAuthMode(authMode: AgentCliAuthMode): string {
-  return authMode === 'api-key' ? 'API key' : 'ChatGPT 로그인';
+  switch (authMode) {
+    case 'chatgpt':
+      return 'ChatGPT 로그인';
+    case 'claude':
+      return 'Claude 로그인';
+    case 'anthropic-console':
+      return 'Anthropic Console';
+    case 'google':
+      return 'Google 로그인';
+    case 'api-key':
+      return 'API key';
+    case 'vertex-ai':
+      return 'Vertex AI';
+  }
 }
 
 export function describeAgentCliModel(model: string): string {
@@ -28,6 +44,10 @@ export function describeAgentCliModel(model: string): string {
     'gpt-5.3-codex-spark': 'GPT-5.3 Codex Spark',
     'gpt-5.2': 'GPT-5.2',
     'gpt-5.2-codex': 'GPT-5.2 Codex',
+    sonnet: 'Sonnet',
+    opus: 'Opus',
+    'gemini-2.5-pro': 'Gemini 2.5 Pro',
+    'gemini-2.5-flash': 'Gemini 2.5 Flash',
   };
 
   return knownLabels[model] ?? model;
@@ -45,12 +65,63 @@ export function describeAgentCliReasoningEffort(
       return '높음';
     case 'xhigh':
       return '매우 높음';
+    default:
+      return modelReasoningEffort;
   }
 }
 
-export function getAgentCliModelOptions(currentModel: string): string[] {
-  const nextOptions = [currentModel, ...AGENT_CLI_MODEL_OPTIONS];
+export function getAgentCliModelOptionsForAgent(
+  agentId: AgentCliId,
+  currentModel: string,
+): string[] {
+  const nextOptions = [currentModel, ...listAgentCliModelOptions(agentId)];
   return [...new Set(nextOptions)];
+}
+
+export function hasAgentCliConnectionDraftChanges(
+  connection: AgentCliConnectionRecord,
+  draft: AgentCliConnectionDraft,
+): boolean {
+  return (
+    connection.settings.commandMode !== draft.commandMode ||
+    (connection.settings.executablePath ?? '') !== draft.executablePath ||
+    connection.settings.authMode !== draft.authMode ||
+    connection.settings.model !== draft.model ||
+    connection.settings.modelReasoningEffort !== draft.modelReasoningEffort
+  );
+}
+
+export function describeAgentCliConnectionSummary(
+  connection: AgentCliConnectionRecord,
+  draft: AgentCliConnectionDraft,
+): string {
+  const summaryParts = [describeAgentCliCommandMode(draft.commandMode)];
+
+  if (connection.definition.capabilities.modelSelection) {
+    summaryParts.unshift(describeAgentCliModel(draft.model));
+  }
+
+  return summaryParts.join(' · ');
+}
+
+export function getAgentCliCapabilityItems(connection: AgentCliConnectionRecord): Array<{
+  enabled: boolean;
+  label: string;
+}> {
+  return [
+    {
+      enabled: connection.definition.capabilities.projectAnalysis,
+      label: '분석',
+    },
+    {
+      enabled: connection.definition.capabilities.referenceTags,
+      label: '태그',
+    },
+    {
+      enabled: connection.definition.capabilities.specChat,
+      label: '채팅',
+    },
+  ];
 }
 
 export function formatSavedAt(updatedAt: string | null): string {
@@ -63,7 +134,7 @@ export function formatSavedAt(updatedAt: string | null): string {
 
 export function getConnectionCheckLabel(check: AgentCliConnectionCheck | undefined): string {
   if (!check) {
-    return '아직 확인하지 않았습니다.';
+    return '미확인';
   }
 
   if (check.status === 'ready') {

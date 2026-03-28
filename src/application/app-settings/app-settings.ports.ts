@@ -7,9 +7,11 @@ import type { Result } from '@/shared/contracts/result';
 
 export interface AgentCliSettingsPort {
   listAgentCliConnections(): Promise<Result<AgentCliConnectionSettings[]>>;
+  readSelectedAgentCli(): Promise<Result<AgentCliId>>;
   saveAgentCliConnection(
     input: AgentCliConnectionSettings,
   ): Promise<Result<AgentCliConnectionSettings>>;
+  saveSelectedAgentCli(input: { agentId: AgentCliId }): Promise<Result<AgentCliId>>;
 }
 
 export interface AgentCliRuntimePort {

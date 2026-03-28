@@ -64,7 +64,7 @@ export function createInMemoryProjectAnalysisRunStatusStore(): ProjectAnalysisRu
         ...currentStatus,
         status: 'cancelling',
         stageMessage: '분석 취소 중',
-        progressMessage: 'Codex 실행을 종료하고 있습니다.',
+        progressMessage: '에이전트 실행을 종료하고 있습니다.',
         updatedAt: new Date().toISOString(),
         completedAt: null,
         lastError: null,

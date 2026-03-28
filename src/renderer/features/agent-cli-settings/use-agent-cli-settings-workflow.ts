@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import type {
-  AgentCliAuthMode,
-  AgentCliCommandMode,
-  AgentCliConnectionCheck,
-  AgentCliConnectionRecord,
-  AgentCliId,
-  AgentCliModelReasoningEffort,
+import {
+  DEFAULT_AGENT_CLI_ID,
+  type AgentCliAuthMode,
+  type AgentCliCommandMode,
+  type AgentCliConnectionCheck,
+  type AgentCliConnectionRecord,
+  type AgentCliId,
+  type AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
-
 import type {
   AgentCliConnectionDraft,
   AgentCliConnectionDraftMap,
@@ -25,11 +25,13 @@ export function useAgentCliSettingsWorkflow(): {
   connections: AgentCliConnectionRecord[];
   draftsByAgentId: AgentCliConnectionDraftMap;
   checkResultsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionCheck>>;
+  selectedAgentId: AgentCliId;
   loadingMessage: string;
   errorMessage: string | null;
   isLoading: boolean;
   savingAgentIds: Partial<Record<AgentCliId, boolean>>;
   checkingAgentIds: Partial<Record<AgentCliId, boolean>>;
+  isSavingSelectedAgentId: boolean;
   connectionCount: number;
   hasConnections: boolean;
   actions: {
@@ -44,6 +46,7 @@ export function useAgentCliSettingsWorkflow(): {
     onCheckConnection(agentId: AgentCliId): Promise<void>;
     onRefresh(): Promise<void>;
     onSaveConnection(agentId: AgentCliId): Promise<void>;
+    onSelectAgent(agentId: AgentCliId): Promise<void>;
   };
 } {
   const [connections, setConnections] = useState<AgentCliConnectionRecord[]>([]);
@@ -51,11 +54,13 @@ export function useAgentCliSettingsWorkflow(): {
   const [checkResultsByAgentId, setCheckResultsByAgentId] = useState<
     Partial<Record<AgentCliId, AgentCliConnectionCheck>>
   >({});
-  const [loadingMessage, setLoadingMessage] = useState('Codex CLI 연결 설정을 불러오는 중입니다.');
+  const [selectedAgentId, setSelectedAgentId] = useState<AgentCliId>(DEFAULT_AGENT_CLI_ID);
+  const [loadingMessage, setLoadingMessage] = useState('CLI 에이전트 연결 설정을 불러오는 중입니다.');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingAgentIds, setSavingAgentIds] = useState<Partial<Record<AgentCliId, boolean>>>({});
   const [checkingAgentIds, setCheckingAgentIds] = useState<Partial<Record<AgentCliId, boolean>>>({});
+  const [isSavingSelectedAgentId, setIsSavingSelectedAgentId] = useState(false);
 
   const applyDraftPatch = (agentId: AgentCliId, patch: Partial<AgentCliConnectionDraft>) => {
     setDraftsByAgentId((current) => patchDraftByAgentId(current, agentId, patch));
@@ -67,6 +72,7 @@ export function useAgentCliSettingsWorkflow(): {
       setConnections([]);
       setDraftsByAgentId({});
       setCheckResultsByAgentId({});
+      setSelectedAgentId(DEFAULT_AGENT_CLI_ID);
       setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
       setLoadingMessage('설정 화면을 불러오지 못했습니다.');
       setIsLoading(false);
@@ -75,21 +81,24 @@ export function useAgentCliSettingsWorkflow(): {
 
     setIsLoading(true);
     setErrorMessage(null);
-    setLoadingMessage('Codex CLI 연결 설정을 불러오는 중입니다.');
+    setLoadingMessage('CLI 에이전트 연결 설정을 불러오는 중입니다.');
 
-    const result = await settingsApi.listAgentCliConnections();
-    if (!result.ok) {
+    const connectionsResult = await settingsApi.listAgentCliConnections();
+
+    if (!connectionsResult.ok) {
       setConnections([]);
       setDraftsByAgentId({});
       setCheckResultsByAgentId({});
-      setErrorMessage(result.error.message);
+      setSelectedAgentId(DEFAULT_AGENT_CLI_ID);
+      setErrorMessage(connectionsResult.error.message);
       setLoadingMessage('설정 정보를 불러오지 못했습니다.');
       setIsLoading(false);
       return;
     }
 
-    setConnections(result.value);
-    setDraftsByAgentId(buildDraftsByAgentId(result.value));
+    setConnections(connectionsResult.value.connections);
+    setDraftsByAgentId(buildDraftsByAgentId(connectionsResult.value.connections));
+    setSelectedAgentId(connectionsResult.value.selectedAgentId ?? DEFAULT_AGENT_CLI_ID);
     setLoadingMessage('연결 설정을 확인했습니다.');
     setIsLoading(false);
   }
@@ -183,15 +192,48 @@ export function useAgentCliSettingsWorkflow(): {
     }
   }
 
+  async function handleSelectAgent(agentId: AgentCliId): Promise<void> {
+    const settingsApi = getAgentCliSettingsApi();
+    if (!settingsApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    if (agentId === selectedAgentId) {
+      return;
+    }
+
+    const previousSelectedAgentId = selectedAgentId;
+    setSelectedAgentId(agentId);
+    setIsSavingSelectedAgentId(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await settingsApi.saveSelectedAgentId({ agentId });
+      if (!result.ok) {
+        setSelectedAgentId(previousSelectedAgentId);
+        setErrorMessage(result.error.message);
+        setLoadingMessage('기본 에이전트를 저장하지 못했습니다.');
+        return;
+      }
+
+      setLoadingMessage('기본 에이전트를 저장했습니다.');
+    } finally {
+      setIsSavingSelectedAgentId(false);
+    }
+  }
+
   const state: AgentCliSettingsWorkbenchState = {
     connections,
     draftsByAgentId,
     checkResultsByAgentId,
+    selectedAgentId,
     loadingMessage,
     errorMessage,
     isLoading,
     savingAgentIds,
     checkingAgentIds,
+    isSavingSelectedAgentId,
     connectionCount: connections.length,
     hasConnections: connections.length > 0,
   };
@@ -235,6 +277,9 @@ export function useAgentCliSettingsWorkflow(): {
       },
       onSaveConnection(agentId: AgentCliId) {
         return handleSaveConnection(agentId);
+      },
+      onSelectAgent(agentId: AgentCliId) {
+        return handleSelectAgent(agentId);
       },
     },
   };

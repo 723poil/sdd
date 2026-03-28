@@ -3,7 +3,7 @@ export {
   AGENT_CLI_REASONING_EFFORT_OPTIONS,
   describeAgentCliModel,
   describeAgentCliReasoningEffort,
-  getAgentCliModelOptions,
+  getAgentCliModelOptionsForAgent,
   getConnectionCheckLabel,
   getConnectionCheckTone,
 } from '@/renderer/features/agent-cli-settings/utils';

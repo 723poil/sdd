@@ -27,6 +27,7 @@ export function createNodeAgentCliRuntimeAdapter(): AgentCliRuntimePort {
       const requestedExecutablePath = input.executablePath ?? definition.defaultExecutableName;
       const checkedAt = new Date().toISOString();
       const resolvedExecutablePath = await resolveAgentCliExecutablePath({
+        agentId: input.agentId,
         executablePath: requestedExecutablePath,
       });
 

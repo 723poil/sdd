@@ -72,7 +72,7 @@ export function createInMemoryProjectSessionMessageRunStatusStore(): ProjectSess
         ...currentStatus,
         status: 'cancelling',
         stageMessage: '요청 취소 중',
-        progressMessage: 'Codex 응답 생성을 종료하고 있습니다.',
+        progressMessage: '에이전트 응답 생성을 종료하고 있습니다.',
         updatedAt: new Date().toISOString(),
         completedAt: null,
         lastError: null,

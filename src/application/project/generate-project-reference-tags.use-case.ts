@@ -2,6 +2,7 @@ import {
   createEmptyProjectReferenceTagDocument,
   type ProjectReferenceTagDocument,
 } from '@/domain/project/project-reference-tag-model';
+import type { AgentCliId } from '@/domain/app-settings/agent-cli-connection-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import type { Result } from '@/shared/contracts/result';
 import { err } from '@/shared/contracts/result';
@@ -14,7 +15,10 @@ import type {
 } from '@/application/project/project.ports';
 
 export interface GenerateProjectReferenceTagsUseCase {
-  execute(input: { rootPath: string }): Promise<Result<ProjectReferenceTagDocument>>;
+  execute(input: {
+    agentId: AgentCliId;
+    rootPath: string;
+  }): Promise<Result<ProjectReferenceTagDocument>>;
 }
 
 export function createGenerateProjectReferenceTagsUseCase(dependencies: {
@@ -50,6 +54,7 @@ export function createGenerateProjectReferenceTagsUseCase(dependencies: {
 
       const generatedReferenceTagsResult =
         await dependencies.projectReferenceTagGenerator.generateReferenceTags({
+          agentId: input.agentId,
           analysis: analysisResult.value,
           projectName: storageResult.value.projectMeta.projectName,
           rootPath: storageResult.value.projectMeta.rootPath,

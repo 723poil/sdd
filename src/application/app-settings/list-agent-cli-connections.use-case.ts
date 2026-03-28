@@ -1,4 +1,6 @@
-import type { AgentCliConnectionRecord } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  AgentCliSettingsSnapshot,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import {
   createDefaultAgentCliConnectionSettings,
   listAgentCliConnectionDefinitions,
@@ -9,7 +11,7 @@ import { ok } from '@/shared/contracts/result';
 import type { AgentCliSettingsPort } from '@/application/app-settings/app-settings.ports';
 
 interface ListAgentCliConnectionsUseCase {
-  execute(): Promise<Result<AgentCliConnectionRecord[]>>;
+  execute(): Promise<Result<AgentCliSettingsSnapshot>>;
 }
 
 export function createListAgentCliConnectionsUseCase(dependencies: {
@@ -22,6 +24,10 @@ export function createListAgentCliConnectionsUseCase(dependencies: {
       if (!storedConnectionsResult.ok) {
         return storedConnectionsResult;
       }
+      const selectedAgentResult = await dependencies.agentCliSettingsStore.readSelectedAgentCli();
+      if (!selectedAgentResult.ok) {
+        return selectedAgentResult;
+      }
 
       const storedConnectionMap = new Map(
         storedConnectionsResult.value.map((connection) => [connection.agentId, connection]),
@@ -33,7 +39,10 @@ export function createListAgentCliConnectionsUseCase(dependencies: {
           createDefaultAgentCliConnectionSettings(definition.agentId),
       }));
 
-      return ok(connectionRecords);
+      return ok({
+        selectedAgentId: selectedAgentResult.value,
+        connections: connectionRecords,
+      });
     },
   };
 }

@@ -48,6 +48,7 @@ export function createFsRecentProjectsRepository(): RecentProjectsStorePort {
           ].slice(0, 12);
 
       await writeAppSettingsDocument({
+        selectedAgentId: settingsDocumentResult.value.selectedAgentId,
         recentProjects: nextRecentProjects,
         agentCliConnections: settingsDocumentResult.value.agentCliConnections,
       });
@@ -86,6 +87,7 @@ export function createFsRecentProjectsRepository(): RecentProjectsStorePort {
       );
 
       await writeAppSettingsDocument({
+        selectedAgentId: settingsDocumentResult.value.selectedAgentId,
         recentProjects: nextRecentProjects,
         agentCliConnections: settingsDocumentResult.value.agentCliConnections,
       });
@@ -114,6 +116,7 @@ export function createFsRecentProjectsRepository(): RecentProjectsStorePort {
       }
 
       await writeAppSettingsDocument({
+        selectedAgentId: settingsDocumentResult.value.selectedAgentId,
         recentProjects: nextRecentProjects,
         agentCliConnections: settingsDocumentResult.value.agentCliConnections,
       });
@@ -153,6 +156,7 @@ export function createFsRecentProjectsRepository(): RecentProjectsStorePort {
       }));
 
       await writeAppSettingsDocument({
+        selectedAgentId: settingsDocumentResult.value.selectedAgentId,
         recentProjects: reorderedProjects,
         agentCliConnections: settingsDocumentResult.value.agentCliConnections,
       });

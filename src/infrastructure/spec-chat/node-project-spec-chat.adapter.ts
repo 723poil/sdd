@@ -4,10 +4,16 @@ import { join, resolve } from 'node:path';
 
 import type { AgentCliSettingsPort } from '@/application/app-settings/app-settings.ports';
 import type { ProjectSpecChatPort } from '@/application/project/project.ports';
+import {
+  describeUnsupportedAgentCliFeature,
+  isAgentCliFeatureSupported,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok } from '@/shared/contracts/result';
 
-import { resolveCodexRuntimeSettings } from '@/infrastructure/analysis/node-project-analyzer-codex-settings';
+import { executeCliAgentStructuredTask } from '@/infrastructure/cli-agents/execute-cli-agent-structured-task';
+import { createStructuredOutputPrompt } from '@/infrastructure/cli-agents/create-structured-output-prompt';
+import { resolveCliAgentRuntimeSettings } from '@/infrastructure/cli-agents/resolve-cli-agent-runtime-settings';
 import { executeCodexProjectSpecChat } from '@/infrastructure/spec-chat/node-project-spec-chat-codex-execution';
 import {
   createProjectSpecChatOutputSchema,
@@ -27,8 +33,18 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
       }
 
       const rootPath = resolve(input.rootPath);
-      const runtimeSettingsResult = await resolveCodexRuntimeSettings({
+      if (!isAgentCliFeatureSupported(input.agentId, 'spec-chat')) {
+        return err(
+          createProjectError(
+            'PROJECT_SPEC_CHAT_FAILED',
+            describeUnsupportedAgentCliFeature(input.agentId, 'spec-chat'),
+          ),
+        );
+      }
+
+      const runtimeSettingsResult = await resolveCliAgentRuntimeSettings({
         agentCliSettingsStore: dependencies.agentCliSettingsStore,
+        agentId: input.agentId,
         overrides: {
           model: input.model,
           modelReasoningEffort: input.modelReasoningEffort,
@@ -38,39 +54,65 @@ export function createNodeProjectSpecChatAdapter(dependencies: {
         return runtimeSettingsResult;
       }
 
-      const tempDirectoryPath = await mkdtemp(join(tmpdir(), 'sdd-codex-spec-chat-'));
+      const tempDirectoryPath = await mkdtemp(
+        join(tmpdir(), `sdd-${runtimeSettingsResult.value.definition.agentId}-spec-chat-`),
+      );
       const outputSchemaPath = join(tempDirectoryPath, 'spec-chat.schema.json');
       const outputLastMessagePath = join(tempDirectoryPath, 'spec-chat.last-message.json');
+      const outputSchema = createProjectSpecChatOutputSchema();
 
       try {
         try {
-          await writeFile(
-            outputSchemaPath,
-            JSON.stringify(createProjectSpecChatOutputSchema(), null, 2),
-            'utf8',
-          );
-
-          const executeResult = await executeCodexProjectSpecChat({
-            executablePath: runtimeSettingsResult.value.executablePath,
-            model: runtimeSettingsResult.value.connectionSettings.model,
-            modelReasoningEffort:
-              runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
-            outputLastMessagePath,
-            outputSchemaPath,
-            prompt: await createProjectSpecChatPrompt({
-              projectName: input.projectName,
-              rootPath,
-              sessionMessages: input.sessionMessages,
-              spec: input.spec,
-            }),
+          await writeFile(outputSchemaPath, JSON.stringify(outputSchema, null, 2), 'utf8');
+          const prompt = await createProjectSpecChatPrompt({
+            projectName: input.projectName,
             rootPath,
-            signal: input.signal,
+            sessionMessages: input.sessionMessages,
+            spec: input.spec,
           });
-          if (!executeResult.ok) {
-            return executeResult;
-          }
 
-          const rawOutput = await readFile(outputLastMessagePath, 'utf8');
+          let rawOutput: string;
+          if (input.agentId === 'codex') {
+            const executeResult = await executeCodexProjectSpecChat({
+              executablePath: runtimeSettingsResult.value.executablePath,
+              model: runtimeSettingsResult.value.connectionSettings.model,
+              modelReasoningEffort:
+                runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
+              outputLastMessagePath,
+              outputSchemaPath,
+              prompt,
+              rootPath,
+              signal: input.signal,
+            });
+            if (!executeResult.ok) {
+              return executeResult;
+            }
+
+            rawOutput = await readFile(outputLastMessagePath, 'utf8');
+          } else {
+            const executeResult = await executeCliAgentStructuredTask({
+              agentId: input.agentId,
+              displayName: runtimeSettingsResult.value.definition.displayName,
+              executablePath: runtimeSettingsResult.value.executablePath,
+              idleTimeoutMs: 15 * 60 * 1000,
+              maxDurationMs: 45 * 60 * 1000,
+              model: runtimeSettingsResult.value.connectionSettings.model,
+              modelReasoningEffort:
+                runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
+              prompt: createStructuredOutputPrompt({
+                basePrompt: prompt,
+                outputSchema,
+              }),
+              rootPath,
+              signal: input.signal,
+              taskLabel: '명세 채팅 응답',
+            });
+            if (!executeResult.ok) {
+              return executeResult;
+            }
+
+            rawOutput = executeResult.value;
+          }
           const parsedResult = parseProjectSpecChatCodexResult(rawOutput);
           if (!parsedResult.ok) {
             return parsedResult;

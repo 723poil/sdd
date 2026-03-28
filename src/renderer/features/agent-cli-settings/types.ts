@@ -22,11 +22,13 @@ export interface AgentCliSettingsViewState {
   connections: AgentCliConnectionRecord[];
   draftsByAgentId: AgentCliConnectionDraftMap;
   checkResultsByAgentId: Partial<Record<AgentCliId, AgentCliConnectionCheck>>;
+  selectedAgentId: AgentCliId;
   loadingMessage: string;
   errorMessage: string | null;
   isLoading: boolean;
   savingAgentIds: Partial<Record<AgentCliId, boolean>>;
   checkingAgentIds: Partial<Record<AgentCliId, boolean>>;
+  isSavingSelectedAgentId: boolean;
 }
 
 export interface AgentCliSettingsViewModel {

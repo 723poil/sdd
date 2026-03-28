@@ -7,6 +7,10 @@ import type {
   ProjectAnalysisRunStatusPort,
   ProjectAnalyzerPort,
 } from '@/application/project/project.ports';
+import {
+  describeUnsupportedAgentCliFeature,
+  isAgentCliFeatureSupported,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectAnalysisDraft } from '@/domain/project/project-analysis-model';
 import { createProjectError } from '@/domain/project/project-errors';
 import { err, ok, type Result } from '@/shared/contracts/result';
@@ -20,8 +24,10 @@ import {
   createLocalProjectAnalysisDraft,
   mergeProjectAnalysisWithLocalDraft,
 } from '@/infrastructure/analysis/project-analysis-local-draft';
+import { executeCliAgentStructuredTask } from '@/infrastructure/cli-agents/execute-cli-agent-structured-task';
+import { createStructuredOutputPrompt } from '@/infrastructure/cli-agents/create-structured-output-prompt';
+import { resolveCliAgentRuntimeSettings } from '@/infrastructure/cli-agents/resolve-cli-agent-runtime-settings';
 import { executeCodexProjectAnalysis } from '@/infrastructure/analysis/node-project-analyzer-codex-execution';
-import { resolveCodexRuntimeSettings } from '@/infrastructure/analysis/node-project-analyzer-codex-settings';
 
 export function createNodeProjectAnalyzerAdapter(dependencies: {
   agentCliSettingsStore: AgentCliSettingsPort;
@@ -94,8 +100,18 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
         return ok(localDraft);
       }
 
-      const codexRuntimeSettingsResult = await resolveCodexRuntimeSettings({
+      if (!isAgentCliFeatureSupported(input.agentId, 'project-analysis')) {
+        return err(
+          createProjectError(
+            'PROJECT_ANALYSIS_FAILED',
+            describeUnsupportedAgentCliFeature(input.agentId, 'project-analysis'),
+          ),
+        );
+      }
+
+      const runtimeSettingsResult = await resolveCliAgentRuntimeSettings({
         agentCliSettingsStore: dependencies.agentCliSettingsStore,
+        agentId: input.agentId,
       });
       if (runControl.signal.aborted) {
         return createCancelledAnalysisResult({
@@ -104,26 +120,26 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
           stageMessage: '분석 취소됨',
         });
       }
-      if (!codexRuntimeSettingsResult.ok) {
+      if (!runtimeSettingsResult.ok) {
         return createLocalAnalysisFallbackResult({
           analysis: localDraft,
           analysisRunStatusStore: dependencies.analysisRunStatusStore,
-          progressMessage: 'Codex 설정을 확인하지 못해 로컬 정적 분석 결과만 사용합니다.',
+          progressMessage: `${runtimeSettingsResult.error.message} 로컬 정적 분석 결과만 사용합니다.`,
           rootPath,
           stageMessage: '로컬 정적 분석 완료',
         });
       }
 
-      const tempDirectoryPath = await mkdtemp(join(tmpdir(), 'sdd-codex-analysis-'));
+      const agentDisplayName = runtimeSettingsResult.value.definition.displayName;
+      const tempDirectoryPath = await mkdtemp(
+        join(tmpdir(), `sdd-${runtimeSettingsResult.value.definition.agentId}-analysis-`),
+      );
       const outputSchemaPath = join(tempDirectoryPath, 'project-analysis.schema.json');
       const outputLastMessagePath = join(tempDirectoryPath, 'project-analysis.last-message.json');
+      const outputSchema = createProjectAnalysisOutputSchema();
 
       try {
-        await writeFile(
-          outputSchemaPath,
-          JSON.stringify(createProjectAnalysisOutputSchema(), null, 2),
-          'utf8',
-        );
+        await writeFile(outputSchemaPath, JSON.stringify(outputSchema, null, 2), 'utf8');
         if (runControl.signal.aborted) {
           return createCancelledAnalysisResult({
             analysisRunStatusStore: dependencies.analysisRunStatusStore,
@@ -132,50 +148,89 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
           });
         }
 
-        const executeResult = await executeCodexProjectAnalysis({
-          analysisRunStatusStore: dependencies.analysisRunStatusStore,
-          executablePath: codexRuntimeSettingsResult.value.executablePath,
-          model: codexRuntimeSettingsResult.value.connectionSettings.model,
-          modelReasoningEffort:
-            codexRuntimeSettingsResult.value.connectionSettings.modelReasoningEffort,
-          outputLastMessagePath,
-          outputSchemaPath,
-          prompt: createProjectAnalysisPrompt({
-            projectName: input.projectName,
-          }),
-          rootPath,
-          signal: runControl.signal,
-        });
-        if (!executeResult.ok) {
-          if (executeResult.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
-            return executeResult;
+        let rawOutput: string;
+        if (input.agentId === 'codex') {
+          const executeResult = await executeCodexProjectAnalysis({
+            analysisRunStatusStore: dependencies.analysisRunStatusStore,
+            executablePath: runtimeSettingsResult.value.executablePath,
+            model: runtimeSettingsResult.value.connectionSettings.model,
+            modelReasoningEffort:
+              runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
+            outputLastMessagePath,
+            outputSchemaPath,
+            prompt: createProjectAnalysisPrompt({
+              projectName: input.projectName,
+            }),
+            rootPath,
+            signal: runControl.signal,
+          });
+          if (!executeResult.ok) {
+            if (executeResult.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+              return executeResult;
+            }
+
+            return createLocalAnalysisFallbackResult({
+              analysis: localDraft,
+              analysisRunStatusStore: dependencies.analysisRunStatusStore,
+              progressMessage: `${agentDisplayName} 보강 분석에 실패해 로컬 정적 분석 결과만 사용합니다.`,
+              rootPath,
+              stageMessage: `${agentDisplayName} 보강 없이 로컬 분석 사용`,
+            });
           }
 
-          return createLocalAnalysisFallbackResult({
-            analysis: localDraft,
-            analysisRunStatusStore: dependencies.analysisRunStatusStore,
-            progressMessage: 'Codex 보강 분석에 실패해 로컬 정적 분석 결과만 사용합니다.',
+          rawOutput = await readFile(outputLastMessagePath, 'utf8');
+        } else {
+          const executeResult = await executeCliAgentStructuredTask({
+            agentId: input.agentId,
+            displayName: agentDisplayName,
+            executablePath: runtimeSettingsResult.value.executablePath,
+            idleTimeoutMs: 20 * 60 * 1000,
+            maxDurationMs: 60 * 60 * 1000,
+            model: runtimeSettingsResult.value.connectionSettings.model,
+            modelReasoningEffort:
+              runtimeSettingsResult.value.connectionSettings.modelReasoningEffort,
+            prompt: createStructuredOutputPrompt({
+              basePrompt: createProjectAnalysisPrompt({
+                projectName: input.projectName,
+              }),
+              outputSchema,
+            }),
             rootPath,
-            stageMessage: 'Codex 보강 없이 로컬 분석 사용',
+            signal: runControl.signal,
+            taskLabel: '분석',
           });
+          if (!executeResult.ok) {
+            if (executeResult.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
+              return executeResult;
+            }
+
+            return createLocalAnalysisFallbackResult({
+              analysis: localDraft,
+              analysisRunStatusStore: dependencies.analysisRunStatusStore,
+              progressMessage: `${agentDisplayName} 보강 분석에 실패해 로컬 정적 분석 결과만 사용합니다.`,
+              rootPath,
+              stageMessage: `${agentDisplayName} 보강 없이 로컬 분석 사용`,
+            });
+          }
+
+          rawOutput = executeResult.value;
         }
 
         dependencies.analysisRunStatusStore.updateAnalysisRunStatus({
           rootPath,
-          stageMessage: 'Codex 응답 정리 중',
-          progressMessage: 'Codex 서술 결과와 로컬 참조 데이터를 합치고 있습니다.',
+          stageMessage: `${agentDisplayName} 응답 정리 중`,
+          progressMessage: `${agentDisplayName} 서술 결과와 로컬 참조 데이터를 합치고 있습니다.`,
           stepIndex: 3,
         });
 
-        const rawOutput = await readFile(outputLastMessagePath, 'utf8');
         const parsedResult = parseProjectAnalysisCodexResult(rawOutput);
         if (!parsedResult.ok) {
           return createLocalAnalysisFallbackResult({
             analysis: localDraft,
             analysisRunStatusStore: dependencies.analysisRunStatusStore,
-            progressMessage: 'Codex 응답 검증에 실패해 로컬 정적 분석 결과만 사용합니다.',
+            progressMessage: `${agentDisplayName} 응답 검증에 실패해 로컬 정적 분석 결과만 사용합니다.`,
             rootPath,
-            stageMessage: 'Codex 응답 대신 로컬 분석 사용',
+            stageMessage: `${agentDisplayName} 응답 대신 로컬 분석 사용`,
           });
         }
 
@@ -194,9 +249,9 @@ export function createNodeProjectAnalyzerAdapter(dependencies: {
         return createLocalAnalysisFallbackResult({
           analysis: localDraft,
           analysisRunStatusStore: dependencies.analysisRunStatusStore,
-          progressMessage: `Codex 보강 분석 중 오류가 발생해 로컬 정적 분석 결과만 사용합니다. (${message})`,
+          progressMessage: `${agentDisplayName} 보강 분석 중 오류가 발생해 로컬 정적 분석 결과만 사용합니다. (${message})`,
           rootPath,
-          stageMessage: 'Codex 오류로 로컬 분석 사용',
+          stageMessage: `${agentDisplayName} 오류로 로컬 분석 사용`,
         });
       } finally {
         await rm(tempDirectoryPath, { recursive: true, force: true });

@@ -3,8 +3,8 @@
   "projectName": "sdd",
   "rootPath": "/Users/723poil/git/side/sdd",
   "createdAt": "2026-03-24T13:31:23.817Z",
-  "updatedAt": "2026-03-27T01:56:35.787Z",
-  "revision": 13,
+  "updatedAt": "2026-03-28T01:05:11.713Z",
+  "revision": 14,
   "lastAnalyzedAt": "2026-03-27T00:38:30.261Z",
   "detectedStack": [
     "Electron",
@@ -15,5 +15,5 @@
     "TypeScript",
     "Vite"
   ],
-  "defaultSpecId": "spec-05"
+  "defaultSpecId": "spec-06"
 }

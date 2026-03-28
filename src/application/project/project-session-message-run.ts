@@ -146,7 +146,7 @@ function createProjectSessionMessageRunController(input: {
     markReplyGenerationStarted() {
       updateRunStatus({
         stageMessage: '응답 생성 중',
-        progressMessage: 'Codex가 명세 초안을 정리하고 있습니다.',
+        progressMessage: '선택한 에이전트가 명세 초안을 정리하고 있습니다.',
         stepIndex: 2,
       });
     },

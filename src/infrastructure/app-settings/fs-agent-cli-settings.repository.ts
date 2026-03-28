@@ -2,6 +2,7 @@ import type { AgentCliSettingsPort } from '@/application/app-settings/app-settin
 import {
   createDefaultAgentCliConnectionSettings,
   type AgentCliConnectionSettings,
+  type AgentCliId,
 } from '@/domain/app-settings/agent-cli-connection-model';
 import { ok } from '@/shared/contracts/result';
 
@@ -34,6 +35,15 @@ export function createFsAgentCliSettingsRepository(): AgentCliSettingsPort {
       return ok(connections);
     },
 
+    async readSelectedAgentCli() {
+      const settingsDocumentResult = await readAppSettingsDocument();
+      if (!settingsDocumentResult.ok) {
+        return settingsDocumentResult;
+      }
+
+      return ok(settingsDocumentResult.value.selectedAgentId);
+    },
+
     async saveAgentCliConnection(input: AgentCliConnectionSettings) {
       const settingsDocumentResult = await readAppSettingsDocument();
       if (!settingsDocumentResult.ok) {
@@ -48,11 +58,27 @@ export function createFsAgentCliSettingsRepository(): AgentCliSettingsPort {
       ];
 
       await writeAppSettingsDocument({
+        selectedAgentId: settingsDocumentResult.value.selectedAgentId,
         recentProjects: settingsDocumentResult.value.recentProjects,
         agentCliConnections: nextAgentCliConnections,
       });
 
       return ok(input);
+    },
+
+    async saveSelectedAgentCli(input: { agentId: AgentCliId }) {
+      const settingsDocumentResult = await readAppSettingsDocument();
+      if (!settingsDocumentResult.ok) {
+        return settingsDocumentResult;
+      }
+
+      await writeAppSettingsDocument({
+        selectedAgentId: input.agentId,
+        recentProjects: settingsDocumentResult.value.recentProjects,
+        agentCliConnections: settingsDocumentResult.value.agentCliConnections,
+      });
+
+      return ok(input.agentId);
     },
   };
 }

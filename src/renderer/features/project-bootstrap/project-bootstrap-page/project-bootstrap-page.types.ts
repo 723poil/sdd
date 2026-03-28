@@ -13,7 +13,11 @@ import type {
   ProjectSessionMessageRunStatus as ProjectSessionMessageRunStatusModel,
   ProjectSessionSummary,
 } from '@/domain/project/project-session-model';
-import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  AgentCliConnectionRecord,
+  AgentCliId,
+  AgentCliModelReasoningEffort,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectSpecDocument } from '@/domain/project/project-spec-model';
 import type { ProjectSessionDraftAttachment } from '@/renderer/features/project-bootstrap/project-bootstrap-page/project-session-attachment-draft';
 
@@ -109,8 +113,8 @@ export interface ProjectBootstrapWorkbenchState {
   isSavingChatRuntimeSettings: boolean;
   isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
-  chatModel: string;
-  chatReasoningEffort: AgentCliModelReasoningEffort;
+  agentCliConnections: AgentCliConnectionRecord[];
+  selectedAgentId: AgentCliId;
   message: string;
   errorMessage: string | null;
 }
@@ -140,6 +144,9 @@ export interface ProjectBootstrapWorkbenchViewModel {
   isSendingMessage: boolean;
   canCancelMessage: boolean;
   progressTasks: WorkbenchProgressTask[];
+  selectedAgentConnection: AgentCliConnectionRecord | null;
+  chatModel: string;
+  chatReasoningEffort: AgentCliModelReasoningEffort;
   workbenchClassName: string;
 }
 

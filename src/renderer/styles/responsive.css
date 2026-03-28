@@ -7,18 +7,10 @@
     --app-switcher-clearance: 16px;
   }
 
-  .settings-overview,
-  .connection-meta-grid,
-  .panel-grid {
+  .panel-grid,
+  .settings-agent-workspace,
+  .connection-form--dense {
     grid-template-columns: 1fr;
-  }
-
-  .settings-overview {
-    display: grid;
-  }
-
-  .settings-overview__actions {
-    justify-items: stretch;
   }
 
   .settings-page {
@@ -27,6 +19,35 @@
 
   .settings-footer-bar {
     padding: 0 16px;
+  }
+
+  .settings-page__header,
+  .connection-inspector__header,
+  .connection-inspector__title-row {
+    align-items: flex-start;
+  }
+
+  .connection-inspector__header {
+    flex-direction: column;
+  }
+
+  .settings-agent-list,
+  .settings-agent-detail {
+    min-width: 0;
+  }
+
+  .agent-cli-list-item__header {
+    gap: 12px;
+  }
+
+  .connection-inspector__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .connection-inspector__meta {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .main-panel {
@@ -41,12 +62,6 @@
   .workspace-floating-bar__leading,
   .workspace-floating-bar__actions {
     width: 100%;
-  }
-
-  .hero-actions,
-  .settings-actions,
-  .connection-card__actions {
-    justify-content: stretch;
   }
 
   .hero-panel__header {
@@ -64,8 +79,7 @@
 
   .hero-actions .primary-button,
   .hero-actions .secondary-button,
-  .connection-card__actions .primary-button,
-  .connection-card__actions .secondary-button {
+  .settings-empty-state__actions .secondary-button {
     width: 100%;
   }
 

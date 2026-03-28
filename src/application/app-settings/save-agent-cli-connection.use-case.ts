@@ -18,8 +18,8 @@ interface SaveAgentCliConnectionUseCase {
     commandMode: AgentCliCommandMode;
     executablePath: string | null;
     authMode: AgentCliAuthMode;
-    model: string;
-    modelReasoningEffort: AgentCliModelReasoningEffort;
+    model?: string | null;
+    modelReasoningEffort?: AgentCliModelReasoningEffort | null;
   }): Promise<Result<AgentCliConnectionRecord>>;
 }
 
@@ -53,14 +53,19 @@ export function createSaveAgentCliConnectionUseCase(dependencies: {
         });
       }
 
-      if (input.model.trim().length === 0) {
+      if (definition.capabilities.modelSelection && (input.model ?? '').trim().length === 0) {
         return err({
           code: 'INVALID_AGENT_CLI_MODEL',
-          message: 'Codex 모델을 선택해야 합니다.',
+          message: '모델을 선택해야 합니다.',
         });
       }
 
-      if (!AGENT_CLI_MODEL_REASONING_EFFORTS.includes(input.modelReasoningEffort)) {
+      if (
+        definition.capabilities.reasoningEffort &&
+        !AGENT_CLI_MODEL_REASONING_EFFORTS.includes(
+          (input.modelReasoningEffort ?? definition.defaultModelReasoningEffort),
+        )
+      ) {
         return err({
           code: 'INVALID_AGENT_CLI_REASONING_EFFORT',
           message: '지원하지 않는 추론 강도입니다.',
@@ -72,8 +77,10 @@ export function createSaveAgentCliConnectionUseCase(dependencies: {
         commandMode: input.commandMode,
         executablePath: input.executablePath,
         authMode: input.authMode,
-        model: input.model,
-        modelReasoningEffort: input.modelReasoningEffort,
+        ...(typeof input.model !== 'undefined' ? { model: input.model } : {}),
+        ...(typeof input.modelReasoningEffort !== 'undefined'
+          ? { modelReasoningEffort: input.modelReasoningEffort }
+          : {}),
         updatedAt: new Date().toISOString(),
       });
       const saveResult = await dependencies.agentCliSettingsStore.saveAgentCliConnection(settings);

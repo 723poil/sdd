@@ -47,10 +47,15 @@ export function createProjectBootstrapWorkbenchViewModel(
     selectedReferenceTagGenerationStatus === 'running' ||
     selectedReferenceTagGenerationStatus === 'cancelling';
   const isCancellingReferenceTags = selectedReferenceTagGenerationStatus === 'cancelling';
+  const selectedAgentConnection =
+    state.agentCliConnections.find(
+      (connection) => connection.definition.agentId === state.selectedAgentId,
+    ) ?? null;
   const canAnalyzeProject =
     state.inspection !== null &&
     state.inspection.initializationState === 'ready' &&
     state.inspection.isWritable &&
+    (selectedAgentConnection?.definition.capabilities.projectAnalysis ?? false) &&
     !isAnalyzing;
   const canAnalyzeReferences =
     state.inspection !== null && state.inspection.isReadable && !isAnalyzing;
@@ -103,6 +108,9 @@ export function createProjectBootstrapWorkbenchViewModel(
     isAnalyzing,
     isSendingMessage,
     canCancelMessage,
+    selectedAgentConnection,
+    chatModel: selectedAgentConnection?.settings.model ?? '',
+    chatReasoningEffort: selectedAgentConnection?.settings.modelReasoningEffort ?? 'high',
     projectEntries: state.recentProjects,
     progressTasks,
     selectedSession,

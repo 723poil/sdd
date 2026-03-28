@@ -1,6 +1,8 @@
 import { useEffect, useRef, type ChangeEvent, type ClipboardEvent, type DragEvent } from 'react';
 
 import {
+  type AgentCliConnectionRecord,
+  type AgentCliId,
   AGENT_CLI_MODEL_REASONING_EFFORTS,
   type AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
@@ -25,11 +27,12 @@ import {
 import {
   describeAgentCliModel,
   describeAgentCliReasoningEffort,
-  getAgentCliModelOptions,
+  getAgentCliModelOptionsForAgent,
 } from '@/renderer/features/agent-cli-settings';
 
 interface InfoSidebarProps {
   activeWorkspacePage: WorkspacePageId;
+  agentConnections: AgentCliConnectionRecord[];
   canAnalyzeProject: boolean;
   canAnalyzeReferences: boolean;
   canCancelAnalysis: boolean;
@@ -54,6 +57,7 @@ interface InfoSidebarProps {
   isSavingChatRuntimeSettings: boolean;
   sessionMessageRunStatus: ProjectSessionMessageRunStatus | null;
   onAddDraftAttachments: (files: File[], source: ProjectSessionMessageAttachmentSource) => void;
+  onChangeChatAgent: (agentId: AgentCliId) => void;
   onChangeChatModel: (value: string) => void;
   onChangeChatReasoningEffort: (value: AgentCliModelReasoningEffort) => void;
   onChangeDraftMessage: (value: string) => void;
@@ -66,6 +70,8 @@ interface InfoSidebarProps {
   onSendMessage: () => void;
   onSetComposerDragActive: (isActive: boolean) => void;
   onToggleSidebar: () => void;
+  selectedAgentConnection: AgentCliConnectionRecord | null;
+  selectedAgentId: AgentCliId;
 }
 
 interface TimelineMessage {
@@ -96,6 +102,9 @@ export function InfoSidebar(props: InfoSidebarProps) {
     : props.isSavingChatRuntimeSettings
       ? '채팅 설정을 저장 중입니다.'
       : null;
+  const selectedAgentDisplayName = props.selectedAgentConnection?.definition.displayName ?? '에이전트';
+  const canAdjustReasoningEffort =
+    props.selectedAgentConnection?.definition.capabilities.reasoningEffort ?? false;
   const chatLogEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const composerDragDepthRef = useRef(0);
@@ -192,7 +201,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
         <div className="sidebar-header info-sidebar__header">
           <div className="info-sidebar__heading">
             <div className="info-sidebar__brand-row">
-              <span className="info-sidebar__brand">CODEX</span>
+              <span className="info-sidebar__brand">{selectedAgentDisplayName}</span>
               <h3 className="info-sidebar__title">채팅</h3>
             </div>
             <p className="info-sidebar__subtitle">
@@ -272,7 +281,9 @@ export function InfoSidebar(props: InfoSidebarProps) {
                 </div>
               ) : timelineMessages.length > 0 ? (
                 <div className="info-sidebar-chat-log__items">
-                  {timelineMessages.map((message) => renderTimelineMessage(message))}
+                  {timelineMessages.map((message) =>
+                    renderTimelineMessage(message, selectedAgentDisplayName),
+                  )}
                   <div ref={chatLogEndRef} />
                 </div>
               ) : (
@@ -377,6 +388,37 @@ export function InfoSidebar(props: InfoSidebarProps) {
                 <div aria-label="현재 채팅 설정" className="info-sidebar-chat-composer__runtime">
                   <div className="info-sidebar-chat-composer__runtime-field">
                     <select
+                      aria-label="현재 에이전트"
+                      className="info-sidebar-chat-composer__runtime-select"
+                      disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
+                      onChange={(event) => {
+                        props.onChangeChatAgent(event.target.value as AgentCliId);
+                      }}
+                      value={props.selectedAgentId}
+                    >
+                      {props.agentConnections.map((connection) => (
+                        <option key={connection.definition.agentId} value={connection.definition.agentId}>
+                          {connection.definition.displayName}
+                        </option>
+                      ))}
+                    </select>
+                    <svg
+                      aria-hidden="true"
+                      className="info-sidebar-chat-composer__runtime-caret"
+                      fill="none"
+                      viewBox="0 0 12 12"
+                    >
+                      <path
+                        d="m3 4.5 3 3 3-3"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="info-sidebar-chat-composer__runtime-field">
+                    <select
                       aria-label="현재 모델"
                       className="info-sidebar-chat-composer__runtime-select"
                       disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
@@ -385,7 +427,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
                       }}
                       value={props.chatModel}
                     >
-                      {getChatModelOptions(props.chatModel).map((model) => (
+                      {getAgentCliModelOptionsForAgent(props.selectedAgentId, props.chatModel).map((model) => (
                         <option key={model} value={model}>
                           {describeAgentCliModel(model)}
                         </option>
@@ -406,39 +448,41 @@ export function InfoSidebar(props: InfoSidebarProps) {
                       />
                     </svg>
                   </div>
-                  <div className="info-sidebar-chat-composer__runtime-field info-sidebar-chat-composer__runtime-field--effort">
-                    <select
-                      aria-label="현재 추론 강도"
-                      className="info-sidebar-chat-composer__runtime-select"
-                      disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
-                      onChange={(event) => {
-                        props.onChangeChatReasoningEffort(
-                          event.target.value as AgentCliModelReasoningEffort,
-                        );
-                      }}
-                      value={props.chatReasoningEffort}
-                    >
-                      {AGENT_CLI_MODEL_REASONING_EFFORTS.map((modelReasoningEffort) => (
-                        <option key={modelReasoningEffort} value={modelReasoningEffort}>
-                          {describeAgentCliReasoningEffort(modelReasoningEffort)}
-                        </option>
-                      ))}
-                    </select>
-                    <svg
-                      aria-hidden="true"
-                      className="info-sidebar-chat-composer__runtime-caret"
-                      fill="none"
-                      viewBox="0 0 12 12"
-                    >
-                      <path
-                        d="m3 4.5 3 3 3-3"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.4"
-                      />
-                    </svg>
-                  </div>
+                  {canAdjustReasoningEffort ? (
+                    <div className="info-sidebar-chat-composer__runtime-field info-sidebar-chat-composer__runtime-field--effort">
+                      <select
+                        aria-label="현재 추론 강도"
+                        className="info-sidebar-chat-composer__runtime-select"
+                        disabled={props.isSavingChatRuntimeSettings || isMessageRequestActive}
+                        onChange={(event) => {
+                          props.onChangeChatReasoningEffort(
+                            event.target.value as AgentCliModelReasoningEffort,
+                          );
+                        }}
+                        value={props.chatReasoningEffort}
+                      >
+                        {AGENT_CLI_MODEL_REASONING_EFFORTS.map((modelReasoningEffort) => (
+                          <option key={modelReasoningEffort} value={modelReasoningEffort}>
+                            {describeAgentCliReasoningEffort(modelReasoningEffort)}
+                          </option>
+                        ))}
+                      </select>
+                      <svg
+                        aria-hidden="true"
+                        className="info-sidebar-chat-composer__runtime-caret"
+                        fill="none"
+                        viewBox="0 0 12 12"
+                      >
+                        <path
+                          d="m3 4.5 3 3 3-3"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.4"
+                        />
+                      </svg>
+                    </div>
+                  ) : null}
                 </div>
                 {props.canCancelMessage ? (
                   <button
@@ -498,7 +542,7 @@ export function InfoSidebar(props: InfoSidebarProps) {
   );
 }
 
-function renderTimelineMessage(message: TimelineMessage) {
+function renderTimelineMessage(message: TimelineMessage, assistantLabel: string) {
   if (message.role === 'system') {
     return (
       <article
@@ -541,7 +585,7 @@ function renderTimelineMessage(message: TimelineMessage) {
       key={message.id}
     >
       <div className="info-sidebar-chat-message__header">
-        <strong>{getMessageRoleLabel(message.role)}</strong>
+        <strong>{getMessageRoleLabel(message.role, assistantLabel)}</strong>
         <span>{formatMessageTimestamp(message.createdAt)}</span>
       </div>
       <div className="info-sidebar-chat-message__body">
@@ -555,12 +599,12 @@ function renderTimelineMessage(message: TimelineMessage) {
   );
 }
 
-function getMessageRoleLabel(role: ProjectSessionMessageRole): string {
+function getMessageRoleLabel(role: ProjectSessionMessageRole, assistantLabel = '에이전트'): string {
   switch (role) {
     case 'user':
       return '나';
     case 'assistant':
-      return '코덱스';
+      return assistantLabel;
     case 'system':
       return '시스템';
   }
@@ -707,10 +751,6 @@ function formatMessageTimestamp(value: string): string {
     day: 'numeric',
     month: 'numeric',
   }).format(date);
-}
-
-function getChatModelOptions(currentModel: string): string[] {
-  return getAgentCliModelOptions(currentModel);
 }
 
 function hasFileTransferData(dataTransfer: DataTransfer | null): boolean {

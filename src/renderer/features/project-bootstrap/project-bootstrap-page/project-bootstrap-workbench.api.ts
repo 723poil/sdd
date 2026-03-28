@@ -1,7 +1,11 @@
 import type {
-  AgentCliConnectionSettings,
+  AgentCliConnectionRecord,
+  AgentCliId,
 } from '@/domain/app-settings/agent-cli-connection-model';
-import { createDefaultAgentCliConnectionSettings } from '@/domain/app-settings/agent-cli-connection-model';
+import {
+  createDefaultAgentCliConnectionSettings,
+  DEFAULT_AGENT_CLI_ID,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectAnalysis,
   ProjectAnalysisRunStatus,
@@ -112,8 +116,15 @@ export async function readProjectSessionMessageRunStatus(input: {
   return result.value;
 }
 
-export async function readCodexConnectionSettings(): Promise<
-  { ok: true; value: AgentCliConnectionSettings } | { ok: false }
+export async function readAgentCliSettingsSnapshot(): Promise<
+  | {
+      ok: true;
+      value: {
+        connections: AgentCliConnectionRecord[];
+        selectedAgentId: AgentCliId;
+      };
+    }
+  | { ok: false }
 > {
   const sddApi = getRendererSddApi();
   if (!sddApi) {
@@ -127,8 +138,40 @@ export async function readCodexConnectionSettings(): Promise<
 
   return {
     ok: true,
-    value:
-      result.value.find((connection) => connection.definition.agentId === 'codex')?.settings ??
-      createDefaultAgentCliConnectionSettings('codex'),
+    value: {
+      connections: result.value.connections,
+      selectedAgentId: result.value.selectedAgentId ?? DEFAULT_AGENT_CLI_ID,
+    },
   };
+}
+
+export function findAgentCliConnectionRecord(
+  connections: AgentCliConnectionRecord[],
+  agentId: AgentCliId,
+): AgentCliConnectionRecord {
+  return (
+    connections.find((connection) => connection.definition.agentId === agentId) ?? {
+      definition: {
+        agentId,
+        displayName: agentId,
+        description: '',
+        defaultExecutableName: agentId,
+        connectionCheckArgs: ['--version'],
+        recommendedTransport: 'exec',
+        futureTransports: [],
+        supportedAuthModes: [],
+        capabilities: {
+          projectAnalysis: false,
+          referenceTags: false,
+          specChat: false,
+          modelSelection: true,
+          reasoningEffort: false,
+        },
+        modelOptions: [],
+        defaultModel: '',
+        defaultModelReasoningEffort: 'high',
+      },
+      settings: createDefaultAgentCliConnectionSettings(agentId),
+    }
+  );
 }

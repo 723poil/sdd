@@ -12,6 +12,7 @@ import type {
   ProjectInspectorPort,
   ProjectAnalysisStoragePort,
 } from '@/application/project/project.ports';
+import type { AgentCliId } from '@/domain/app-settings/agent-cli-connection-model';
 import { mergeReferenceAnalysisDraft } from '@/application/project/project-analysis-draft-merger';
 import { readProjectInspection } from '@/application/project/read-project-inspection';
 import { createProjectError } from '@/domain/project/project-errors';
@@ -36,6 +37,7 @@ export interface AnalyzeProjectWorkflowDependencies {
 }
 
 export interface AnalyzeProjectWorkflowInput {
+  agentId: AgentCliId;
   mode: ProjectAnalysisMode;
   rootPath: string;
 }
@@ -64,6 +66,7 @@ async function executeFullAnalysis(
   }
 
   const analysisDraftResult = await dependencies.projectAnalyzer.analyzeProject({
+    agentId: input.agentId,
     mode: input.mode,
     projectName: storageResult.value.projectMeta.projectName,
     rootPath: storageResult.value.projectMeta.rootPath,
@@ -104,6 +107,7 @@ async function executeReferenceOnlyAnalysis(
 
   const inspection = inspectionResult.value;
   const analysisDraftResult = await dependencies.projectAnalyzer.analyzeProject({
+    agentId: input.agentId,
     mode: 'references',
     projectName: inspection.projectMeta?.projectName ?? inspection.projectName,
     rootPath: inspection.rootPath,

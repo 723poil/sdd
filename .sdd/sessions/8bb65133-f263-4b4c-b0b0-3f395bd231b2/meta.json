@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "id": "8bb65133-f263-4b4c-b0b0-3f395bd231b2",
+  "specId": "spec-06",
+  "title": "새 명세 06 채팅",
+  "createdAt": "2026-03-28T01:05:19.033Z",
+  "updatedAt": "2026-03-28T01:14:02.624Z",
+  "revision": 3,
+  "lastMessageAt": "2026-03-28T01:14:02.624Z",
+  "lastMessagePreview": "이번 초안은 spec-05의 기능 범위는 유지하고, 실제 문제를 에이전트 설정 화면 UX 재구성으로 좁혔습니다. 현재 `AgentCliSe...",
+  "messageCount": 2
+}

@@ -1,16 +1,26 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-27T01:56:35.787Z",
+  "generatedAt": "2026-03-28T01:14:02.619Z",
   "specs": [
+    {
+      "id": "spec-06",
+      "slug": "spec-06",
+      "title": "에이전트 설정 화면 UX 재구성",
+      "status": "draft",
+      "latestVersion": "v1",
+      "currentVersion": "v1",
+      "updatedAt": "2026-03-28T01:14:02.619Z",
+      "summary": "멀티 CLI 에이전트 기능은 유지하되, 에이전트 설정 화면을 선택 중심 인스펙터 구조로 다시 설계합니다. 인라인 설명은 줄이고 tooltip 우선, icon-first 액션으로 정리합니다."
+    },
     {
       "id": "spec-05",
       "slug": "spec-05",
-      "title": "새 명세 05",
-      "status": "draft",
-      "latestVersion": null,
-      "currentVersion": null,
-      "updatedAt": "2026-03-27T01:56:35.787Z",
-      "summary": "채팅으로 작성 중인 초안입니다."
+      "title": "멀티 CLI 에이전트 연결 및 명세 채팅 에이전트 선택 지원",
+      "status": "archived",
+      "latestVersion": "v1",
+      "currentVersion": "v1",
+      "updatedAt": "2026-03-28T01:04:52.421Z",
+      "summary": "Codex 전용 연결 모델을 Claude Code와 Gemini CLI까지 확장한다. 설정 화면, 채팅 패널, 분석 실행 경로가 선택된 에이전트를 일관되게 반영해야 한다."
     },
     {
       "id": "spec-04",

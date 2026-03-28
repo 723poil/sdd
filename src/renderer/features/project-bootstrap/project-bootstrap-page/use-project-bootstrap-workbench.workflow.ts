@@ -1,10 +1,15 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import type {
-  AgentCliConnectionSettings,
+  AgentCliConnectionRecord,
+  AgentCliId,
   AgentCliModelReasoningEffort,
 } from '@/domain/app-settings/agent-cli-connection-model';
-import { createDefaultAgentCliConnectionSettings } from '@/domain/app-settings/agent-cli-connection-model';
+import {
+  DEFAULT_AGENT_CLI_ID,
+  describeUnsupportedAgentCliFeature,
+  isAgentCliFeatureSupported,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectAnalysisDocumentId,
   ProjectAnalysisDocumentLayoutMap,
@@ -70,7 +75,7 @@ import type {
 import {
   createEmptyProjectWorkspaceSnapshot,
   readAnalysisRunStatus,
-  readCodexConnectionSettings,
+  readAgentCliSettingsSnapshot,
   readProjectSessionMessageRunStatus,
   readProjectWorkspaceSnapshot,
   type ProjectWorkspaceSnapshot,
@@ -95,6 +100,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     onEndDraggingProject(): void;
     onRemoveDraftAttachment(draftId: string): void;
     onSetComposerDragActive(isActive: boolean): void;
+    onChangeChatAgent(agentId: AgentCliId): void;
     onChangeChatModel(model: string): void;
     onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort): void;
     onGenerateReferenceTags(): Promise<'succeeded' | 'failed' | 'cancelled'>;
@@ -196,8 +202,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const [isSavingChatRuntimeSettings, setIsSavingChatRuntimeSettings] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-  const [codexConnectionSettings, setCodexConnectionSettings] =
-    useState<AgentCliConnectionSettings>(() => createDefaultAgentCliConnectionSettings('codex'));
+  const [agentCliConnections, setAgentCliConnections] = useState<AgentCliConnectionRecord[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<AgentCliId>(DEFAULT_AGENT_CLI_ID);
   const [message, setMessage] = useState<string>('로컬 프로젝트를 선택해 시작하세요.');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const selectedPathRef = useRef<string | null>(null);
@@ -214,6 +220,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
   const sessionMessageTaskIdsBySessionKeyRef = useRef<Record<string, string>>({});
   const progressTasks = useWorkbenchProgressTasks();
   const analysis = transientAnalysis ?? storedAnalysis;
+  const selectedAgentConnection =
+    agentCliConnections.find((connection) => connection.definition.agentId === selectedAgentId) ??
+    null;
 
   const selectedSpec = resolveSelectedSpec(specs, selectedSpecId);
   const specSessions = selectedSpec
@@ -427,17 +436,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         return;
       }
 
-      const [recentProjectsResult, codexConnectionSettingsResult] = await Promise.all([
+      const [recentProjectsResult, agentCliSettingsResult] = await Promise.all([
         sddApi.project.listRecentProjects(),
-        readCodexConnectionSettings(),
+        readAgentCliSettingsSnapshot(),
       ]);
 
       if (recentProjectsResult.ok) {
         setRecentProjects(recentProjectsResult.value);
       }
 
-      if (codexConnectionSettingsResult.ok) {
-        setCodexConnectionSettings(codexConnectionSettingsResult.value);
+      if (agentCliSettingsResult.ok) {
+        setAgentCliConnections(agentCliSettingsResult.value.connections);
+        setSelectedAgentId(agentCliSettingsResult.value.selectedAgentId);
       }
     })();
   }, []);
@@ -834,6 +844,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    const agentDisplayName = selectedAgentConnection?.definition.displayName ?? '에이전트';
+
+    if (mode === 'full' && !isAgentCliFeatureSupported(selectedAgentId, 'project-analysis')) {
+      const unsupportedMessage = describeUnsupportedAgentCliFeature(
+        selectedAgentId,
+        'project-analysis',
+      );
+      setErrorMessage(unsupportedMessage);
+      setMessage(unsupportedMessage);
+      return;
+    }
+
     const analysisRootPath = selectedPath;
     if (mode === 'references') {
       setActiveWorkspacePage('references');
@@ -845,7 +867,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       setMessage(
         mode === 'references'
           ? '참조 분석을 시작할 수 없습니다.'
-          : '전체 분석을 시작할 수 없습니다.',
+          : `${agentDisplayName} 전체 분석을 시작할 수 없습니다.`,
       );
       return;
     }
@@ -854,7 +876,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setMessage(
       mode === 'references'
         ? '참조 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.'
-        : '전체 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.',
+        : `${agentDisplayName}로 전체 분석을 시작했습니다. 아래 상태 카드에서 진행 상황을 확인하세요.`,
     );
     setAnalysisRunStatusesByRootPath((current) =>
       replaceRecordValue(
@@ -869,13 +891,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           progressMessage:
             mode === 'references'
               ? '참조 분석 요청을 전송했습니다.'
-              : '전체 분석 요청을 전송했습니다.',
+              : `${agentDisplayName} 전체 분석 요청을 전송했습니다.`,
         }),
       ),
     );
 
     try {
       const result = await sddApi.project.analyze({
+        agentId: selectedAgentId,
         mode,
         rootPath: analysisRootPath,
       });
@@ -892,12 +915,16 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           if (result.error.code === 'PROJECT_ANALYSIS_CANCELLED') {
             setErrorMessage(null);
             setMessage(
-              mode === 'references' ? '참조 분석이 취소되었습니다.' : '전체 분석이 취소되었습니다.',
+              mode === 'references'
+                ? '참조 분석이 취소되었습니다.'
+                : `${agentDisplayName} 전체 분석이 취소되었습니다.`,
             );
           } else {
             setErrorMessage(formatAppErrorMessage(result.error));
             setMessage(
-              mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.',
+              mode === 'references'
+                ? '참조 분석에 실패했습니다.'
+                : `${agentDisplayName} 전체 분석에 실패했습니다.`,
             );
           }
         }
@@ -925,7 +952,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           ? result.value.inspection.isWritable
             ? '참조 분석이 완료되었습니다. 참조 탭과 분석 문서를 확인해 주세요.'
             : '참조 분석이 완료되었습니다. 현재 실행에서는 저장하지 않고 화면에만 표시했습니다.'
-          : '전체 분석이 완료되었습니다. 분석 페이지에서 문서를 확인해 주세요.',
+          : `${agentDisplayName}로 전체 분석이 완료되었습니다. 분석 페이지에서 문서를 확인해 주세요.`,
       );
     } catch (error) {
       const nextMessage =
@@ -944,7 +971,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       if (selectedPathRef.current === analysisRootPath) {
         setErrorMessage(nextMessage);
         setMessage(
-          mode === 'references' ? '참조 분석에 실패했습니다.' : '전체 분석에 실패했습니다.',
+          mode === 'references'
+            ? '참조 분석에 실패했습니다.'
+            : `${agentDisplayName} 전체 분석에 실패했습니다.`,
         );
       }
     }
@@ -1078,6 +1107,18 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    if (!selectedAgentConnection) {
+      setErrorMessage('현재 사용할 CLI 에이전트 설정을 찾지 못했습니다.');
+      return;
+    }
+
+    if (!isAgentCliFeatureSupported(selectedAgentId, 'spec-chat')) {
+      const unsupportedMessage = describeUnsupportedAgentCliFeature(selectedAgentId, 'spec-chat');
+      setErrorMessage(unsupportedMessage);
+      setMessage(unsupportedMessage);
+      return;
+    }
+
     let attachmentUploads;
     try {
       attachmentUploads =
@@ -1131,13 +1172,16 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     });
 
     setErrorMessage(null);
-    setMessage(`"${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 있습니다.`);
+    setMessage(
+      `${selectedAgentConnection.definition.displayName}로 "${selectedSpec.meta.title}" 명세 채팅에 메시지를 보내고 있습니다.`,
+    );
 
     try {
       const result = await sddApi.project.sendSessionMessage({
+        agentId: selectedAgentId,
         attachments: attachmentUploads,
-        model: codexConnectionSettings.model,
-        modelReasoningEffort: codexConnectionSettings.modelReasoningEffort,
+        model: selectedAgentConnection.settings.model,
+        modelReasoningEffort: selectedAgentConnection.settings.modelReasoningEffort,
         rootPath: selectedPath,
         sessionId: selectedSession.id,
         text: currentDraftMessage,
@@ -1166,13 +1210,15 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
             }),
           });
           progressTasks.updateRequestProgressTask(sendMessageTask, {
-            detail: `"${selectedSpec.meta.title}" 명세 채팅 응답 생성을 취소했습니다.`,
+            detail: `${selectedAgentConnection.definition.displayName} 명세 채팅 응답 생성을 취소했습니다.`,
             errorMessage: null,
             isCancellable: false,
             status: 'cancelled',
           });
           setErrorMessage(null);
-          setMessage(`"${selectedSpec.meta.title}" 명세 채팅 응답 생성을 취소했습니다.`);
+          setMessage(
+            `${selectedAgentConnection.definition.displayName} 명세 채팅 응답 생성을 취소했습니다.`,
+          );
           return;
         }
 
@@ -1202,7 +1248,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           status: 'failed',
         });
         setErrorMessage(result.error.message);
-        setMessage('메시지를 저장하지 못했습니다.');
+        setMessage(`${selectedAgentConnection.definition.displayName} 채팅 요청을 완료하지 못했습니다.`);
         return;
       }
 
@@ -1258,7 +1304,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         });
         setErrorMessage(result.value.assistantErrorMessage);
         setMessage(
-          `"${selectedSpec.meta.title}" 명세 채팅에 메시지를 저장했지만 응답은 받지 못했습니다.`,
+          `${selectedAgentConnection.definition.displayName}에 메시지를 저장했지만 응답은 받지 못했습니다.`,
         );
         return;
       }
@@ -1268,9 +1314,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         sessionId: selectedSession.id,
         status: null,
       });
-      setMessage(`"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`);
+      setMessage(`${selectedAgentConnection.definition.displayName} 응답을 받았습니다.`);
       progressTasks.updateRequestProgressTask(sendMessageTask, {
-        detail: `"${selectedSpec.meta.title}" 명세 채팅에서 응답을 받았습니다.`,
+        detail: `${selectedAgentConnection.definition.displayName} 응답을 받았습니다.`,
         isCancellable: false,
         status: 'succeeded',
       });
@@ -1321,7 +1367,7 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     const taskId = sessionMessageTaskIdsBySessionKeyRef.current[sessionKey];
     if (taskId) {
       progressTasks.updateRequestProgressTaskById(taskId, {
-        detail: 'Codex 응답 생성을 종료하고 있습니다.',
+        detail: `${selectedAgentConnection?.definition.displayName ?? '에이전트'} 응답 생성을 종료하고 있습니다.`,
         errorMessage: null,
         isCancellable: false,
         status: 'cancelling',
@@ -1338,7 +1384,9 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         sessionId,
         status: result.value,
       });
-      setMessage('채팅 응답 취소를 요청했습니다.');
+      setMessage(
+        `${selectedAgentConnection?.definition.displayName ?? '에이전트'} 응답 취소를 요청했습니다.`,
+      );
       return;
     }
 
@@ -1733,9 +1781,20 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return 'failed';
     }
 
+    if (!isAgentCliFeatureSupported(selectedAgentId, 'reference-tags')) {
+      const unsupportedMessage = describeUnsupportedAgentCliFeature(
+        selectedAgentId,
+        'reference-tags',
+      );
+      setErrorMessage(unsupportedMessage);
+      setMessage(unsupportedMessage);
+      return 'failed';
+    }
+
     const projectName = inspection?.projectName ?? null;
+    const agentDisplayName = selectedAgentConnection?.definition.displayName ?? '에이전트';
     const generateReferenceTagsTask = progressTasks.startRequestProgressTask({
-      detail: '에이전트가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.',
+      detail: `${agentDisplayName}가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.`,
       isCancellable: true,
       kind: 'reference-tags-generate',
       projectName,
@@ -1749,17 +1808,20 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     try {
       const result = await sddApi.project.generateReferenceTags({
+        agentId: selectedAgentId,
         rootPath,
       });
       if (!result.ok) {
         if (result.error.code === 'PROJECT_REFERENCE_TAG_GENERATION_CANCELLED') {
           progressTasks.updateRequestProgressTask(generateReferenceTagsTask, {
-            detail: '에이전트 파일 태그 자동 생성을 취소했습니다.',
+            detail: `${agentDisplayName} 파일 태그 자동 생성을 취소했습니다.`,
             errorMessage: null,
             isCancellable: false,
             status: 'cancelled',
           });
-          setMessage(`${projectName ?? '프로젝트'} 파일 태그 자동 생성을 취소했습니다.`);
+          setMessage(
+            `${projectName ?? '프로젝트'}에서 ${agentDisplayName} 파일 태그 자동 생성을 취소했습니다.`,
+          );
           return 'cancelled';
         }
 
@@ -1777,10 +1839,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
         applyReferenceTagsToAnalysis(result.value);
       }
       setMessage(
-        `${projectName ?? '프로젝트'}에서 에이전트가 분석 -> 실행 -> 검증 단계를 거쳐 파일 태그를 자동 생성했습니다.`,
+        `${projectName ?? '프로젝트'}에서 ${agentDisplayName}가 분석 -> 실행 -> 검증 단계를 거쳐 파일 태그를 자동 생성했습니다.`,
       );
       progressTasks.updateRequestProgressTask(generateReferenceTagsTask, {
-        detail: '에이전트가 분석, 실행, 검증을 거쳐 파일 태그를 자동 생성했습니다.',
+        detail: `${agentDisplayName}가 분석, 실행, 검증을 거쳐 파일 태그를 자동 생성했습니다.`,
         isCancellable: false,
         status: 'succeeded',
       });
@@ -1806,9 +1868,10 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
 
     setReferenceTagGenerationStatus(rootPath, 'cancelling');
     const taskId = referenceTagGenerationTaskIdsByRootPathRef.current[rootPath];
+    const agentDisplayName = selectedAgentConnection?.definition.displayName ?? '에이전트';
     if (taskId) {
       progressTasks.updateRequestProgressTaskById(taskId, {
-        detail: '에이전트 실행을 종료하고 있습니다.',
+        detail: `${agentDisplayName} 실행을 종료하고 있습니다.`,
         errorMessage: null,
         isCancellable: false,
         status: 'cancelling',
@@ -1819,13 +1882,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       rootPath,
     });
     if (result.ok) {
+      setMessage(`${agentDisplayName} 파일 태그 자동 생성 취소를 요청했습니다.`);
       return;
     }
 
     setReferenceTagGenerationStatus(rootPath, 'running');
     if (taskId) {
       progressTasks.updateRequestProgressTaskById(taskId, {
-        detail: '에이전트가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.',
+        detail: `${selectedAgentConnection?.definition.displayName ?? '에이전트'}가 파일 태그를 분석하고 생성 결과를 검증하고 있습니다.`,
         errorMessage: null,
         isCancellable: true,
         status: 'running',
@@ -1834,8 +1898,11 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
     setErrorMessage(result.error.message);
   }
 
-  async function saveCodexConnectionSettings(
-    patch: Partial<Pick<AgentCliConnectionSettings, 'model' | 'modelReasoningEffort'>>,
+  async function saveSelectedAgentConnectionSettings(
+    patch: {
+      model?: string;
+      modelReasoningEffort?: AgentCliModelReasoningEffort;
+    },
   ): Promise<void> {
     const sddApi = getRendererSddApi();
     if (!sddApi) {
@@ -1843,21 +1910,37 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       return;
     }
 
+    if (!selectedAgentConnection) {
+      setErrorMessage('현재 사용할 CLI 에이전트 설정을 찾지 못했습니다.');
+      return;
+    }
+
+    const agentDisplayName = selectedAgentConnection.definition.displayName;
+
     const saveSettingsTask = progressTasks.startRequestProgressTask({
-      detail: 'Codex 연결 설정을 저장하고 있습니다.',
+      detail: `${agentDisplayName} 연결 설정을 저장하고 있습니다.`,
       kind: 'settings-save',
       projectName: inspection?.projectName ?? null,
       rootPath: selectedPathRef.current,
-      title: 'Codex 설정 저장',
+      title: '채팅 설정 저장',
     });
 
-    const previousSettings = codexConnectionSettings;
-    const nextSettings: AgentCliConnectionSettings = {
-      ...codexConnectionSettings,
+    const previousConnection = selectedAgentConnection;
+    const nextSettings = {
+      ...selectedAgentConnection.settings,
       ...patch,
     };
 
-    setCodexConnectionSettings(nextSettings);
+    setAgentCliConnections((current) =>
+      current.map((connection) =>
+        connection.definition.agentId === selectedAgentId
+          ? {
+              ...connection,
+              settings: nextSettings,
+            }
+          : connection,
+      ),
+    );
     setIsSavingChatRuntimeSettings(true);
     setErrorMessage(null);
 
@@ -1877,16 +1960,54 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
           errorMessage: result.error.message,
           status: 'failed',
         });
-        setCodexConnectionSettings(previousSettings);
+        setAgentCliConnections((current) =>
+          current.map((connection) =>
+            connection.definition.agentId === previousConnection.definition.agentId
+              ? previousConnection
+              : connection,
+          ),
+        );
         setErrorMessage(result.error.message);
         return;
       }
 
-      setCodexConnectionSettings(result.value.settings);
+      setAgentCliConnections((current) =>
+        current.map((connection) =>
+          connection.definition.agentId === result.value.definition.agentId ? result.value : connection,
+        ),
+      );
       progressTasks.updateRequestProgressTask(saveSettingsTask, {
-        detail: 'Codex 모델과 추론 강도 설정을 저장했습니다.',
+        detail: `${agentDisplayName} 채팅 설정을 저장했습니다.`,
         status: 'succeeded',
       });
+    } finally {
+      setIsSavingChatRuntimeSettings(false);
+    }
+  }
+
+  async function handleChangeChatAgent(agentId: AgentCliId): Promise<void> {
+    const sddApi = getRendererSddApi();
+    if (!sddApi) {
+      setErrorMessage('앱 연결 상태를 확인할 수 없습니다.');
+      return;
+    }
+
+    if (agentId === selectedAgentId) {
+      return;
+    }
+
+    const previousAgentId = selectedAgentId;
+    setSelectedAgentId(agentId);
+    setIsSavingChatRuntimeSettings(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await sddApi.settings.saveSelectedAgentId({ agentId });
+      if (!result.ok) {
+        setSelectedAgentId(previousAgentId);
+        setErrorMessage(result.error.message);
+        return;
+      }
     } finally {
       setIsSavingChatRuntimeSettings(false);
     }
@@ -2109,8 +2230,8 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       isSavingChatRuntimeSettings,
       isLeftSidebarOpen,
       isRightSidebarOpen,
-      chatModel: codexConnectionSettings.model,
-      chatReasoningEffort: codexConnectionSettings.modelReasoningEffort,
+      agentCliConnections,
+      selectedAgentId,
       message,
       errorMessage,
     },
@@ -2167,11 +2288,14 @@ export function useProjectBootstrapWorkbenchWorkflow(): {
       onCreateSpec() {
         void handleCreateSpec();
       },
+      onChangeChatAgent(agentId: AgentCliId) {
+        void handleChangeChatAgent(agentId);
+      },
       onChangeChatModel(model: string) {
-        void saveCodexConnectionSettings({ model });
+        void saveSelectedAgentConnectionSettings({ model });
       },
       onChangeChatReasoningEffort(modelReasoningEffort: AgentCliModelReasoningEffort) {
-        void saveCodexConnectionSettings({ modelReasoningEffort });
+        void saveSelectedAgentConnectionSettings({ modelReasoningEffort });
       },
       onGenerateReferenceTags() {
         return handleGenerateReferenceTags();

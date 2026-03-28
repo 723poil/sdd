@@ -3,6 +3,8 @@ import { access, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { delimiter, isAbsolute, join } from 'node:path';
 
+import type { AgentCliId } from '@/domain/app-settings/agent-cli-connection-model';
+
 const MACOS_COMMON_EXECUTABLE_DIRECTORIES = [
   '/opt/homebrew/bin',
   '/usr/local/bin',
@@ -10,6 +12,7 @@ const MACOS_COMMON_EXECUTABLE_DIRECTORIES = [
 ] as const;
 
 export async function resolveAgentCliExecutablePath(input: {
+  agentId?: AgentCliId;
   executablePath: string;
 }): Promise<string | null> {
   const normalizedExecutablePath = normalizeExecutablePath(input.executablePath);
@@ -29,7 +32,10 @@ export async function resolveAgentCliExecutablePath(input: {
     return executableFromPath;
   }
 
-  for (const candidatePath of listPlatformExecutableFallbackPaths(normalizedExecutablePath)) {
+  for (const candidatePath of listPlatformExecutableFallbackPaths({
+    agentId: input.agentId,
+    executableName: normalizedExecutablePath,
+  })) {
     if (await isExecutableFile(candidatePath)) {
       return candidatePath;
     }
@@ -82,15 +88,18 @@ async function resolveExecutableFromPathDirectories(
   return null;
 }
 
-function listPlatformExecutableFallbackPaths(executableName: string): string[] {
+function listPlatformExecutableFallbackPaths(input: {
+  agentId: AgentCliId | undefined;
+  executableName: string;
+}): string[] {
   const fallbackPaths = new Set<string>();
 
   if (process.platform === 'darwin') {
     for (const directoryPath of MACOS_COMMON_EXECUTABLE_DIRECTORIES) {
-      fallbackPaths.add(join(directoryPath, executableName));
+      fallbackPaths.add(join(directoryPath, input.executableName));
     }
 
-    if (executableName === 'codex') {
+    if (input.agentId === 'codex' || input.executableName === 'codex') {
       fallbackPaths.add('/Applications/Codex.app/Contents/Resources/codex');
       fallbackPaths.add(
         join(homedir(), 'Applications', 'Codex.app', 'Contents', 'Resources', 'codex'),

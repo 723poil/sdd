@@ -1,15 +1,699 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-03-27T01:56:40.910Z",
+  "generatedAt": "2026-03-28T01:14:02.656Z",
   "sessions": [
+    {
+      "id": "8bb65133-f263-4b4c-b0b0-3f395bd231b2",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:14:02.624Z",
+      "lastMessageAt": "2026-03-28T01:14:02.624Z",
+      "lastMessagePreview": "이번 초안은 spec-05의 기능 범위는 유지하고, 실제 문제를 에이전트 설정 화면 UX 재구성으로 좁혔습니다. 현재 `AgentCliSe...",
+      "messageCount": 2
+    },
+    {
+      "id": "39c3b824-0228-4301-b123-e1899eb4938c",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:19.026Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ef96953e-5e7f-48ce-93d5-ce1c7a1e1e68",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:19.020Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "0e1b6174-9869-4c0c-a419-6f5c32f49557",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:19.011Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "8a917aa5-b1a6-48c1-bb27-afddd914abf9",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:19.002Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "4f079290-5e4e-4119-92d3-51d0fd4cd681",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.994Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "d7771213-a503-4bd3-9bed-7ee450cbd998",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.984Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "03b2270c-48db-410d-b1f6-f032ec5dc63d",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.973Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "0d8aa60f-130d-4ee4-8e23-f8cf8f44991e",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.968Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ed81d01a-4165-41f1-a127-100f495525dc",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.959Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c051e11d-35a8-48ed-849e-f055be01095b",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.946Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "8bca7e6c-cc7e-4b59-a99e-da13dbd6fdba",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.934Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "91f63126-b53d-4152-b880-6711bfd15e7e",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.921Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "0bcf6972-c7f0-44d3-8050-6b7166db7fec",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.908Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "55b9f51d-74c1-4c65-b5fb-fd33351c664b",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.898Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "e81ac326-a910-442f-aaa0-8d28aab91c55",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.889Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "34608484-753e-4e8e-8b37-73fbb4e2a7f7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.877Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "abbdafc0-b78f-4bfa-b61e-c8a81b4e416f",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.866Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "874d6d58-9378-416d-9a43-7a681afed8db",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.860Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "828100a8-289f-44e6-b398-94a17520e0a8",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.857Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c30c6f7f-a151-4782-8adb-03d9ff1b26e7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.856Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "6eebe375-e665-40ce-9292-523f982865dd",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.841Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "24d5725f-ef5d-4ead-958f-b57fff36792d",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.832Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "58ef55fc-1615-4be5-9221-cd0cf64ca3c7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.820Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "902aad6f-dbc5-46cc-982e-fb6c138d4f78",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.810Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "18e715c8-f5cd-4f32-bfc5-5dc4dc41f89a",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.797Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "0551eb13-6e53-492d-aea1-6f467900d0f9",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.781Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "f3810ef7-e838-434f-a7fe-e5b5c9a788f3",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.768Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "74a3408a-767f-4f67-a9f7-b809c1e558f3",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.753Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "02e28263-704e-4548-952d-44d1ab83c855",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.707Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "a2198c6e-c6b1-45c7-b23c-6cdcd2e6ff10",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.691Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "75cddeac-8b1e-4f4f-87c9-4449a7d65f81",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.680Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3e3b844b-584a-4688-9bfa-15dd8a7b34da",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.667Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3854a620-1d28-445b-9ddb-d3454884ec80",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.656Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "9009fb37-5f8e-4678-9d92-3a35346be211",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.645Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "050fe36e-698d-4979-b67f-0f4958099612",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.632Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "9b8e312c-2bef-44fe-a311-8c4d8ccb2257",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.620Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "185eff8a-ff82-4691-869c-524e5278cc35",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.609Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3566c07e-5cbf-4e52-94e7-e43f3aaccd15",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.597Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "4f60b3aa-5cad-4af8-9abd-1d70edd2a1d7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.585Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "7d7dd59f-46f8-44c3-b2b8-657e8efbca5a",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.574Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "449bfb64-556a-4ee5-b549-2f1f9171ef8b",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.563Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3fcf8feb-0719-462f-b362-92f711998282",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.553Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "d658be04-6aa3-43d2-b899-dea087c5cc70",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.543Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "402d3764-133c-44d8-986e-17c2c262da52",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.534Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "04c8ce28-c055-4106-9982-d90a909df3ae",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.523Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c3d23d04-3699-4a8b-ab4f-6acb1c076b14",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.511Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ad591790-ee9f-4bc2-94a1-79a5dd1160b9",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.500Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "83c3214c-b2fc-4fb6-870d-a91d37b543d5",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.488Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "967563df-94f2-4644-8fa8-11215a380422",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.476Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "e242d584-105e-40ba-aa60-498340993e3e",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.459Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "f9fb5bdc-30e5-48ef-9304-340074680eb1",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.449Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "02a8ae14-7e0f-4a45-b2b1-3219d382215b",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.437Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "1f83ad91-52e7-411d-90a9-dac37a76e578",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.428Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "3489f57a-ff17-4dcc-b92f-8e2f9e309e5a",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.416Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "09b385f8-8382-43f9-9ef8-b7429a645a16",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.406Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "6dc0de67-5e1f-44e4-8c75-216d57fbfb75",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.396Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "05d2dd49-bc3a-425e-89fd-db04f103de76",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.384Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "a962ca42-7ffe-44dc-83bc-28be9bb96bb7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.372Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ec38ed96-2869-459f-a123-f22b0c9a0973",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.360Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "feb88bb4-96a2-4a07-8670-ddf7702de4b7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.350Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "9f166446-a774-4757-b42f-61b3764e537c",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.337Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "ded70eba-42d1-48d4-9ea6-a0cf3e95a688",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.326Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "61c9183b-a44a-4500-9bf3-a71e116afbcd",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.317Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "e1482328-500d-4bf9-bb16-fe84aba9bcfb",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.306Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "5ebf305e-5051-4b19-b4f3-212bcee7ec88",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.296Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "69a59807-1c02-405f-8da4-aa994be117fb",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.281Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c094d77f-2379-4a66-830c-4efe325ccfea",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.268Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "2d23d919-fc92-41fb-89ca-3f551ed57bd7",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.258Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "6364755b-ad5d-4dda-a839-5e431bfdc0a0",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.247Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "544140f9-8da1-424f-8452-5ac702efcfdf",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.234Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c63c5cb7-157d-4a58-8390-2897f2bb8209",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.223Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "f9c379cd-c999-453f-851a-7548ae20b333",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.205Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "52ac767f-d452-4833-a976-3d9d8d428634",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.194Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "8f739a75-ddf7-43d9-a00d-9a3b4f766d8e",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.151Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
+    {
+      "id": "c062d094-f27a-4b4e-809f-4da6e9405ddc",
+      "specId": "spec-06",
+      "title": "새 명세 06 채팅",
+      "updatedAt": "2026-03-28T01:05:18.099Z",
+      "lastMessageAt": null,
+      "lastMessagePreview": null,
+      "messageCount": 0
+    },
     {
       "id": "78ab9bda-ced6-4af5-a633-b3325543873e",
       "specId": "spec-05",
       "title": "새 명세 05 채팅",
-      "updatedAt": "2026-03-27T01:56:40.882Z",
-      "lastMessageAt": null,
-      "lastMessagePreview": null,
-      "messageCount": 0
+      "updatedAt": "2026-03-27T02:04:08.954Z",
+      "lastMessageAt": "2026-03-27T02:04:08.954Z",
+      "lastMessagePreview": "초안은 Codex 고정 가정을 제거하고 Codex CLI, Claude Code, Gemini CLI를 설정 화면과 오른쪽 채팅 패널, 실...",
+      "messageCount": 2
     },
     {
       "id": "516ed975-39fa-4002-aa91-22684fffb04d",

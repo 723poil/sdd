@@ -1,4 +1,7 @@
-import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  AgentCliId,
+  AgentCliModelReasoningEffort,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectDirectoryStatus,
   ProjectMeta,
@@ -57,6 +60,7 @@ export interface ProjectInspectorPort {
 
 export interface ProjectAnalyzerPort {
   analyzeProject(input: {
+    agentId: AgentCliId;
     mode: ProjectAnalysisMode;
     rootPath: string;
     projectName: string;
@@ -65,6 +69,7 @@ export interface ProjectAnalyzerPort {
 
 export interface ProjectReferenceTagGeneratorPort {
   generateReferenceTags(input: {
+    agentId: AgentCliId;
     analysis: ProjectAnalysis;
     projectName: string;
     rootPath: string;
@@ -158,6 +163,7 @@ export interface ProjectSessionPort {
 
 export interface ProjectSpecChatPort {
   generateReply(input: {
+    agentId: AgentCliId;
     model: string;
     modelReasoningEffort: AgentCliModelReasoningEffort;
     projectName: string;

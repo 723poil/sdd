@@ -1,4 +1,7 @@
-import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  AgentCliId,
+  AgentCliModelReasoningEffort,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type {
   ProjectAnalysis,
   ProjectAnalysisDocumentLayoutMap,
@@ -80,6 +83,7 @@ export interface RenameProjectInput {
 }
 
 export interface AnalyzeProjectInput {
+  agentId: AgentCliId;
   mode: ProjectAnalysisMode;
   rootPath: string;
 }
@@ -95,6 +99,7 @@ export interface SaveProjectReferenceTagsInput {
 }
 
 export interface GenerateProjectReferenceTagsInput {
+  agentId: AgentCliId;
   rootPath: string;
 }
 
@@ -189,6 +194,7 @@ export interface ReadProjectSessionMessageRunStatusInput {
 }
 
 export interface SendProjectSessionMessageInput {
+  agentId: AgentCliId;
   attachments: ProjectSessionMessageAttachmentUpload[];
   model: string;
   modelReasoningEffort: AgentCliModelReasoningEffort;

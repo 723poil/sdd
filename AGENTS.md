@@ -60,7 +60,7 @@
 - `chat.jsonl`은 단순 메시지 배열이 아니라 append-only event log다.
 - 주요 JSON 파일은 `schemaVersion`을 가져야 한다.
 - 변경 가능한 JSON은 `revision` 또는 `updatedAt` 기준 충돌 검사를 고려한다.
-- Codex CLI MVP 연결은 `codex exec` 우선이다.
+- CLI 에이전트 MVP 연결은 각 에이전트의 `exec` 계열 단발 실행 경로를 우선한다.
 - `app-server`는 현재 experimental이므로 고도화 옵션으로만 본다.
 - 분석 실행은 activity 기반으로 추적하고, 단순 고정 wall timeout보다 inactivity/hang 검출을 우선한다.
 - 큰 저장소나 자연스럽게 분리되는 작업은 subagent/delegation 활용을 유도하되, 결과는 하나의 통합된 산출물로 정리한다.
@@ -70,7 +70,7 @@
 - 중앙 작업 영역은 docs 페이지처럼 `분석 / 명세` 두 페이지 구조를 우선한다.
 - 분석 문서는 Markdown 기준으로 저장/렌더링하고, 필요하면 Mermaid fenced block을 포함할 수 있다.
 - 분석 페이지는 문서 맵 연결선과 파일별 참조 관계를 중앙 패널에서 함께 보여준다.
-- Codex 모델과 추론 강도는 앱 전역 설정과 오른쪽 채팅에서 직접 확인/조정 가능해야 하며, 분석 실행 인자에도 그대로 반영한다.
+- 선택된 CLI 에이전트의 모델은 앱 전역 설정과 오른쪽 채팅에서 직접 확인/조정 가능해야 하며, 추론 강도는 지원하는 에이전트에서만 노출하고 실행 인자에도 그대로 반영한다.
 
 ## 작업 시 기본 행동
 
@@ -93,17 +93,17 @@
   - 로컬 정적 분석 기반 기본 프로젝트 분석 실행
   - TS/JS/Kotlin/PHP/Java 파일의 정적 참조 관계 추출
   - 읽기 전용 프로젝트에서도 참조 분석은 저장 없이 화면에 임시 표시 가능
-  - 필요 시 Codex exec 기반 문서 서술 보강
+  - 필요 시 선택된 CLI 에이전트 exec 기반 문서 서술 보강
   - 분석 결과를 `.sdd/analysis/*` 와 `project.json.lastAnalyzedAt` 에 반영
   - 분석 결과의 문서 맵 연결선과 파일별 참조 관계를 함께 저장
   - 최근 프로젝트 목록 유지 및 수동 드래그 정렬
   - 앱 전역 CLI 에이전트 연결 설정 저장
-  - Codex CLI 연결 확인
-  - Codex 모델 / 추론 강도 확인 및 저장
+  - `Codex CLI`, `Claude Code`, `Gemini CLI` 연결 확인
+  - 에이전트별 모델 / 지원되는 경우 추론 강도 확인 및 저장
   - 새 명세 채팅 시작
   - 명세 문맥 기반 채팅 저장
-  - 현재 채팅 모델 / 추론 강도를 실제 명세 채팅 실행 인자에 반영
-  - 명세 문맥 + 세션 이력 기반 `codex exec` assistant 응답 생성
+  - 현재 채팅 에이전트 / 모델 / 지원되는 경우 추론 강도를 실제 명세 채팅 실행 인자에 반영
+  - 명세 문맥 + 세션 이력 기반 선택된 CLI 에이전트 exec assistant 응답 생성
   - 명세 단위 세션 연결
   - 내부 채팅 로그를 `.sdd/sessions/*` 에 재사용 가능하게 저장
 - 현재 UI 구조는 아래 기준을 따른다.
@@ -126,7 +126,7 @@
   - `04-storage-format.md`
   - `06-design-patterns.md`
   - `07-engineering-conventions.md`
-- Codex 연결 방식 변경
+- CLI 에이전트 연결 방식 변경
   - `08-codex-cli-integration.md`
   - `03-mvp-plan.md`
 - 아키텍처/레이어 경계 변경

@@ -1,4 +1,7 @@
-import type { AgentCliModelReasoningEffort } from '@/domain/app-settings/agent-cli-connection-model';
+import type {
+  AgentCliId,
+  AgentCliModelReasoningEffort,
+} from '@/domain/app-settings/agent-cli-connection-model';
 import type { ProjectSpecSaveResult } from '@/domain/project/project-spec-model';
 import type {
   ProjectSessionMessageAttachmentUpload,
@@ -32,6 +35,7 @@ export interface SendProjectSessionMessageOutput {
 
 export interface SendProjectSessionMessageUseCase {
   execute(input: {
+    agentId: AgentCliId;
     model: string;
     modelReasoningEffort: AgentCliModelReasoningEffort;
     rootPath: string;
@@ -220,6 +224,7 @@ export function createSendProjectSessionMessageUseCase(dependencies: {
       }
 
       const replyResult = await dependencies.projectSpecChat.generateReply({
+        agentId: input.agentId,
         model: input.model,
         modelReasoningEffort: input.modelReasoningEffort,
         projectName: storageResult.value.projectMeta.projectName,

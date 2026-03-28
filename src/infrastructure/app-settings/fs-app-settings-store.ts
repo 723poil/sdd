@@ -5,8 +5,11 @@ import { join } from 'node:path';
 import {
   APP_SETTINGS_SCHEMA_VERSION,
   createAgentCliConnectionSettings,
+  DEFAULT_AGENT_CLI_ID,
   type AgentCliConnectionSettings,
+  type AgentCliId,
   type AgentCliModelReasoningEffort,
+  isAgentCliId,
   isAgentCliModelReasoningEffort,
   isAgentCliConnectionSettings,
 } from '@/domain/app-settings/agent-cli-connection-model';
@@ -17,9 +20,11 @@ import { writeJsonAtomically } from '@/infrastructure/fs/write-json-atomically';
 
 const LEGACY_APP_SETTINGS_SCHEMA_VERSION = 1;
 const PREVIOUS_APP_SETTINGS_SCHEMA_VERSION = 2;
+const CURRENT_APP_SETTINGS_SCHEMA_VERSION = 3;
 
 export interface AppSettingsDocument {
   schemaVersion: typeof APP_SETTINGS_SCHEMA_VERSION;
+  selectedAgentId: AgentCliId;
   recentProjects: RecentProject[];
   agentCliConnections: AgentCliConnectionSettings[];
 }
@@ -58,6 +63,7 @@ function isAppSettingsDocumentCandidate(
   value: unknown,
 ): value is {
   schemaVersion: number;
+  selectedAgentId?: unknown;
   recentProjects?: unknown;
   agentCliConnections?: unknown;
 } {
@@ -72,8 +78,11 @@ function isAppSettingsDocumentCandidate(
     [
       LEGACY_APP_SETTINGS_SCHEMA_VERSION,
       PREVIOUS_APP_SETTINGS_SCHEMA_VERSION,
+      CURRENT_APP_SETTINGS_SCHEMA_VERSION,
       APP_SETTINGS_SCHEMA_VERSION,
     ].includes(candidate.schemaVersion) &&
+    (typeof candidate.selectedAgentId === 'undefined' ||
+      isAgentCliId(candidate.selectedAgentId)) &&
     (typeof candidate.recentProjects === 'undefined' || Array.isArray(candidate.recentProjects)) &&
     (typeof candidate.agentCliConnections === 'undefined' ||
       Array.isArray(candidate.agentCliConnections))
@@ -183,6 +192,9 @@ export async function readAppSettingsDocument(): Promise<Result<AppSettingsDocum
 
     return ok({
       schemaVersion: APP_SETTINGS_SCHEMA_VERSION,
+      selectedAgentId: isAgentCliId(parsed.selectedAgentId)
+        ? parsed.selectedAgentId
+        : DEFAULT_AGENT_CLI_ID,
       recentProjects: normalizeRecentProjects(rawRecentProjects),
       agentCliConnections: normalizeAgentCliConnections(rawAgentCliConnections, {
         codexModel: codexDefaults.model,
@@ -198,6 +210,7 @@ export async function readAppSettingsDocument(): Promise<Result<AppSettingsDocum
     if (isMissingFile) {
       return ok({
         schemaVersion: APP_SETTINGS_SCHEMA_VERSION,
+        selectedAgentId: DEFAULT_AGENT_CLI_ID,
         recentProjects: [],
         agentCliConnections: [],
       });
@@ -216,6 +229,7 @@ export async function writeAppSettingsDocument(
   await mkdir(getSettingsDirectoryPath(), { recursive: true });
   await writeJsonAtomically(getAppSettingsFilePath(), {
     schemaVersion: APP_SETTINGS_SCHEMA_VERSION,
+    selectedAgentId: document.selectedAgentId,
     recentProjects: normalizeRecentProjects(document.recentProjects),
     agentCliConnections: normalizeAgentCliConnections(document.agentCliConnections),
   });
